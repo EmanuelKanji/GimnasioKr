@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpiar localStorage</title>
+</head>
+<body>
+    <h1>Limpiar localStorage</h1>
+    <button onclick="clearStorage()">Limpiar localStorage</button>
+    <div id="output"></div>
+    
+    <script>
+        function clearStorage() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            document.getElementById('output').innerHTML = '<p style="color: green;">✅ localStorage limpiado. Por favor, vuelve a hacer login.</p>';
+        }
+        
+        // Mostrar estado actual
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        
+        document.getElementById('output').innerHTML = `
+            <h2>Estado actual:</h2>
+            <p>Token: ${token ? 'Presente' : 'No hay token'}</p>
+            <p>Usuario: ${user ? 'Presente' : 'No hay usuario'}</p>
+        `;
+    </script>
+</body>
+</html>
