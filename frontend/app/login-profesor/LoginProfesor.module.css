@@ -1,0 +1,438 @@
+/* LoginProfesor.module.css */
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.errorMessage {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.loginContainer {
+  width: 100%;
+  max-width: 440px;
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.loginCard {
+  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 60px rgba(1, 44, 171, 0.15);
+  overflow: hidden;
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.loginCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 80px rgba(1, 44, 171, 0.2);
+}
+
+.loginCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #012CAB, #00F757);
+  opacity: 0.9;
+}
+
+.header {
+  padding: 2rem 2rem 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.professorBadge {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 4px 8px rgba(1, 44, 171, 0.2));
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #012CAB;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #012CAB 0%, #00F757 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.titleUnderline {
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #012CAB, #00F757);
+  border-radius: 2px;
+  margin: 0 auto 1rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.form {
+  padding: 1rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-left: 0.5rem;
+}
+
+.input {
+  padding: 1rem 1rem 1rem 3rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #012CAB;
+  box-shadow: 0 0 0 3px rgba(1, 44, 171, 0.1);
+  transform: translateY(-1px);
+}
+
+.input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  top: 2.6rem;
+  font-size: 1.25rem;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+.input:focus + .inputIcon {
+  color: #012CAB;
+}
+
+.securityNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #fef7ff 0%, #faf5ff 100%);
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  margin: 0.5rem 0;
+}
+
+.securityIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.securityText {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.loginButton {
+  margin-top: 1rem;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(135deg, #012CAB 0%, #2563eb 100%);
+  border: none;
+  border-radius: 1rem;
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.loginButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.loginButton:hover::before {
+  left: 100%;
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(1, 44, 171, 0.3);
+  background: linear-gradient(135deg, #012CAB 0%, #1e40af 100%);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
+
+.buttonText {
+  position: relative;
+  z-index: 2;
+  font-weight: 800;
+}
+
+.buttonIcon {
+  font-size: 1.5rem;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.loginButton:hover .buttonIcon {
+  transform: translateX(4px) scale(1.1);
+}
+
+.footer {
+  padding: 1.5rem 2rem 2rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.dividerText {
+  background: #fafbff;
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+  font-weight: 600;
+}
+
+.footerText {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.secureBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #00F757;
+  font-weight: 600;
+  background: rgba(0, 247, 87, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+}
+
+.backgroundEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(1, 44, 171, 0.08) 0%, transparent 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loginCard {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes professionalGlow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.backgroundEffect {
+  animation: professionalGlow 6s ease-in-out infinite;
+}
+
+@keyframes badgeFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.professorBadge {
+  animation: badgeFloat 4s ease-in-out infinite;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .loginContainer {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
+  .header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+  
+  .professorBadge {
+    font-size: 2.5rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .form {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+  
+  .securityNote {
+    padding: 0.75rem;
+  }
+  
+  .loginButton {
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.input:focus-visible {
+  outline: 2px solid #012CAB;
+  outline-offset: 2px;
+}
+
+.loginButton:focus-visible {
+  outline: 2px solid #00F757;
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .loginCard {
+    border-width: 2px;
+  }
+  
+  .input {
+    border-width: 2px;
+  }
+  
+  .loginButton {
+    border: 2px solid #012CAB;
+  }
+  
+  .securityNote {
+    border-width: 2px;
+  }
+}
+
+/* Estados de carga */
+.loginButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.loginButton:disabled::before {
+  display: none;
+}
+
+/* Efectos especiales para profesor */
+.securityNote {
+  position: relative;
+  overflow: hidden;
+}
+
+.securityNote::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(1, 44, 171, 0.05), transparent);
+  transition: left 0.6s;
+}
+
+.securityNote:hover::before {
+  left: 100%;
+}

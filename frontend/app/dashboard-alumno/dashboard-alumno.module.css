@@ -1,0 +1,632 @@
+/* dashboard-alumno.module.css - Diseño Premium */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Menú Lateral - Estilo Premium */
+.menu {
+  width: 320px;
+  background: linear-gradient(165deg, #0a1f5c 0%, #1e3a8a 50%, #2563eb 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem 0;
+  box-shadow: 
+    4px 0 32px rgba(1, 44, 171, 0.15),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 500;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.menu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(34, 197, 94, 0.2) 0%, transparent 50%);
+  z-index: --1;
+}
+
+.menuHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 0 2rem;
+}
+
+.menuTitle {
+  padding: 40;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff 0%, #dbeafe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.menuSubtitle {
+  font-size: 0.875rem;
+  color: #c7d2fe;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.menuNav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1.5rem;
+}
+
+.menuBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.menuBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s;
+}
+
+.menuBtn:hover::before {
+  left: 100%;
+}
+
+.menuBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.menuBtn.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 
+    0 4px 16px rgba(16, 185, 129, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.menuBtnIcon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.menuBtn:hover .menuBtnIcon,
+.menuBtn.active .menuBtnIcon {
+  opacity: 1;
+}
+
+.menuFooter {
+  padding: 0 1.5rem;
+  margin-top: auto;
+}
+
+.menuBtnLogout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.menuBtnLogout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+}
+
+/* Contenido Principal */
+.content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: 
+    radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+  position: relative;
+}
+
+.content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.02"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="%231e3a8a" stroke-width="0.8"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  pointer-events: none;
+}
+
+.contentBox {
+  width: 100%;
+  max-width: 1000px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 
+    0 8px 48px rgba(1, 44, 171, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  padding: 3rem;
+  min-height: 600px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+.contentBox::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent);
+}
+
+/* Hamburguesa Premium */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 32px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.hamburgerLine {
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+  border-radius: 3px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.hamburger.active {
+  transform: rotate(180deg);
+}
+
+.hamburger.active .hamburgerLine:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+  background: #fff;
+}
+
+.hamburger.active .hamburgerLine:nth-child(2) {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.hamburger.active .hamburgerLine:nth-child(3) {
+  transform: rotate(-45deg) translate(8px, -8px);
+  background: #fff;
+}
+
+/* Overlay Premium */
+.mobileOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 25, 49, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.mobileOverlay.active {
+  opacity: 1;
+}
+
+/* Header Móvil Premium */
+.mobileHeader {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: #fff;
+  padding: 1.25rem 1.5rem;
+  z-index: 999;
+  box-shadow: 0 4px 24px rgba(1, 44, 171, 0.2);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileHeaderContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mobileTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #fff 0%, #dbeafe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.userBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #fff;
+}
+
+.userName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Responsive Design - Breakpoints Profesionales */
+
+/* Laptops grandes (1200px+) */
+@media (min-width: 1200px) {
+  .contentBox {
+    max-width: 1100px;
+    padding: 3.5rem;
+  }
+}
+
+/* Laptops (1024px - 1199px) */
+@media (max-width: 1199px) {
+  .menu {
+    width: 280px;
+  }
+  
+  .contentBox {
+    max-width: 900px;
+    padding: 2.5rem;
+  }
+}
+
+/* Tablets grandes (768px - 1023px) */
+@media (max-width: 1023px) {
+  .menu {
+    width: 260px;
+    padding: 2rem 0;
+  }
+  
+  .menuTitle {
+    font-size: 1.5rem;
+  }
+  
+  .menuBtn {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .content {
+    padding: 1.5rem;
+  }
+  
+  .contentBox {
+    padding: 2rem;
+    min-height: 550px;
+    border-radius: 20px;
+  }
+}
+
+/* Tablets y móviles grandes (768px y menos) */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    width: 300px;
+    padding: 5rem 0 2rem 0;
+    box-shadow: 8px 0 48px rgba(1, 44, 171, 0.25);
+  }
+  
+  .menu.active {
+    transform: translateX(0);
+  }
+  
+  .hamburger {
+    display: flex;
+  }
+  
+  .mobileOverlay {
+    display: block;
+  }
+  
+  .mobileHeader {
+    display: block;
+  }
+  
+  .content {
+    margin-top: 80px;
+    padding: 1rem;
+    min-height: calc(100vh - 80px);
+  }
+  
+  .contentBox {
+    max-width: 100%;
+    padding: 2rem 1.5rem;
+    min-height: 500px;
+    border-radius: 20px;
+    margin-top: 0;
+  }
+  
+  .menuHeader {
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* Móviles medianos (480px - 767px) */
+@media (max-width: 767px) {
+  .hamburger {
+    width: 28px;
+    height: 20px;
+    top: 20px;
+    left: 20px;
+  }
+  
+  .mobileHeader {
+    padding: 1rem 1.25rem;
+  }
+  
+  .mobileTitle {
+    font-size: 1.1rem;
+  }
+  
+  .userBadge {
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .userName {
+    display: none;
+  }
+  
+  .content {
+    margin-top: 70px;
+    padding: 0.875rem;
+  }
+  
+  .contentBox {
+    padding: 1.75rem 1.25rem;
+    min-height: 450px;
+    border-radius: 18px;
+  }
+  
+  .menu {
+    width: 280px;
+  }
+}
+
+/* Móviles pequeños (375px - 479px) */
+@media (max-width: 479px) {
+  .hamburger {
+    width: 26px;
+    height: 18px;
+    top: 18px;
+    left: 18px;
+  }
+  
+  .hamburgerLine {
+    height: 2.5px;
+  }
+  
+  .mobileHeader {
+    padding: 0.875rem 1rem;
+  }
+  
+  .mobileTitle {
+    font-size: 1rem;
+  }
+  
+  .content {
+    margin-top: 65px;
+    padding: 0.75rem;
+  }
+  
+  .contentBox {
+    padding: 1.5rem 1rem;
+    min-height: 400px;
+    border-radius: 16px;
+  }
+  
+  .menu {
+    width: 260px;
+    padding: 4rem 0 2rem 0;
+  }
+  
+  .menuNav {
+    padding: 0 1rem;
+  }
+  
+  .menuBtn {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Móviles muy pequeños (hasta 374px) */
+@media (max-width: 374px) {
+  .menu {
+    width: 100%;
+    border-radius: 0;
+  }
+  
+  .contentBox {
+    padding: 1.25rem 0.875rem;
+    border-radius: 14px;
+  }
+  
+  .userBadge {
+    display: none;
+  }
+}
+
+/* Modo landscape en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+  .menu {
+    padding: 4rem 0 1.5rem 0;
+    overflow-y: auto;
+  }
+  
+  .menuHeader {
+    margin-bottom: 1.5rem;
+  }
+  
+  .menuBtn {
+    padding: 0.625rem 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .contentBox {
+    min-height: 400px;
+    padding: 1.5rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.hamburger:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.menuBtn:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .content,
+  .hamburgerLine,
+  .mobileOverlay,
+  .menuBtn,
+  .contentBox {
+    transition: none;
+  }
+  
+  .menuBtn::before {
+    display: none;
+  }
+}
+
+/* Modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+  .layout {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+  
+  .contentBox {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 48px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+  .menuBtn {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .menuBtn.active {
+    border: 2px solid #fff;
+  }
+  
+  .contentBox {
+    border: 2px solid #1e3a8a;
+  }
+}

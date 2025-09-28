@@ -1,0 +1,386 @@
+/* PasarAsistencia.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: #012CAB;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #012CAB, #00F757);
+  border-radius: 2px;
+}
+
+.cameraButton {
+  width: 100%;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(135deg, #012CAB 0%, #0052ff 100%);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cameraButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.cameraButton:hover::before {
+  left: 100%;
+}
+
+.cameraButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(1, 44, 171, 0.3);
+}
+
+.cameraButton:active {
+  transform: translateY(0);
+}
+
+.cameraIcon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+
+.qrSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.sectionLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sectionLabel::before {
+  content: '📷';
+  font-size: 1.2em;
+}
+
+.qrInput {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+  text-align: center;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.qrInput:focus {
+  outline: none;
+  border-color: #012CAB;
+  border-style: solid;
+  box-shadow: 0 0 0 3px rgba(1, 44, 171, 0.1);
+  transform: translateY(-1px);
+}
+
+.qrInput::placeholder {
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.rutForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.rutLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rutLabel::before {
+  content: '👤';
+  font-size: 1.2em;
+}
+
+.rutInput {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: 'Monaco', 'Consolas', monospace;
+  letter-spacing: 0.05em;
+}
+
+.rutInput:focus {
+  outline: none;
+  border-color: #012CAB;
+  box-shadow: 0 0 0 3px rgba(1, 44, 171, 0.1);
+  transform: translateY(-1px);
+}
+
+.rutInput::placeholder {
+  color: #94a3b8;
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #00F757 0%, #00d947 100%);
+  color: #012CAB;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 247, 87, 0.3);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.resultAlert {
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #7dd3fc;
+  border-radius: 0.75rem;
+  color: #0369a1;
+  font-size: 0.95rem;
+  animation: slideInUp 0.3s ease-out;
+}
+
+.resultSuccess {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #4ade80;
+  color: #166534;
+}
+
+.resultContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.resultIcon {
+  font-size: 1.2em;
+  flex-shrink: 0;
+}
+
+.resultText {
+  flex: 1;
+}
+
+.monoText {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+
+/* Animaciones */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(1, 44, 171, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(1, 44, 171, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(1, 44, 171, 0);
+  }
+}
+
+/* Estado de escaneo activo */
+.scanning {
+  animation: pulse 2s infinite;
+  border-color: #00F757 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+    gap: 1.5rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .cameraButton {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .qrSection, .rutForm {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.375rem;
+  }
+  
+  .cameraButton {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  .qrInput, .rutInput {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .submitButton {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.cameraButton:focus-visible,
+.qrInput:focus-visible,
+.rutInput:focus-visible,
+.submitButton:focus-visible {
+  outline: 2px solid #00F757;
+  outline-offset: 2px;
+}
+
+/* Estados de validación */
+.rutInput:invalid:not(:focus) {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+/* Loading states */
+.cameraButton:disabled,
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.cameraButton:disabled::before,
+.submitButton:disabled::before {
+  display: none;
+}
+
+/* Efecto de éxito temporal */
+.successFlash {
+  animation: successFlash 0.5s ease-in-out;
+}
+
+@keyframes successFlash {
+  0% {
+    background-color: #00F757;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Separador visual */
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.separator::before {
+  margin-right: 1rem;
+}
+
+.separator::after {
+  margin-left: 1rem;
+}

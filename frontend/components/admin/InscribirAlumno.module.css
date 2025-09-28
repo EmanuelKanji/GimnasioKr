@@ -1,0 +1,342 @@
+/* InscribirAlumno.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(1, 44, 171, 0.1);
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: #012CAB;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #012CAB, #00F757);
+  border-radius: 2px;
+}
+
+.input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #012CAB;
+  box-shadow: 0 0 0 3px rgba(1, 44, 171, 0.15);
+  transform: translateY(-1px);
+}
+
+.input::placeholder {
+  color: #94a3b8;
+}
+
+.select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23012CAB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #012CAB;
+  box-shadow: 0 0 0 3px rgba(1, 44, 171, 0.15);
+  transform: translateY(-1px);
+}
+
+.button {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #012CAB 0%, #0052ff 100%);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.button:hover::before {
+  left: 100%;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 44, 171, 0.3);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+/* Estilos para la lista de alumnos (si decides agregarla después) */
+.alumnosList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alumnoItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.alumnoItem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(1, 44, 171, 0.1);
+  border-color: #012CAB;
+}
+
+.alumnoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.alumnoName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.alumnoDetails {
+  font-size: 0.8rem;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.deleteButton {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.deleteButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+/* Estados especiales para inputs de fecha */
+.input[type="date"] {
+  position: relative;
+}
+
+.input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* Grupos de campos relacionados */
+.fieldGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .form {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .fieldGroup {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .alumnoItem {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .deleteButton {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .form {
+    padding: 1.25rem;
+  }
+  
+  .title {
+    font-size: 1.375rem;
+  }
+  
+  .input, .select {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .button {
+    padding: 0.875rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.input:focus-visible,
+.select:focus-visible,
+.button:focus-visible {
+  outline: 2px solid #00F757;
+  outline-offset: 2px;
+}
+
+/* Estados de validación */
+.input:invalid:not(:focus) {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+/* Animaciones suaves */
+.form {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Placeholder animations */
+.input:focus::placeholder {
+  transform: translateX(5px);
+  transition: transform 0.3s ease;
+}
+
+/* Loading state */
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.button:disabled::before {
+  display: none;
+}
+
+/* Custom scroll para selects en Firefox */
+.select {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.select::-webkit-scrollbar {
+  width: 6px;
+}
+
+.select::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.select::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}

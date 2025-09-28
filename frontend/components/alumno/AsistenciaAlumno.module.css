@@ -1,0 +1,98 @@
+/* AsistenciaAlumno.module.css - inspirado en los estilos admin */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: #012CAB;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+}
+
+.calendarBox {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(1, 44, 171, 0.08);
+  padding: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.calendar {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0.5rem;
+}
+
+.dayHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #012CAB;
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+.dayCell {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.emptyCell {
+  background: transparent;
+}
+
+.asistido {
+  background: linear-gradient(90deg, #00F757 0%, #012CAB 100%);
+  color: #fff;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(1, 44, 171, 0.12);
+  margin: 0 auto;
+  border: 2px solid #012CAB;
+}
+
+.noAsistido {
+  background: #fff;
+  color: #012CAB;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  margin: 0 auto;
+  border: 2px solid #e2e8f0;
+}
+
+@media (max-width: 600px) {
+  .calendarBox {
+    padding: 0.5rem;
+  }
+  .calendar {
+    border-spacing: 0.25rem;
+  }
+  .dayHeader {
+    font-size: 0.9rem;
+  }
+  .asistido, .noAsistido {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.95rem;
+  }
+}

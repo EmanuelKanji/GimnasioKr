@@ -1,0 +1,339 @@
+/* HistorialAsistencia.module.css */
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #012CAB;
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: -0.025em;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, #012CAB, #00F757);
+  border-radius: 2px;
+}
+
+.tableContainer {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 32px rgba(1, 44, 171, 0.12);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.tableContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(1, 44, 171, 0.15);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #012CAB 0%, #2563eb 100%);
+}
+
+.table th {
+  padding: 1.25rem 1rem;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  border-bottom: 2px solid #012CAB;
+}
+
+.table th:first-child {
+  border-top-left-radius: 1.5rem;
+}
+
+.table th:last-child {
+  border-top-right-radius: 1.5rem;
+}
+
+.table tbody tr {
+  background: #ffffff;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr:hover {
+  background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(1, 44, 171, 0.1);
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table td {
+  padding: 1.25rem 1rem;
+  color: #1e293b;
+  font-weight: 500;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #fafbff;
+}
+
+.table tbody tr:nth-child(even):hover {
+  background: linear-gradient(135deg, #e8edff 0%, #f0f4ff 100%);
+}
+
+/* Estilos para celdas específicas */
+.table td:first-child {
+  font-weight: 600;
+  color: #012CAB;
+}
+
+.table td:nth-child(3) {
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.table td:nth-child(4) {
+  color: #00F757;
+  font-weight: 600;
+}
+
+.table td:last-child {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+/* Badge para planes */
+.table td:last-child::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  background: #00F757;
+}
+
+.table td:last-child[data-plan="basico"]::before {
+  background: #00F757;
+}
+
+.table td:last-child[data-plan="premium"]::before {
+  background: #012CAB;
+}
+
+.table td:last-child[data-plan="vip"]::before {
+  background: #f59e0b;
+}
+
+/* Estados de carga */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  color: #64748b;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.loadingText::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #012CAB;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mensaje cuando no hay datos */
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.emptySubtext {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .tableContainer {
+    overflow-x: auto;
+  }
+  
+  .table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 1rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .table th {
+    font-size: 0.75rem;
+    padding: 0.875rem 0.5rem;
+  }
+  
+  .table td {
+    padding: 0.875rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.table th:focus-visible,
+.table td:focus-visible {
+  outline: 2px solid #00F757;
+  outline-offset: -2px;
+}
+
+.table tbody tr:focus-within {
+  background: #f0f4ff;
+  box-shadow: 0 0 0 2px #012CAB;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .tableContainer {
+    border-width: 2px;
+  }
+  
+  .table th {
+    border-bottom-width: 3px;
+  }
+  
+  .table td {
+    border-bottom-width: 2px;
+  }
+}
+
+/* Efectos de animación para filas */
+@keyframes fadeInRow {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table tbody tr {
+  animation: fadeInRow 0.3s ease-out;
+}
+
+.table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+.table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+.table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+.table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+.table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+
+/* Scrollbar personalizado para tabla */
+.tableContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #012CAB, #00F757);
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #012CAB, #2563eb);
+}
+
+/* Estados vacíos */
+.emptyState {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #e2e8f0;
+}
+
+.emptyState:hover {
+  border-color: #012CAB;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(1, 44, 171, 0.1);
+}

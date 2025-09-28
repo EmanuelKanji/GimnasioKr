@@ -1,0 +1,161 @@
+/* dashboard-profesor.module.css - igual estilo que dashboard-alumno */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7f7f7 0%, #f0f4ff 100%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.menu {
+  width: 280px;
+  background: linear-gradient(180deg, #012CAB 0%, #0052ff 80%, #00F757 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 0 1.5rem 0;
+  box-shadow: 4px 0 24px rgba(1, 44, 171, 0.15);
+  position: relative;
+  z-index: 10;
+}
+
+.menuTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.menuTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: #00F757;
+  border-radius: 1px;
+}
+
+.menuBtn {
+  width: 85%;
+  margin-bottom: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.menuBtn:hover {
+  background: rgba(0, 247, 87, 0.18);
+  color: #00F757;
+}
+
+.menuBtnLogout {
+  background: #e53935 !important;
+  color: #fff !important;
+  margin-top: 2rem;
+}
+.menuBtnLogout:hover {
+  background: #b71c1c !important;
+  color: #fff !important;
+}
+.active {
+  background: #fff;
+  color: #012CAB;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(1, 44, 171, 0.12);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.contentBox {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(1, 44, 171, 0.08);
+  padding: 2.5rem 2rem;
+  min-height: 500px;
+}
+
+/* dashboard-profesor.module.css - patrón moderno, cuadros separados, columnas */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #012CAB;
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: -0.025em;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, #012CAB, #00F757);
+  border-radius: 2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.gridBottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .gridBottom {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .container {
+    padding: 1rem;
+  }
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+}
