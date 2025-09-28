@@ -12,8 +12,6 @@ export const generateQRCode = async (userId: string, rut: string): Promise<strin
   try {
     const qrString = await QRCode.toDataURL(JSON.stringify(qrData), {
       errorCorrectionLevel: 'M',
-      type: 'image/png',
-      quality: 0.92,
       margin: 1,
       color: {
         dark: '#000000',

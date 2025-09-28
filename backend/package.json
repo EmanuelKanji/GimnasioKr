@@ -8,7 +8,13 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["gym", "management", "attendance", "qr", "nodejs"],
+  "keywords": [
+    "gym",
+    "management",
+    "attendance",
+    "qr",
+    "nodejs"
+  ],
   "author": "Emanuel Aguilera",
   "license": "MIT",
   "description": "Backend API for GimnasioKr - Gym Management System",
@@ -28,7 +34,15 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/ms": "^2.1.0",
     "@types/node": "^24.5.2",
+    "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"

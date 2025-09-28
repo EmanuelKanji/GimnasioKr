@@ -33,7 +33,7 @@ export const register = async (req: Request, res: Response) => {
     await user.save();
 
     // Generar código QR para el usuario
-    const qrCode = await generateQRCode(user._id.toString(), user.rut);
+    const qrCode = await generateQRCode(user._id?.toString() || '', user.rut);
     user.qrCode = qrCode;
     await user.save();
 

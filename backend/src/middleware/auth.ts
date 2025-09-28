@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyToken, JWTPayload } from '../utils/jwt';
 import User from '../models/User';
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: JWTPayload;
 }
 
@@ -44,4 +44,3 @@ export const authorize = (...roles: string[]) => {
   };
 };
 
-export { AuthenticatedRequest };

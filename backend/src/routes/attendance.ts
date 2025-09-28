@@ -14,7 +14,9 @@ router.post('/qr', registerAttendanceByQR);
 router.post('/rut', registerAttendanceByRUT);
 
 // Rutas protegidas
-router.get('/history/:userId?', authenticate, getAttendanceHistory);
-router.get('/stats/:userId?', authenticate, getAttendanceStats);
+router.get('/history/:userId', authenticate, getAttendanceHistory);
+router.get('/history', authenticate, getAttendanceHistory);
+router.get('/stats/:userId', authenticate, getAttendanceStats);
+router.get('/stats', authenticate, getAttendanceStats);
 
 export default router;
