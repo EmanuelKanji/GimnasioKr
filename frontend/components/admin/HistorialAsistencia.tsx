@@ -13,7 +13,7 @@ export default function HistorialAsistencia() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:4000/api/asistencias', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

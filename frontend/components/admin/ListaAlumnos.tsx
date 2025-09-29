@@ -25,7 +25,7 @@ export default function ListaAlumnos() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:4000/api/alumnos', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

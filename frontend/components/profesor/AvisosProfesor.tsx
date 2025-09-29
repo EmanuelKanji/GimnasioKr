@@ -29,7 +29,7 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
-    fetch('http://localhost:4000/api/avisos/profesor', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/profesor', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -49,7 +49,7 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
     setEnviando(true);
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:4000/api/avisos', {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
+    "@netlify/next": "^1.4.9",
     "html5-qrcode": "^2.3.8",
     "next": "15.5.4",
     "qrcode.react": "^4.2.0",

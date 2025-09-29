@@ -37,7 +37,7 @@ export default function InscribirAlumnoForm() {
     setMensaje(null);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:4000/api/alumnos', {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

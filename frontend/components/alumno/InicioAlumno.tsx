@@ -17,19 +17,19 @@ export default function InicioAlumno() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     // Fetch asistencia
-    fetch('http://localhost:4000/api/alumnos/me/asistencias', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => setDiasAsistidos(data.diasAsistidos || []));
     // Fetch plan
-    fetch('http://localhost:4000/api/alumnos/me/plan', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/plan', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => setPlan(data.plan || null));
     // Fetch avisos
-    fetch('http://localhost:4000/api/alumnos/me/avisos', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/avisos', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

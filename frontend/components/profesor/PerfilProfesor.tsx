@@ -43,7 +43,7 @@ export default function PerfilProfesor() {
       console.error('Error decodificando JWT:', e);
     }
     // Obtener datos del profesor
-    fetch('http://localhost:4000/api/profesor/me', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/profesor/me', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -71,7 +71,7 @@ export default function PerfilProfesor() {
     setEditMode(false);
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:4000/api/profesor/me', {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/profesor/me', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export default function PerfilProfesor() {
       const data = await res.json();
       setSuccess('Información guardada correctamente');
       // Obtener perfil actualizado después del POST
-      const perfilRes = await fetch('http://localhost:4000/api/profesor/me', {
+  const perfilRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/profesor/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

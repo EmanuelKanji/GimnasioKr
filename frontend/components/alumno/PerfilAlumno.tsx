@@ -17,7 +17,7 @@ export default function PerfilAlumno() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     // El backend obtiene el rut desde el token y devuelve solo el perfil del alumno autenticado
-    fetch('http://localhost:4000/api/alumnos/me/perfil', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/perfil', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

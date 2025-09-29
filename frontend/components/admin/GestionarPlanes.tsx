@@ -11,7 +11,7 @@ export default function GestionarPlanes() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:4000/api/planes', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/planes', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -38,7 +38,7 @@ export default function GestionarPlanes() {
     e.preventDefault();
     setMensaje(null);
     try {
-      const res = await fetch('http://localhost:4000/api/planes', {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/planes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,7 +66,7 @@ export default function GestionarPlanes() {
   const handleDelete = async (id: string) => {
     setMensaje(null);
     try {
-      const res = await fetch(`http://localhost:4000/api/planes/${id}`, {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + `/api/planes/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
