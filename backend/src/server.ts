@@ -32,7 +32,9 @@ app.use(helmet());
 // Limitar a 100 peticiones por IP cada 15 minutos
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 // Permitir solo el origen del frontend en producción
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
+const allowedOrigins = ['http://localhost:3000', 'https://kraccess.netlify.app'];
+if (process.env.CORS_ORIGIN) allowedOrigins.push(process.env.CORS_ORIGIN);
+app.use(cors({ origin: allowedOrigins }));
 
 // ========================
 // Rutas
