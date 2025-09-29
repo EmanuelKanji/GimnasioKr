@@ -30,7 +30,7 @@ const loginUser = async (req, res) => {
             // Buscar el alumno por el email del usuario
             const alumno = await Alumno_1.default.findOne({ email: user.username });
             rut = alumno ? alumno.rut : undefined;
-            console.log('RUT encontrado para alumno:', rut); // Debug
+            // RUT encontrado para alumno: debug
         }
         // Generar JWT
         const token = jsonwebtoken_1.default.sign({

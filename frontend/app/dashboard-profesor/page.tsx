@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./dashboard-profesor.module.css";
 import ResumenProfesor from "../../components/profesor/ResumenProfesor";
 import PasarAsistenciaProfesor from "../../components/profesor/PasarAsistenciaProfesor";
@@ -12,48 +12,46 @@ export default function DashboardProfesor() {
     "resumen" | "asistencia" | "alumnos" | "avisos" | "perfil"
   >("resumen");
 
-  // Datos de ejemplo
-  const alumnos = [
-    {
-      nombre: "Juan Pérez",
-      rut: "12.345.678-9",
-      email: "juan.perez@email.com",
-      telefono: "+56912345678",
-      direccion: "Av. Siempre Viva 742",
-      fechaNacimiento: "2000-01-01",
-      plan: "Mensual",
-      asistencia: 18,
-      fechaInicioPlan: "2025-09-01",
-    },
-    {
-      nombre: "Ana Torres",
-      rut: "98.765.432-1",
-      email: "ana.torres@email.com",
-      telefono: "+56987654321",
-      direccion: "Calle Falsa 123",
-      fechaNacimiento: "1995-05-10",
-      plan: "Trimestral",
-      asistencia: 22,
-      fechaInicioPlan: "2025-08-15",
-    },
-  ];
+  // Lista de todos los alumnos inscritos (fetch desde backend)
+  const [alumnosInscritos, setAlumnosInscritos] = useState<any[]>([]);
+  const [loadingAlumnos, setLoadingAlumnos] = useState(true);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('http://localhost:4000/api/alumnos', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => res.ok ? res.json() : Promise.reject('Error al obtener alumnos'))
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAlumnosInscritos(data);
+        } else if (Array.isArray(data.alumnos)) {
+          setAlumnosInscritos(data.alumnos);
+        } else {
+          setAlumnosInscritos([]);
+        }
+        setLoadingAlumnos(false);
+      })
+      .catch(() => {
+        setAlumnosInscritos([]);
+        setLoadingAlumnos(false);
+      });
+  }, []);
 
-  const avisos = [
-    {
-      id: "1",
-      titulo: "Recordatorio de pago",
-      mensaje: "Recuerda pagar tu mensualidad antes del 5 de cada mes.",
-      fecha: "2025-09-20",
-      leido: false,
-    },
-    {
-      id: "2",
-      titulo: "Cambio de horario",
-      mensaje: "Las clases del viernes serán a las 19:00 hrs.",
-      fecha: "2025-09-22",
-      leido: true,
-    },
-  ];
+  // Estado para la lista de "mis alumnos" del profesor
+  const [misAlumnos, setMisAlumnos] = useState<any[]>([]);
+
+  // Funciones para agregar/eliminar alumnos
+  const agregarAlumno = (alumno: any) => {
+    if (!misAlumnos.some(a => a.rut === alumno.rut)) {
+      setMisAlumnos(prev => [...prev, alumno]);
+    }
+  };
+  const eliminarAlumno = (rut: string) => {
+    setMisAlumnos(prev => prev.filter(a => a.rut !== rut));
+  };
 
   return (
     <div className={styles.layout}>
@@ -116,19 +114,20 @@ export default function DashboardProfesor() {
         <div className={styles.contentBox}>
           {view === "resumen" && <ResumenProfesor />}
           {view === "asistencia" && <PasarAsistenciaProfesor />}
-          {view === "alumnos" && <ListaAlumnosProfesor alumnos={alumnos} />}
-          {view === "avisos" && <AvisosProfesor avisos={avisos} />}
-          {view === "perfil" && (
-            <PerfilProfesor
-              perfil={{
-                nombre: "Pedro González",
-                rut: "11.222.333-4",
-                email: "pedro.gonzalez@email.com",
-                telefono: "+56987654321",
-                direccion: "Calle Falsa 123",
-                fechaNacimiento: "1980-05-10",
-              }}
+          {view === "alumnos" && (
+            <ListaAlumnosProfesor
+              alumnos={alumnosInscritos}
+              misAlumnos={misAlumnos}
+              agregarAlumno={agregarAlumno}
+              eliminarAlumno={eliminarAlumno}
+              loading={loadingAlumnos}
             />
+          )}
+          {view === "avisos" && (
+            <AvisosProfesor misAlumnos={misAlumnos} />
+          )}
+          {view === "perfil" && (
+            <PerfilProfesor />
           )}
         </div>
       </main>

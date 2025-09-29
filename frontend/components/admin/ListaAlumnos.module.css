@@ -1,3 +1,41 @@
+/* Paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination button {
+  background: linear-gradient(135deg, #012CAB 0%, #00F757 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(1, 44, 171, 0.08);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.pagination button:disabled {
+  background: #e2e8f0;
+  color: #a0aec0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #012CAB;
+  background: #f3f6fa;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(1, 44, 171, 0.05);
+}
 /* ListaAlumnos.module.css */
 
 .container {

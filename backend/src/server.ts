@@ -21,6 +21,8 @@ import { authenticateToken, requireRole } from './middleware/auth';
 import { connectDB } from './config/db';
 import User from './models/User';
 import planRoutes from './routes/planRoutes';
+import avisoRoutes from './routes/avisoRoutes';
+import profesorRoutes from './routes/profesorRoutes';
 
 
 // 3. Inicialización de Express y middlewares
@@ -47,6 +49,8 @@ app.use('/api/usuarios', authenticateToken, requireRole(['admin']), userRoutes);
 app.use('/api/alumnos', authenticateToken, alumnoRoutes);
 app.use('/api/planes', authenticateToken, requireRole(['admin']), planRoutes);
 app.use('/api/asistencias', authenticateToken, asistenciaRoutes);
+app.use('/api/avisos', avisoRoutes);
+app.use('/api/profesor', profesorRoutes);
 
 // ========================
 // Manejo de errores global
@@ -64,19 +68,15 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 const PORT = process.env.PORT || 4000;
 
 async function ensureAdminUser() {
-  const admin = await User.findOne({ username: 'admin', role: 'admin' });
-  if (!admin) {
-    await User.create({ username: 'admin', password: 'admin123', role: 'admin' });
-    console.log('Usuario admin creado por defecto');
-  }
+  // Eliminada la creación automática del usuario admin por defecto
 }
 
 app.listen(PORT, async () => {
   try {
     await connectDB();
     await ensureAdminUser();
-    console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
-    console.log('✅ Conexión a MongoDB exitosa');
+  // 🚀 Backend corriendo en http://localhost:${PORT}
+  // ✅ Conexión a MongoDB exitosa
   } catch (err) {
     console.error('❌ Error al conectar a MongoDB:', err);
   }

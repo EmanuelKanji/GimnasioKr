@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const asistenciaRoutes_1 = __importDefault(require("./routes/asistenciaRoutes"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const helmet_1 = __importDefault(require("helmet"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 // ========================
@@ -19,12 +21,17 @@ const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const alumnoRoutes_1 = __importDefault(require("./routes/alumnoRoutes"));
 const auth_1 = require("./middleware/auth");
 const db_1 = require("./config/db");
-const User_1 = __importDefault(require("./models/User"));
 const planRoutes_1 = __importDefault(require("./routes/planRoutes"));
+const avisoRoutes_1 = __importDefault(require("./routes/avisoRoutes"));
+const profesorRoutes_1 = __importDefault(require("./routes/profesorRoutes"));
 // 3. Inicialización de Express y middlewares
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-app.use((0, cors_1.default)({ origin: process.env.CORS_ORIGIN || '*' }));
+app.use((0, helmet_1.default)());
+// Limitar a 100 peticiones por IP cada 15 minutos
+app.use((0, express_rate_limit_1.default)({ windowMs: 15 * 60 * 1000, max: 100 }));
+// Permitir solo el origen del frontend en producción
+app.use((0, cors_1.default)({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
 // ========================
 // Rutas
 // ========================
@@ -38,6 +45,8 @@ app.use('/api/usuarios', auth_1.authenticateToken, (0, auth_1.requireRole)(['adm
 app.use('/api/alumnos', auth_1.authenticateToken, alumnoRoutes_1.default);
 app.use('/api/planes', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), planRoutes_1.default);
 app.use('/api/asistencias', auth_1.authenticateToken, asistenciaRoutes_1.default);
+app.use('/api/avisos', avisoRoutes_1.default);
+app.use('/api/profesor', profesorRoutes_1.default);
 // ========================
 // Manejo de errores global
 // ========================
@@ -50,18 +59,14 @@ app.use((err, _req, res, _next) => {
 // ========================
 const PORT = process.env.PORT || 4000;
 async function ensureAdminUser() {
-    const admin = await User_1.default.findOne({ username: 'admin', role: 'admin' });
-    if (!admin) {
-        await User_1.default.create({ username: 'admin', password: 'admin123', role: 'admin' });
-        console.log('Usuario admin creado por defecto');
-    }
+    // Eliminada la creación automática del usuario admin por defecto
 }
 app.listen(PORT, async () => {
     try {
         await (0, db_1.connectDB)();
         await ensureAdminUser();
-        console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
-        console.log('✅ Conexión a MongoDB exitosa');
+        // 🚀 Backend corriendo en http://localhost:${PORT}
+        // ✅ Conexión a MongoDB exitosa
     }
     catch (err) {
         console.error('❌ Error al conectar a MongoDB:', err);

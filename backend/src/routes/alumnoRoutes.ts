@@ -13,7 +13,7 @@ const router = Router();
 
 // Rutas para administradores - gestión de alumnos
 router.post('/', requireRole(['admin']), crearAlumno);
-router.get('/', requireRole(['admin']), obtenerAlumnos);
+router.get('/', requireRole(['admin', 'profesor']), obtenerAlumnos);
 
 // Rutas para alumnos autenticados - sus propios datos
 router.get('/me/perfil', requireRole(['alumno', 'admin']), obtenerPerfilAlumno);

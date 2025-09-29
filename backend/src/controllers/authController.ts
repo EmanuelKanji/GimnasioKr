@@ -30,7 +30,7 @@ export const loginUser = async (req: Request, res: Response) => {
       // Buscar el alumno por el email del usuario
       const alumno = await Alumno.findOne({ email: user.username });
       rut = alumno ? alumno.rut : undefined;
-      console.log('RUT encontrado para alumno:', rut); // Debug
+  // RUT encontrado para alumno: debug
     }
 
     // Generar JWT
