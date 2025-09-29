@@ -4,4 +4,4 @@
   base = "frontend"
 
 [[plugins]]
-  package = "@netlify/next"
+  package = "@netlify/plugin-nextjs"
