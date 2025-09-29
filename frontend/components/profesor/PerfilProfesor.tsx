@@ -1,3 +1,5 @@
+'use client';
+
 import styles from './PerfilProfesor.module.css';
 
 interface PerfilInfo {

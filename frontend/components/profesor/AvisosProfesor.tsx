@@ -1,3 +1,5 @@
+'use client';
+
 export interface Aviso {
   id: string;
   titulo: string;
@@ -8,21 +10,13 @@ export interface Aviso {
 import styles from './AvisosProfesor.module.css';
 import { useState, useEffect } from 'react';
 
-interface Alumno {
-  nombre: string;
-  rut: string;
-}
+import type { Alumno } from '../../../shared/types';
 
 interface AvisosProfesorProps {
   misAlumnos: Alumno[];
 }
 
 export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps) {
-
-interface Alumno {
-  nombre: string;
-  rut: string;
-}
 
 // Recibe los alumnos de "mis alumnos" como prop
   const [avisosLocal, setAvisosLocal] = useState<Aviso[]>([]);
@@ -64,7 +58,7 @@ interface Alumno {
         body: JSON.stringify({
           titulo,
           mensaje,
-          destinatarios: misAlumnos.map(a => (a.rut || '').replace(/\.|-/g, '').toUpperCase()),
+          destinatarios: misAlumnos.map(a => (a.rut ?? '').replace(/\.|-/g, '').toUpperCase()),
         }),
       });
       if (!res.ok) throw new Error('Error al enviar aviso');

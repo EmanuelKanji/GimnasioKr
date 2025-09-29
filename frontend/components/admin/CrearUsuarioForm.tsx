@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styles from './CrearUsuarioForm.module.css';
 
-interface Props {}
+type Props = unknown;
 
 export default function CrearUsuarioForm(props: Props) {
   const [role, setRole] = useState<'alumno' | 'profesor'>('alumno');

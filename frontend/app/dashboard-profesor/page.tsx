@@ -4,6 +4,7 @@ import styles from "./dashboard-profesor.module.css";
 import ResumenProfesor from "../../components/profesor/ResumenProfesor";
 import PasarAsistenciaProfesor from "../../components/profesor/PasarAsistenciaProfesor";
 import ListaAlumnosProfesor from "../../components/profesor/ListaAlumnosProfesor";
+import type { Alumno } from '../../../shared/types';
 import AvisosProfesor from "../../components/profesor/AvisosProfesor";
 import PerfilProfesor from "../../components/profesor/PerfilProfesor";
 
@@ -13,7 +14,7 @@ export default function DashboardProfesor() {
   >("resumen");
 
   // Lista de todos los alumnos inscritos (fetch desde backend)
-  const [alumnosInscritos, setAlumnosInscritos] = useState<any[]>([]);
+  const [alumnosInscritos, setAlumnosInscritos] = useState<Alumno[]>([]);
   const [loadingAlumnos, setLoadingAlumnos] = useState(true);
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -41,10 +42,10 @@ export default function DashboardProfesor() {
   }, []);
 
   // Estado para la lista de "mis alumnos" del profesor
-  const [misAlumnos, setMisAlumnos] = useState<any[]>([]);
+  const [misAlumnos, setMisAlumnos] = useState<Alumno[]>([]);
 
   // Funciones para agregar/eliminar alumnos
-  const agregarAlumno = (alumno: any) => {
+  const agregarAlumno = (alumno: Alumno) => {
     if (!misAlumnos.some(a => a.rut === alumno.rut)) {
       setMisAlumnos(prev => [...prev, alumno]);
     }

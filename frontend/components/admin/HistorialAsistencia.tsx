@@ -1,14 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
+import type { Asistencia } from '../../../shared/types';
 import styles from './HistorialAsistencia.module.css';
 
 export default function HistorialAsistencia() {
-  const [historial, setHistorial] = useState<any[]>([]);
+  const [historial, setHistorial] = useState<Asistencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [rutSearch, setRutSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-    const [nombreSearch, setNombreSearch] = useState('');
+  const [nombreSearch, setNombreSearch] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -108,7 +109,7 @@ export default function HistorialAsistencia() {
                 <tr key={idx}>
                   <td>{item.nombre}</td>
                   <td>{item.rut}</td>
-                  <td>{new Date(item.fecha).toLocaleString()}</td>
+                  <td>{item.fecha ? new Date(item.fecha).toLocaleString() : ''}</td>
                   <td>{item.email}</td>
                   <td>{item.telefono}</td>
                   <td data-plan={item.plan?.toLowerCase()}>{item.plan}</td>

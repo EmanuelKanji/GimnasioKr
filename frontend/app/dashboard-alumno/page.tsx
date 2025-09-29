@@ -7,6 +7,7 @@ import PerfilAlumno from "../../components/alumno/PerfilAlumno";
 import AvisosAlumno from "../../components/alumno/AvisosAlumno";
 import InicioAlumno from "../../components/alumno/InicioAlumno";
 import QrAlumno from "../../components/alumno/QrAlumno";
+import type { PerfilInfo } from '../../../shared/types';
 
 // Iconos SVG como componentes
 const HomeIcon = () => (
@@ -71,7 +72,7 @@ export default function DashboardAlumno() {
   >("inicio");
   
   const [menuOpen, setMenuOpen] = useState(false);
-  const [perfil, setPerfil] = useState<any | null>(null);
+    const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
   const [loadingPerfil, setLoadingPerfil] = useState(true);
 
   // Obtener perfil del alumno al cargar el dashboard
@@ -234,10 +235,10 @@ export default function DashboardAlumno() {
               <div className={styles.loadingState}>Cargando QR...</div>
             ) : perfil ? (
               <QrAlumno
-                rut={perfil.rut}
-                plan={perfil.plan}
-                fechaInicio={perfil.fechaInicioPlan}
-                fechaFin={perfil.fechaTerminoPlan}
+                rut={perfil?.rut ?? ''}
+                plan={perfil?.plan ?? ''}
+                fechaInicio={perfil?.fechaInicioPlan ?? ''}
+                fechaFin={perfil?.fechaTerminoPlan ?? ''}
               />
             ) : (
               <div className={styles.errorState}>No se encontró el perfil del alumno.</div>

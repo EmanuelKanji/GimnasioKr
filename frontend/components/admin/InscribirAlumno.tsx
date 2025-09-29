@@ -1,23 +1,12 @@
-
 'use client';
+import type { Alumno } from '../../../shared/types';
 import { useState } from 'react';
 import styles from './InscribirAlumno.module.css';
 
-interface Alumno {
-  nombre: string;
-  rut: string;
-  direccion: string;
-  fechaNacimiento: string;
-  email: string;
-  telefono: string;
-  plan: string;
-  fechaInicioPlan: string;
-}
 
 export default function InscribirAlumnoForm() {
-  const [form, setForm] = useState<any>({
+  const [form, setForm] = useState<Alumno>({
     nombre: '',
-    email: '',
     telefono: '',
     rut: '',
     direccion: '',
@@ -25,15 +14,19 @@ export default function InscribirAlumnoForm() {
     plan: 'mensual',
     fechaInicioPlan: '',
     duracion: 'mensual',
-    monto: '',
+    monto: 0,
     password: '',
+    email: '',
   });
   const [alumnos, setAlumnos] = useState<Alumno[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (e.target.name === 'plan') {
-      setForm((prev: any) => ({ ...prev, duracion: e.target.value }));
+    if (e.target.name === 'monto') {
+      setForm({ ...form, monto: Number(e.target.value) });
+    } else if (e.target.name === 'plan') {
+      setForm({ ...form, plan: e.target.value, duracion: e.target.value });
+    } else {
+      setForm({ ...form, [e.target.name]: e.target.value });
     }
   };
 
@@ -64,7 +57,6 @@ export default function InscribirAlumnoForm() {
         setMensaje('Alumno inscrito exitosamente.');
         setForm({
           nombre: '',
-          email: '',
           telefono: '',
           rut: '',
           direccion: '',
@@ -72,8 +64,9 @@ export default function InscribirAlumnoForm() {
           plan: 'mensual',
           fechaInicioPlan: '',
           duracion: 'mensual',
-          monto: '',
+          monto: 0,
           password: '',
+          email: '',
         });
       } else {
         setMensaje(data.message || 'Error al inscribir alumno.');

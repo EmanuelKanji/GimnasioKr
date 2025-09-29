@@ -54,7 +54,7 @@ export class HttpClient {
     }
   }
 
-  static async post<T>(endpoint: string, data: any): Promise<ApiResponse<T>> {
+  static async post<T>(endpoint: string, data: unknown): Promise<ApiResponse<T>> {
     const token = this.getToken();
     
     if (!token) {

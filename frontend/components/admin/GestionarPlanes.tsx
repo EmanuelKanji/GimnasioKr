@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import styles from './GestionarPlanes.module.css';
+import type { Plan } from '../../../shared/types';
 
 export default function GestionarPlanes() {
-  const [planes, setPlanes] = useState<any[]>([]);
+  const [planes, setPlanes] = useState<Plan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState({ nombre: '', descripcion: '', precio: '', clases: '', matricula: '', duracion: 'mensual' });

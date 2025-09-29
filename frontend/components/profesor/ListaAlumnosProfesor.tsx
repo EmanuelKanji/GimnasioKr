@@ -1,16 +1,9 @@
+'use client';
+
 import styles from './ListaAlumnosProfesor.module.css';
 import { useEffect, useState } from 'react';
 
-interface Alumno {
-  nombre: string;
-  rut: string;
-  direccion?: string;
-  fechaNacimiento?: string;
-  email?: string;
-  telefono?: string;
-  plan?: string;
-  fechaInicioPlan?: string;
-}
+import type { Alumno } from '../../../shared/types';
 
 interface ListaAlumnosProfesorProps {
   alumnos: Alumno[];
@@ -38,7 +31,7 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
       rutOk = cleanRut.includes(rutSearch);
     }
     if (nombreSearch) {
-      nombreOk = alumno.nombre.toLowerCase().includes(nombreSearch.toLowerCase());
+      nombreOk = (alumno.nombre ?? '').toLowerCase().includes(nombreSearch.toLowerCase());
     }
     // Excluir los que ya están en "mis alumnos"
     const yaAgregado = misAlumnos.some(a => a.rut === alumno.rut);
@@ -68,7 +61,7 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
                 <td className={styles.tableCell} data-label="Plan"><span className={styles.planBadge}>{alumno.plan}</span></td>
                 <td className={styles.tableCell} data-label="Inicio"><span className={styles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
                 <td className={styles.tableCell} data-label="Acción">
-                  <button onClick={() => eliminarAlumno(alumno.rut)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Eliminar</button>
+                  <button onClick={() => eliminarAlumno(alumno.rut ?? '')} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Eliminar</button>
                 </td>
               </tr>
             ))}

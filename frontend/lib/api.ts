@@ -1,3 +1,4 @@
+import type { Alumno } from '../../shared/types';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export interface LoginResponse {
@@ -86,9 +87,9 @@ class ApiService {
   }
 
   // Verificar token (para rutas protegidas)
-  async verifyToken(token: string): Promise<{ valid: boolean; user?: any }> {
+  async verifyToken(token: string): Promise<{ valid: boolean; user?: Alumno }> {
     try {
-      const response = await this.request<{ valid: boolean; user?: any }>('/api/verify', {
+  const response = await this.request<{ valid: boolean; user?: Alumno }>('/api/verify', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

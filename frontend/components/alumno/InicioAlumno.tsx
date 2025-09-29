@@ -1,10 +1,17 @@
+import type { PlanAlumno, Aviso } from '../../../shared/types';
 import styles from './InicioAlumno.module.css';
 import { useEffect, useState } from 'react';
 
 export default function InicioAlumno() {
   const [diasAsistidos, setDiasAsistidos] = useState<string[]>([]);
-  const [plan, setPlan] = useState<any>(null);
-  const [avisos, setAvisos] = useState<any[]>([]);
+  const [plan, setPlan] = useState<PlanAlumno>({
+    nombre: '',
+    estadoPago: 'pendiente',
+    fechaInicio: '',
+    fechaFin: '',
+    monto: 0
+  });
+  const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,17 +89,17 @@ export default function InicioAlumno() {
               <span className={plan?.estadoPago === 'pagado' ? styles.paid : styles.pending}>
                 {plan?.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}
               </span>
-              <span className={styles.planDates}>{plan ? `${new Date(plan.fechaInicio).toLocaleDateString('es-CL')} - ${new Date(plan.fechaFin).toLocaleDateString('es-CL')}` : ''}</span>
+              <span className={styles.planDates}>{plan?.fechaInicio ? `${new Date(plan.fechaInicio).toLocaleDateString('es-CL')}` : ''}{plan?.fechaFin ? ` - ${new Date(plan.fechaFin).toLocaleDateString('es-CL')}` : ''}</span>
               <span className={styles.planMonto}>{plan ? `$${plan.monto?.toLocaleString('es-CL')}` : ''}</span>
             </div>
           </div>
           <div className={styles.compactSection}>
             <span className={styles.compactLabel}>Avisos:</span>
             <div className={styles.avisosList}>
-              {avisos.slice(0,2).map((aviso, idx) => (
+                {avisos.slice(0, 2).map((aviso, idx) => (
                 <div key={idx} className={aviso.leido ? styles.leido : styles.noleido}>
                   <span className={styles.avisoTitle}>{aviso.titulo}</span>
-                  <span className={styles.avisoDate}>{new Date(aviso.fecha).toLocaleDateString('es-CL')}</span>
+                  <span className={styles.avisoDate}>{aviso.fecha ? new Date(aviso.fecha).toLocaleDateString('es-CL') : ''}</span>
                 </div>
               ))}
             </div>
