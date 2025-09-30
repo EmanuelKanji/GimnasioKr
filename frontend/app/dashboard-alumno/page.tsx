@@ -153,10 +153,11 @@ export default function DashboardAlumno() {
       <div 
         className={`${styles.mobileOverlay} ${menuOpen ? styles.active : ''}`}
         onClick={handleOverlayClick}
+        style={{ zIndex: menuOpen ? 999 : -1, pointerEvents: menuOpen ? 'auto' : 'none' }}
       />
 
       {/* Menú Lateral Premium */}
-      <aside className={`${styles.menu} ${menuOpen ? styles.active : ''}`}>
+      <aside className={`${styles.menu} ${menuOpen ? styles.active : ''}`} style={{ zIndex: menuOpen ? 1000 : 500 }}>
         <div className={styles.menuHeader}>
           <h3 className={styles.menuTitle}>Alumno</h3>
           <p className={styles.menuSubtitle}>Panel de control del alumno</p>
@@ -223,7 +224,7 @@ export default function DashboardAlumno() {
       </aside>
 
       {/* Contenido Principal Premium */}
-      <main className={styles.content}>
+      <main className={styles.content} style={{ zIndex: menuOpen ? 1 : 1001 }}>
         <div className={styles.contentBox}>
           {view === "inicio" && <InicioAlumno />}
           {view === "asistencia" && <AsistenciaAlumno />}
