@@ -43,7 +43,7 @@ export default function PasarAsistencia() {
     setQrResult(rutQR);
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:4000/api/asistencias', {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function PasarAsistencia() {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:4000/api/asistencias', {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -19,7 +19,7 @@ export default function DashboardProfesor() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
-    fetch('http://localhost:4000/api/alumnos', {
+  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
