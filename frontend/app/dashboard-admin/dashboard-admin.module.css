@@ -1,4 +1,4 @@
-/* dashboard-admin.module.css - Diseño Premium Admin */
+/* dashboard-admin.module.css - Diseño Premium Admin Corregido */
 .layout {
   display: flex;
   min-height: 100vh;
@@ -138,6 +138,7 @@
 .menuFooter {
   padding: 0 1.5rem;
   margin-top: auto;
+  padding-bottom: 1rem; /* Añadido para espacio en móviles */
 }
 
 .menuBtnLogout {
@@ -157,6 +158,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: auto; /* Asegura que se mantenga abajo */
 }
 
 .menuBtnLogout:hover {
@@ -364,6 +366,15 @@
   font-size: 1.1rem;
 }
 
+/* CORRECCIÓN PRINCIPAL: Asegurar que el menú sea desplazable en móviles */
+.menuScroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
 /* Responsive Design - Breakpoints Profesionales */
 
 /* Laptops grandes (1200px+) */
@@ -428,6 +439,9 @@
     width: 300px;
     padding: 5rem 0 2rem 0;
     box-shadow: 8px 0 48px rgba(15, 23, 42, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Cambiado de overflow: hidden */
   }
   
   .menu.active {
@@ -462,6 +476,22 @@
   
   .menuHeader {
     margin-bottom: 2.5rem;
+    padding: 0 1.5rem;
+    flex-shrink: 0; /* Evita que se comprima */
+  }
+  
+  .menuNav {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+  }
+  
+  .menuFooter {
+    flex-shrink: 0; /* Evita que se comprima */
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
   }
 }
 
@@ -504,6 +534,10 @@
   .menu {
     width: 280px;
   }
+  
+  .menuFooter {
+    padding: 0 1.5rem 1rem;
+  }
 }
 
 /* Móviles pequeños (375px - 479px) */
@@ -539,7 +573,7 @@
   }
   
   .menu {
-    width: 260px;
+    width: 100%;
     padding: 4rem 0 2rem 0;
   }
   
@@ -550,6 +584,10 @@
   .menuBtn {
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
+  }
+  
+  .menuFooter {
+    padding: 0 1rem 1rem;
   }
 }
 
@@ -574,21 +612,26 @@
 @media (max-height: 600px) and (orientation: landscape) {
   .menu {
     padding: 4rem 0 1.5rem 0;
-    overflow-y: auto;
   }
   
   .menuHeader {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0 1.5rem;
   }
   
   .menuBtn {
     padding: 0.625rem 1rem;
     margin-bottom: 0.25rem;
+    font-size: 0.85rem;
   }
   
   .contentBox {
-    min-height: 400px;
+    min-height: 350px;
     padding: 1.5rem;
+  }
+  
+  .menuFooter {
+    padding: 0.5rem 1.5rem 1rem;
   }
 }
 

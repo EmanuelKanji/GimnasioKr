@@ -1,4 +1,4 @@
-/* dashboard-alumno.module.css - Diseño Premium */
+/* dashboard-alumno.module.css - Diseño Premium Corregido */
 .layout {
   display: flex;
   min-height: 100vh;
@@ -35,7 +35,7 @@
   background: 
     radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(34, 197, 94, 0.2) 0%, transparent 50%);
-  z-index: --1;
+  z-index: -1; /* Corregido: era --1 */
 }
 
 .menuHeader {
@@ -45,7 +45,7 @@
 }
 
 .menuTitle {
-  padding: 40;
+  padding: 20px; /* Corregido: era 40 */
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -69,6 +69,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0 1.5rem;
+  overflow-y: auto; /* Añadido para scroll */
 }
 
 .menuBtn {
@@ -138,6 +139,8 @@
 .menuFooter {
   padding: 0 1.5rem;
   margin-top: auto;
+  padding-bottom: 1rem; /* Añadido para espacio en móviles */
+  flex-shrink: 0; /* Evita que se comprima */
 }
 
 .menuBtnLogout {
@@ -157,6 +160,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: auto; /* Asegura que se mantenga abajo */
 }
 
 .menuBtnLogout:hover {
@@ -394,7 +398,7 @@
   }
 }
 
-/* Tablets y móviles grandes (768px y menos) */
+/* Tablets y móviles grandes (768px y menos) - CORRECCIONES PRINCIPALES */
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
@@ -409,6 +413,9 @@
     width: 300px;
     padding: 5rem 0 2rem 0;
     box-shadow: 8px 0 48px rgba(1, 44, 171, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
   .menu.active {
@@ -443,6 +450,22 @@
   
   .menuHeader {
     margin-bottom: 2.5rem;
+    padding: 0 1.5rem;
+    flex-shrink: 0; /* Evita que se comprima */
+  }
+  
+  .menuNav {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+  }
+  
+  .menuFooter {
+    flex-shrink: 0; /* Evita que se comprima */
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(10, 25, 49, 0.8);
+    backdrop-filter: blur(10px);
   }
 }
 
@@ -485,6 +508,10 @@
   .menu {
     width: 280px;
   }
+  
+  .menuFooter {
+    padding: 0 1.5rem 1rem;
+  }
 }
 
 /* Móviles pequeños (375px - 479px) */
@@ -520,7 +547,7 @@
   }
   
   .menu {
-    width: 260px;
+    width: 100%;
     padding: 4rem 0 2rem 0;
   }
   
@@ -531,6 +558,10 @@
   .menuBtn {
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
+  }
+  
+  .menuFooter {
+    padding: 0 1rem 1rem;
   }
 }
 
@@ -555,21 +586,26 @@
 @media (max-height: 600px) and (orientation: landscape) {
   .menu {
     padding: 4rem 0 1.5rem 0;
-    overflow-y: auto;
   }
   
   .menuHeader {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0 1.5rem;
   }
   
   .menuBtn {
     padding: 0.625rem 1rem;
     margin-bottom: 0.25rem;
+    font-size: 0.85rem;
   }
   
   .contentBox {
-    min-height: 400px;
+    min-height: 350px;
     padding: 1.5rem;
+  }
+  
+  .menuFooter {
+    padding: 0.5rem 1.5rem 1rem;
   }
 }
 
