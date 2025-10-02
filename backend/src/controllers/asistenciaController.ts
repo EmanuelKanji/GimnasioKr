@@ -143,7 +143,7 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
     const limiteClases = alumno.limiteClases || 'todos_los_dias';
     if (limiteClases !== 'todos_los_dias') {
       // Obtener asistencias del mes actual
-      const asistenciasMes = alumno.asistencias.filter(fecha => {
+      const asistenciasMes = alumno.asistencias.filter((fecha: string) => {
         const fechaAsistencia = new Date(fecha);
         return fechaAsistencia.getFullYear() === yyyy && fechaAsistencia.getMonth() === (parseInt(mm) - 1);
       });

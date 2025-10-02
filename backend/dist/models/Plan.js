@@ -41,6 +41,12 @@ const PlanSchema = new mongoose_1.Schema({
     clases: { type: mongoose_1.Schema.Types.Mixed, required: true },
     matricula: { type: mongoose_1.Schema.Types.Mixed, required: true },
     duracion: { type: String, required: true },
+    limiteClases: {
+        type: String,
+        enum: ['12', '8', 'todos_los_dias'],
+        required: true,
+        default: 'todos_los_dias'
+    },
 }, {
     timestamps: true
 });

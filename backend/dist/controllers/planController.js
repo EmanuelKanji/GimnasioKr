@@ -21,11 +21,24 @@ const crearPlan = async (req, res) => {
         if (!nombre || !descripcion || !precio || !clases || !matricula || !duracion) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
         }
+        // Validar que el límite de clases sea válido
+        const limiteClasesValidos = ['12', '8', 'todos_los_dias'];
+        if (!limiteClasesValidos.includes(clases)) {
+            return res.status(400).json({ message: 'Límite de clases inválido. Debe ser: 12, 8 o todos_los_dias' });
+        }
         const existe = await Plan_1.default.findOne({ nombre });
         if (existe) {
             return res.status(409).json({ message: 'El plan ya existe.' });
         }
-        const nuevoPlan = await Plan_1.default.create({ nombre, descripcion, precio, clases, matricula, duracion });
+        const nuevoPlan = await Plan_1.default.create({
+            nombre,
+            descripcion,
+            precio,
+            clases,
+            matricula,
+            duracion,
+            limiteClases: clases // Mapear clases a limiteClases
+        });
         res.status(201).json(nuevoPlan);
     }
     catch (error) {

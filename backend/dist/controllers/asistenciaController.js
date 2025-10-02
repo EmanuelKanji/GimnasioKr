@@ -127,6 +127,24 @@ const registrarAsistencia = async (req, res) => {
                 fecha: fechaHoy
             });
         }
+        // 4. Verificar límites de clases del plan (si está configurado)
+        const limiteClases = alumno.limiteClases || 'todos_los_dias';
+        if (limiteClases !== 'todos_los_dias') {
+            // Obtener asistencias del mes actual
+            const asistenciasMes = alumno.asistencias.filter((fecha) => {
+                const fechaAsistencia = new Date(fecha);
+                return fechaAsistencia.getFullYear() === yyyy && fechaAsistencia.getMonth() === (parseInt(mm) - 1);
+            });
+            const limiteNumero = parseInt(limiteClases);
+            if (asistenciasMes.length >= limiteNumero) {
+                return res.status(403).json({
+                    message: `Has alcanzado el límite de ${limiteNumero} clases este mes.`,
+                    codigo: 'LIMITE_CLASES_ALCANZADO',
+                    limite: limiteNumero,
+                    usadas: asistenciasMes.length
+                });
+            }
+        }
         // ============= REGISTRO DE ASISTENCIA =============
         // Crear registro en la colección de asistencias
         const asistencia = await Asistencia_1.default.create({
