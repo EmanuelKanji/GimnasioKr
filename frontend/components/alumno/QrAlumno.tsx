@@ -1,15 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import styles from './QrAlumno.module.css';
+import { calcularLimiteClases, obtenerMensajeLimite, obtenerColorIndicador, type LimiteClases } from '../../lib/classLimits';
 
 interface QrAlumnoProps {
   rut: string;
   plan: string;
   fechaInicio: string;
   fechaFin: string;
+  limiteClases?: LimiteClases;
+  asistenciasMes?: string[];
 }
 
-export default function QrAlumno({ rut, plan, fechaInicio, fechaFin }: QrAlumnoProps) {
+export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClases = 'todos_los_dias', asistenciasMes = [] }: QrAlumnoProps) {
   const [activo, setActivo] = useState(false);
   const [qrData, setQrData] = useState('');
   const [tiempoRestante, setTiempoRestante] = useState(0);
@@ -41,20 +44,28 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin }: QrAlumnoP
     setTiempoRestante(tiempoExpiracion);
   }, [rut, plan, fechaInicio, fechaFin]);
 
-  // Verificar si el plan está activo
+  // Calcular información de límites de clases
+  const limiteInfo = calcularLimiteClases(limiteClases, asistenciasMes);
+  const mensajeLimite = obtenerMensajeLimite(limiteClases, asistenciasMes);
+  const colorIndicador = obtenerColorIndicador(limiteClases, asistenciasMes);
+
+  // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {
     const hoy = new Date();
     const inicio = new Date(fechaInicio);
     const fin = new Date(fechaFin);
     const planActivo = hoy >= inicio && hoy <= fin;
     
-    setActivo(planActivo);
+    // Verificar si puede acceder hoy según los límites de clases
+    const puedeAccederHoy = limiteInfo.puedeAcceder;
     
-    // Solo generar QR si el plan está activo
-    if (planActivo) {
+    setActivo(planActivo && puedeAccederHoy);
+    
+    // Solo generar QR si el plan está activo y puede acceder
+    if (planActivo && puedeAccederHoy) {
       generarNuevoQR();
     }
-  }, [fechaInicio, fechaFin, rut, plan, generarNuevoQR]);
+  }, [fechaInicio, fechaFin, rut, plan, limiteInfo.puedeAcceder, generarNuevoQR]);
 
   // Contador regresivo para mostrar tiempo restante del QR
   useEffect(() => {
@@ -74,16 +85,36 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin }: QrAlumnoP
     return () => clearInterval(interval);
   }, [tiempoRestante, generarNuevoQR]);
 
-  // Si el plan no está activo, mostrar mensaje de error
+  // Si el plan no está activo o no puede acceder, mostrar mensaje de error
   if (!activo) {
+    const hoy = new Date();
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    const planActivo = hoy >= inicio && hoy <= fin;
+    
     return (
       <div className={styles.container}>
         <h2 className={styles.title}>🔒 Mi QR</h2>
         <div className={styles.errorContainer}>
           <h3 className={styles.errorTitle}>❌ QR no disponible</h3>
           <div className={styles.errorMessage}>
-            <p>Tu plan está inactivo o ha expirado.</p>
-            <p>Por favor, renueva tu plan para acceder al gimnasio.</p>
+            {!planActivo ? (
+              <>
+                <p>Tu plan está inactivo o ha expirado.</p>
+                <p>Por favor, renueva tu plan para acceder al gimnasio.</p>
+              </>
+            ) : (
+              <>
+                <p>Has alcanzado el límite de clases de tu plan.</p>
+                <p>{mensajeLimite}</p>
+                <div className={styles.limiteInfo}>
+                  <div className={styles.limiteStats}>
+                    <span>Clases usadas: {limiteInfo.diasUsados}/{limiteInfo.diasDisponibles}</span>
+                    <span>Restantes: {limiteInfo.diasRestantes}</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -144,6 +175,33 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin }: QrAlumnoP
             <div className={styles.planDetail}>
               <span className={styles.planLabel}>Válido hasta:</span>
               <span className={styles.planValue}>{new Date(fechaFin).toLocaleDateString('es-CL')}</span>
+            </div>
+            
+            {/* Información de límites de clases */}
+            <div className={styles.limiteClasesInfo}>
+              <h5>🎯 Límite de Clases</h5>
+              <div className={styles.limiteDetail}>
+                <span className={styles.limiteLabel}>Tipo:</span>
+                <span className={styles.limiteValue}>
+                  {limiteClases === '12' ? '12 clases al mes' : 
+                   limiteClases === '8' ? '8 clases al mes' : 'Todos los días hábiles'}
+                </span>
+              </div>
+              <div className={styles.limiteDetail}>
+                <span className={styles.limiteLabel}>Usadas:</span>
+                <span className={styles.limiteValue} style={{ color: colorIndicador }}>
+                  {limiteInfo.diasUsados}/{limiteInfo.diasDisponibles}
+                </span>
+              </div>
+              <div className={styles.limiteDetail}>
+                <span className={styles.limiteLabel}>Restantes:</span>
+                <span className={styles.limiteValue} style={{ color: colorIndicador }}>
+                  {limiteInfo.diasRestantes}
+                </span>
+              </div>
+              <div className={styles.limiteMessage}>
+                {mensajeLimite}
+              </div>
             </div>
           </div>
         </div>

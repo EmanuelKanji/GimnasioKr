@@ -1,69 +1,65 @@
 
 import styles from './AsistenciaAlumno.module.css';
 import { useEffect, useState } from 'react';
+import { generateMonthlyCalendar, isAsistido, getMonthName } from '../../lib/dateUtils';
 
 export default function AsistenciaAlumno() {
   const [diasAsistidos, setDiasAsistidos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        setDiasAsistidos(data.diasAsistidos || []);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching asistencias:', error);
-        setLoading(false);
+  const cargarAsistencias = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      setDiasAsistidos(data.diasAsistidos || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching asistencias:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarAsistencias();
+    
+    // Actualizar cada 30 segundos para sincronización en tiempo real
+    const interval = setInterval(cargarAsistencias, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Escuchar eventos de actualización desde otros componentes
+  useEffect(() => {
+    const handleAsistenciaUpdate = () => {
+      cargarAsistencias();
+    };
+
+    window.addEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
+    
+    return () => {
+      window.removeEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
+    };
   }, []);
 
   // Generación de calendario que inicia en lunes
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const weeks: (Date | undefined)[][] = [];
-  let currentWeek: (Date | undefined)[] = [];
-  // Ajuste: getDay() 0=domingo, 1=lunes... queremos que 1=lunes sea el inicio
-  let startDay = firstDay.getDay();
-  if (startDay === 0) startDay = 7; // domingo como último día
-  for (let i = 1; i < startDay; i++) currentWeek.push(undefined);
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const date = new Date(year, month, d);
-    currentWeek.push(date);
-    if (currentWeek.length === 7) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-  if (currentWeek.length) {
-    while (currentWeek.length < 7) currentWeek.push(undefined);
-    weeks.push(currentWeek);
-  }
-  const isAsistido = (date: Date | undefined) => {
-    if (!date) return false;
-    const iso = date.toISOString().slice(0, 10);
-    return diasAsistidos.includes(iso);
-  };
+  const calendar = generateMonthlyCalendar(today.getFullYear(), today.getMonth());
 
   if (loading) return <div className={styles.container}>Cargando asistencia...</div>;
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Asistencia mensual</h2>
+      <h2 className={styles.title}>Asistencia - {getMonthName(today.getMonth())} {today.getFullYear()}</h2>
       <div className={styles.calendarBox}>
         <table className={styles.calendar}>
           <thead>
@@ -74,12 +70,12 @@ export default function AsistenciaAlumno() {
             </tr>
           </thead>
           <tbody>
-            {weeks.map((week, i) => (
+            {calendar.weeks.map((week, i) => (
               <tr key={i}>
-                {week.map((date, j) => (
+                {week.dates.map((date, j) => (
                   <td key={j} className={date ? styles.dayCell : styles.emptyCell}>
                     {date && (
-                      <div className={isAsistido(date) ? styles.asistido : styles.noAsistido}>
+                      <div className={isAsistido(date, diasAsistidos) ? styles.asistido : styles.noAsistido}>
                         {date.getDate()}
                       </div>
                     )}

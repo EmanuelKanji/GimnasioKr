@@ -7,7 +7,7 @@ export default function GestionarPlanes() {
   const [planes, setPlanes] = useState<Plan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [mensaje, setMensaje] = useState<string | null>(null);
-  const [nuevo, setNuevo] = useState({ nombre: '', descripcion: '', precio: '', clases: '', matricula: '', duracion: 'mensual' });
+  const [nuevo, setNuevo] = useState({ nombre: '', descripcion: '', precio: '', clases: '12', matricula: '', duracion: 'mensual' });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -54,7 +54,7 @@ export default function GestionarPlanes() {
       if (res.ok) {
         setPlanes([...planes, data]);
         setMensaje('Plan creado exitosamente.');
-        setNuevo({ nombre: '', descripcion: '', precio: '', clases: '', matricula: '', duracion: 'mensual' });
+        setNuevo({ nombre: '', descripcion: '', precio: '', clases: '12', matricula: '', duracion: 'mensual' });
       } else {
         setMensaje(data.message || 'Error al crear el plan.');
       }
@@ -110,15 +110,17 @@ export default function GestionarPlanes() {
           className={styles.input}
           required
         />
-        <input
-          type="text"
+        <select
           name="clases"
-          placeholder="Clases o días"
           value={nuevo.clases}
           onChange={handleChange}
           className={styles.input}
           required
-        />
+        >
+          <option value="12">12 clases al mes</option>
+          <option value="8">8 clases al mes</option>
+          <option value="todos_los_dias">Todos los días hábiles</option>
+        </select>
         <input
           type="text"
           name="matricula"
@@ -153,7 +155,8 @@ export default function GestionarPlanes() {
                 <div className={styles.planName}>{plan.nombre}</div>
                 {plan.descripcion && <div className={styles.planDescription}>{plan.descripcion}</div>}
                 <div className={styles.planDetails}>
-                  <span>Clases: {plan.clases}</span>
+                  <span>Límite: {plan.clases === '12' ? '12 clases al mes' : 
+                                 plan.clases === '8' ? '8 clases al mes' : 'Todos los días hábiles'}</span>
                   <span>Precio: ${plan.precio?.toLocaleString()}</span>
                   <span>Matrícula: {plan.matricula}</span>
                 </div>

@@ -1,6 +1,7 @@
 import type { PlanAlumno, Aviso } from '../../../shared/types';
 import styles from './InicioAlumno.module.css';
 import { useEffect, useState } from 'react';
+import { generateCurrentWeek, generateMonthlyCalendar, isAsistido, toISODate, getMonthName } from '../../lib/dateUtils';
 
 export default function InicioAlumno() {
   const [diasAsistidos, setDiasAsistidos] = useState<string[]>([]);
@@ -14,46 +15,70 @@ export default function InicioAlumno() {
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const cargarDatos = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Fetch asistencia
+      const asistenciasRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const asistenciasData = await asistenciasRes.json();
+      setDiasAsistidos(asistenciasData.diasAsistidos || []);
+      
+      // Fetch plan
+      const planRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/plan', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const planData = await planRes.json();
+      setPlan(planData.plan || null);
+      
+      // Fetch avisos
+      const avisosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/avisos', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const avisosData = await avisosRes.json();
+      setAvisos(avisosData.avisos || []);
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    // Fetch asistencia
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setDiasAsistidos(data.diasAsistidos || []));
-    // Fetch plan
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/plan', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setPlan(data.plan || null));
-    // Fetch avisos
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/avisos', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setAvisos(data.avisos || []));
-    setLoading(false);
+    cargarDatos();
+    
+    // Actualizar cada 30 segundos para sincronización en tiempo real
+    const interval = setInterval(cargarDatos, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Escuchar eventos de actualización desde otros componentes
+  useEffect(() => {
+    const handleAsistenciaUpdate = () => {
+      cargarDatos();
+    };
+
+    window.addEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
+    
+    return () => {
+      window.removeEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
+    };
   }, []);
 
   // Calcular la semana actual (lunes a domingo)
   const today = new Date();
-  // getDay: 0=domingo, 1=lunes, ..., 6=sábado
-  const dayOfWeek = today.getDay();
-  // Si es domingo (0), retroceder 6 días para llegar al lunes anterior
-  // Si es otro día, retroceder (dayOfWeek - 1) días para llegar al lunes
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  const weekDates: string[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    weekDates.push(d.toISOString().slice(0, 10));
-  }
+  const weekDates = generateCurrentWeek(today);
+  const weekDatesISO = weekDates.map(toISODate);
 
   // Filtrar asistencias solo de la semana actual
-  const asistenciasSemana = diasAsistidos.filter((d) => weekDates.includes(d));
+  const asistenciasSemana = diasAsistidos.filter((d) => weekDatesISO.includes(d));
+
+  // Generar calendario mensual para mostrar en el resumen
+  const calendar = generateMonthlyCalendar(today.getFullYear(), today.getMonth());
 
   if (loading) {
   return <div className={styles.container}>Cargando resumen...</div>;
@@ -65,21 +90,44 @@ export default function InicioAlumno() {
       <div className={styles.compactBox}>
         <div className={styles.compactRow}>
           <div className={styles.compactSection}>
-            <span className={styles.compactLabel}>Asistencia:</span>
-            <div className={styles.weekRow}>
-              {weekDates.map((date, idx) => {
-                const dateObj = new Date(date);
-                const asistido = asistenciasSemana.includes(date);
-                return (
-                  <div
-                    key={date}
-                    className={asistido ? styles.asistido : styles.noAsistido}
-                    title={dateObj.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' })}
-                  >
-                    {dateObj.getDate()}
+            <span className={styles.compactLabel}>Asistencia - {getMonthName(today.getMonth())} {today.getFullYear()}:</span>
+            <div className={styles.calendarContainer}>
+              {/* Semana actual */}
+              <div className={styles.weekRow}>
+                <span className={styles.weekLabel}>Esta semana:</span>
+                {weekDates.map((date, idx) => {
+                  const asistido = isAsistido(date, diasAsistidos);
+                  return (
+                    <div
+                      key={toISODate(date)}
+                      className={asistido ? styles.asistido : styles.noAsistido}
+                      title={`${date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' })} - ${asistido ? 'Asistió' : 'No asistió'}`}
+                    >
+                      {date.getDate()}
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Mini calendario mensual */}
+              <div className={styles.miniCalendar}>
+                <div className={styles.calendarHeader}>
+                  {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) => (
+                    <div key={day} className={styles.dayHeader}>{day}</div>
+                  ))}
+                </div>
+                {calendar.weeks.slice(0, 3).map((week, weekIdx) => (
+                  <div key={weekIdx} className={styles.calendarWeek}>
+                    {week.dates.map((date, dayIdx) => (
+                      <div
+                        key={dayIdx}
+                        className={`${styles.calendarDay} ${!date ? styles.emptyDay : ''} ${date && isAsistido(date, diasAsistidos) ? styles.asistido : styles.noAsistido}`}
+                      >
+                        {date ? date.getDate() : ''}
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
           <div className={styles.compactSection}>

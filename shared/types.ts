@@ -46,6 +46,7 @@ export interface Alumno {
   monto?: number;
   password?: string;
   email?: string;
+  limiteClases?: '12' | '8' | 'todos_los_dias';
 }
 
 export interface Plan {
@@ -56,6 +57,7 @@ export interface Plan {
   clases: string | number;
   matricula: string | number;
   duracion: 'mensual' | 'trimestral' | 'anual';
+  limiteClases: '12' | '8' | 'todos_los_dias'; // Límite de clases por mes
 }
 
 export interface PerfilInfo {

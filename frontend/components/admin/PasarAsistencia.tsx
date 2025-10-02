@@ -69,6 +69,16 @@ export default function PasarAsistencia() {
         
         setQrResult(mensaje);
         
+        // Notificar a otros componentes que se registró una asistencia
+        window.dispatchEvent(new CustomEvent('asistenciaRegistrada', {
+          detail: {
+            timestamp: new Date().toISOString(),
+            rut: result.asistencia?.rut || rutParaEnviar,
+            alumno: result.asistencia?.alumno || 'N/A',
+            fecha: result.asistencia?.fecha || 'Hoy'
+          }
+        }));
+        
         // Limpiar resultado después de 5 segundos
         setTimeout(() => {
           setQrResult('');
@@ -120,6 +130,16 @@ export default function PasarAsistencia() {
       const data = await res.json();
       if (res.ok) {
         setQrResult(`${rutQR} - ${new Date().toLocaleString()}`);
+        
+        // Notificar a otros componentes que se registró una asistencia
+        window.dispatchEvent(new CustomEvent('asistenciaRegistrada', {
+          detail: {
+            timestamp: new Date().toISOString(),
+            rut: rutQR,
+            alumno: data.asistencia?.alumno || 'N/A',
+            fecha: data.asistencia?.fecha || 'Hoy'
+          }
+        }));
       } else {
         setQrResult(`Error: ${data.message}`);
       }
@@ -149,6 +169,16 @@ export default function PasarAsistencia() {
       const data = await res.json();
       if (res.ok) {
         setRutResult(`${rut} - ${new Date().toLocaleString()}`);
+        
+        // Notificar a otros componentes que se registró una asistencia
+        window.dispatchEvent(new CustomEvent('asistenciaRegistrada', {
+          detail: {
+            timestamp: new Date().toISOString(),
+            rut: rut,
+            alumno: data.asistencia?.alumno || 'N/A',
+            fecha: data.asistencia?.fecha || 'Hoy'
+          }
+        }));
       } else {
         setRutResult(`Error: ${data.message}`);
       }

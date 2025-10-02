@@ -7,6 +7,7 @@ export interface IPlan extends Document {
   clases: string | number;
   matricula: string | number;
   duracion: string; // Ejemplo: 'mensual', 'trimestral', 'anual'
+  limiteClases: '12' | '8' | 'todos_los_dias'; // Límite de clases por mes
 }
 
 const PlanSchema: Schema = new Schema({
@@ -16,6 +17,12 @@ const PlanSchema: Schema = new Schema({
   clases: { type: Schema.Types.Mixed, required: true },
   matricula: { type: Schema.Types.Mixed, required: true },
   duracion: { type: String, required: true },
+  limiteClases: { 
+    type: String, 
+    enum: ['12', '8', 'todos_los_dias'], 
+    required: true,
+    default: 'todos_los_dias'
+  },
 }, {
   timestamps: true
 });

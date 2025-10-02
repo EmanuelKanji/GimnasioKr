@@ -69,6 +69,16 @@ export default function PasarAsistencia() {
         
         setQrResult(mensaje);
         
+        // Notificar a otros componentes que se registró una asistencia
+        window.dispatchEvent(new CustomEvent('asistenciaRegistrada', {
+          detail: {
+            timestamp: new Date().toISOString(),
+            rut: result.asistencia?.rut || rutParaEnviar,
+            alumno: result.asistencia?.alumno || 'N/A',
+            fecha: result.asistencia?.fecha || 'Hoy'
+          }
+        }));
+        
         // Limpiar resultado después de 5 segundos
         setTimeout(() => {
           setQrResult('');

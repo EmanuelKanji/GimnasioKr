@@ -74,21 +74,64 @@ export default function DashboardAlumno() {
   const [menuOpen, setMenuOpen] = useState(false);
     const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
   const [loadingPerfil, setLoadingPerfil] = useState(true);
+  const [asistenciasMes, setAsistenciasMes] = useState<string[]>([]);
+  const [limiteClases, setLimiteClases] = useState<'12' | '8' | 'todos_los_dias'>('todos_los_dias');
 
-  // Obtener perfil del alumno al cargar el dashboard
+  const cargarDatos = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Cargar perfil del alumno
+      const perfilRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/perfil', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const perfilData = await perfilRes.json();
+      setPerfil(perfilData.perfil || null);
+      
+      // Cargar asistencias del mes
+      const asistenciasRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const asistenciasData = await asistenciasRes.json();
+      setAsistenciasMes(asistenciasData.diasAsistidos || []);
+      
+      // Obtener límite de clases del plan (por ahora hardcodeado, después se obtendrá del plan)
+      if (perfilData.perfil?.plan) {
+        // Aquí se debería obtener el límite de clases del plan desde la API
+        // Por ahora usamos un valor por defecto basado en el nombre del plan
+        const planNombre = perfilData.perfil.plan.toLowerCase();
+        if (planNombre.includes('12')) {
+          setLimiteClases('12');
+        } else if (planNombre.includes('8')) {
+          setLimiteClases('8');
+        } else {
+          setLimiteClases('todos_los_dias');
+        }
+      }
+      
+      setLoadingPerfil(false);
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+      setLoadingPerfil(false);
+    }
+  };
+
+  // Obtener perfil del alumno y asistencias al cargar el dashboard
   useEffect(() => {
-    const token = localStorage.getItem('token');
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/perfil', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        setPerfil(data.perfil || null);
-        setLoadingPerfil(false);
-      })
-      .catch(() => setLoadingPerfil(false));
+    cargarDatos();
+  }, []);
+
+  // Escuchar eventos de actualización de asistencia
+  useEffect(() => {
+    const handleAsistenciaUpdate = () => {
+      cargarDatos();
+    };
+
+    window.addEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
+    
+    return () => {
+      window.removeEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
+    };
   }, []);
 
   const handleViewChange = (newView: "inicio" | "asistencia" | "plan" | "perfil" | "avisos" | "qr") => {
@@ -240,6 +283,8 @@ export default function DashboardAlumno() {
                 plan={perfil?.plan ?? ''}
                 fechaInicio={perfil?.fechaInicioPlan ?? ''}
                 fechaFin={perfil?.fechaTerminoPlan ?? ''}
+                limiteClases={limiteClases}
+                asistenciasMes={asistenciasMes}
               />
             ) : (
               <div className={styles.errorState}>No se encontró el perfil del alumno.</div>

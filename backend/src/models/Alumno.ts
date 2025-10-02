@@ -12,6 +12,7 @@ export interface IAlumno extends Document {
   fechaTerminoPlan: string;
   duracion: string;
   monto: number;
+  limiteClases: '12' | '8' | 'todos_los_dias'; // Límite de clases por mes
   asistencias: string[]; // Fechas ISO
   avisos: {
     titulo: string;
@@ -33,6 +34,11 @@ const AlumnoSchema: Schema = new Schema({
   fechaTerminoPlan: { type: String, required: true },
   duracion: { type: String, required: true },
   monto: { type: Number, required: false, default: 0 },
+  limiteClases: { 
+    type: String, 
+    enum: ['12', '8', 'todos_los_dias'], 
+    default: 'todos_los_dias' 
+  },
   asistencias: { type: [String], default: [] }, // Fechas ISO
   avisos: {
     type: [

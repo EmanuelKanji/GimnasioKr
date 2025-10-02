@@ -203,6 +203,79 @@
   color: #0f172a;
 }
 
+/* Información de límites de clases */
+.limiteClasesInfo {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 1rem;
+  border: 1px solid #0ea5e9;
+}
+
+.limiteClasesInfo h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0369a1;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.limiteDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.limiteDetail:last-of-type {
+  border-bottom: none;
+}
+
+.limiteLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0c4a6e;
+}
+
+.limiteValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.limiteMessage {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #0c4a6e;
+  text-align: center;
+  font-style: italic;
+}
+
+.limiteInfo {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 0.75rem;
+  border: 1px solid #ef4444;
+}
+
+.limiteStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #dc2626;
+  text-align: center;
+}
+
+.limiteStats span {
+  font-weight: 600;
+}
+
 .errorContainer {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border-radius: 1.5rem;
