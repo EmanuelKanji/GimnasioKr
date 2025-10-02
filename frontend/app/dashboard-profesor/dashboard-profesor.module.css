@@ -1,9 +1,6 @@
 /* dashboard-profesor.module.css - Diseño Premium Profesor */
 
-/* Smooth scrolling global y optimizaciones de performance */
-* {
-  scroll-behavior: smooth;
-}
+/* Smooth scrolling - aplicado al layout específico */
 
 /* Optimización GPU para mejor performance */
 .layout,
@@ -14,11 +11,6 @@
   backface-visibility: hidden;
 }
 
-/* Prevención de layout shifts */
-.layout {
-  contain: layout style paint;
-}
-
 .layout {
   display: flex;
   min-height: 100vh;
@@ -27,6 +19,12 @@
   position: relative;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  contain: layout style paint; /* Prevención de layout shifts */
+  scroll-behavior: smooth; /* Smooth scrolling aplicado aquí */
+}
+
+.layout * {
+  scroll-behavior: smooth; /* Smooth scrolling para elementos hijos */
 }
 
 /* Menú Lateral - Estilo Premium Profesor */
