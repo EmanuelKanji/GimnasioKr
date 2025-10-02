@@ -151,16 +151,16 @@ const obtenerEstadisticasProfesor = async (req, res) => {
         const estadisticas = {
             asistenciasSemana: asistenciasPorDia,
             alumnos: {
-                total: totalAlumnos,
-                activos: alumnosActivos,
-                nuevos: alumnosNuevos,
-                misAlumnos: misAlumnosDetalles.length
+                total: totalAlumnos || 0,
+                activos: alumnosActivos || 0,
+                nuevos: alumnosNuevos || 0,
+                misAlumnos: misAlumnosDetalles.length || 0
             },
-            avisos: avisosConEstadisticas,
+            avisos: avisosConEstadisticas || [],
             resumen: {
-                totalAsistenciasSemana: asistenciasSemana.length,
-                promedioAsistenciasDiarias: Math.round(asistenciasSemana.length / 7),
-                avisosEnviados: avisos.length,
+                totalAsistenciasSemana: asistenciasSemana.length || 0,
+                promedioAsistenciasDiarias: Math.round((asistenciasSemana.length || 0) / 7),
+                avisosEnviados: avisos.length || 0,
                 fechaActualizacion: new Date()
             }
         };

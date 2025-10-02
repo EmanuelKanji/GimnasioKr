@@ -37,21 +37,40 @@ export default function ResumenProfesor() {
   // Obtener estadísticas del profesor
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      setError('Token no encontrado');
+      setLoading(false);
+      return;
+    }
 
-    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/profesor/estadisticas', {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    console.log('🔄 Obteniendo estadísticas desde:', `${apiUrl}/api/profesor/estadisticas`);
+
+    fetch(`${apiUrl}/api/profesor/estadisticas`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     })
-      .then(res => res.ok ? res.json() : Promise.reject('Error al obtener estadísticas'))
+      .then(async res => {
+        console.log('📡 Respuesta del servidor:', res.status, res.statusText);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('❌ Error del servidor:', errorText);
+          throw new Error(`${res.status}: ${errorText}`);
+        }
+        
+        return res.json();
+      })
       .then(data => {
+        console.log('✅ Estadísticas recibidas:', data);
         setEstadisticas(data);
         setLoading(false);
       })
       .catch(err => {
-        console.error('Error:', err);
-        setError('No se pudieron cargar las estadísticas');
+        console.error('❌ Error completo:', err);
+        setError(`Error: ${err.message || 'No se pudieron cargar las estadísticas'}`);
         setLoading(false);
       });
   }, []);
