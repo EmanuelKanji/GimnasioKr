@@ -562,3 +562,152 @@
     border-left-width: 6px;
   }
 }
+
+/* Nuevos estilos para el resumen */
+.misAlumnosList {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.misAlumnosList h4 {
+  margin: 0 0 1rem 0;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.noAlumnos {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.alumnosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.alumnoCard {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.alumnoCard:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.alumnoNombre {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.alumnoRut {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.alumnoPlan {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.masAlumnos {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Acciones rápidas */
+.accionesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.accionItem {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.accionItem:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.accionIcon {
+  font-size: 1.5rem;
+}
+
+.accionText {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Responsive para nuevos elementos */
+@media (max-width: 768px) {
+  .alumnosGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .accionesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .accionItem {
+    padding: 0.75rem;
+  }
+  
+  .accionIcon {
+    font-size: 1.25rem;
+  }
+  
+  .accionText {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .accionesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .misAlumnosList {
+    padding: 0.75rem;
+  }
+  
+  .alumnoCard {
+    padding: 0.5rem;
+  }
+}

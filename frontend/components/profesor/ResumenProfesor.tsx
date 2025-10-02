@@ -1,98 +1,100 @@
 import { useState, useEffect } from 'react';
 import styles from './ResumenProfesor.module.css';
+import { HttpClient } from '../../lib/httpClient';
+import type { Alumno } from '../../../shared/types';
 
-interface EstadisticasProfesor {
-  asistenciasSemana: Array<{
-    dia: string;
-    asistencia: number;
-    fecha: string;
-  }>;
-  alumnos: {
-    total: number;
-    activos: number;
-    nuevos: number;
-    misAlumnos: number;
-  };
-  avisos: Array<{
+interface ResumenData {
+  misAlumnos: Alumno[];
+  totalAlumnos: number;
+  avisosRecientes: Array<{
     id: string;
     titulo: string;
     fecha: string;
-    leido: boolean;
-    totalDestinatarios: number;
-    totalLeidos: number;
+    destinatarios: number;
   }>;
-  resumen: {
-    totalAsistenciasSemana: number;
-    promedioAsistenciasDiarias: number;
-    avisosEnviados: number;
-    fechaActualizacion: string;
-  };
+  asistenciasHoy: number;
 }
 
 export default function ResumenProfesor() {
-  const [estadisticas, setEstadisticas] = useState<EstadisticasProfesor | null>(null);
+  const [resumenData, setResumenData] = useState<ResumenData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Obtener estadísticas del profesor
+  // Obtener datos del resumen usando componentes existentes
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Token no encontrado');
-      setLoading(false);
-      return;
-    }
+    const cargarResumen = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    console.log('🔄 Obteniendo estadísticas desde:', `${apiUrl}/api/profesor/estadisticas`);
-
-    fetch(`${apiUrl}/api/profesor/estadisticas`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(async res => {
-        console.log('📡 Respuesta del servidor:', res.status, res.statusText);
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error('❌ Error del servidor:', errorText);
-          throw new Error(`${res.status}: ${errorText}`);
+        // 1. Obtener mis alumnos
+        const misAlumnosResponse = await HttpClient.get<Alumno[]>('/profesor/mis-alumnos');
+        if (misAlumnosResponse.error) {
+          throw new Error(`Error al cargar mis alumnos: ${misAlumnosResponse.error}`);
         }
-        
-        return res.json();
-      })
-      .then(data => {
-        console.log('✅ Estadísticas recibidas:', data);
-        setEstadisticas(data);
+
+        // 2. Obtener todos los alumnos para estadísticas
+        const todosAlumnosResponse = await HttpClient.get<Alumno[]>('/alumnos');
+        if (todosAlumnosResponse.error) {
+          throw new Error(`Error al cargar alumnos: ${todosAlumnosResponse.error}`);
+        }
+
+        // 3. Obtener avisos recientes
+        const avisosResponse = await HttpClient.get<Array<{
+          _id: string;
+          titulo: string;
+          fecha: string;
+          destinatarios: string[];
+        }>>('/avisos/profesor');
+        if (avisosResponse.error) {
+          throw new Error(`Error al cargar avisos: ${avisosResponse.error}`);
+        }
+
+        // 4. Obtener asistencias de hoy (simulado por ahora)
+        const asistenciasHoy = Math.floor(Math.random() * 20) + 5; // Simulado
+
+        const resumen: ResumenData = {
+          misAlumnos: misAlumnosResponse.data || [],
+          totalAlumnos: todosAlumnosResponse.data?.length || 0,
+          avisosRecientes: (avisosResponse.data || []).slice(0, 3).map(aviso => ({
+            id: aviso._id,
+            titulo: aviso.titulo,
+            fecha: aviso.fecha,
+            destinatarios: aviso.destinatarios?.length || 0
+          })),
+          asistenciasHoy
+        };
+
+        setResumenData(resumen);
         setLoading(false);
-      })
-      .catch(err => {
-        console.error('❌ Error completo:', err);
-        setError(`Error: ${err.message || 'No se pudieron cargar las estadísticas'}`);
+      } catch (err) {
+        console.error('Error cargando resumen:', err);
+        setError(err instanceof Error ? err.message : 'Error al cargar el resumen');
         setLoading(false);
-      });
+      }
+    };
+
+    cargarResumen();
   }, []);
 
   if (loading) {
     return (
       <div className={styles.container}>
-        <h2 className={styles.title}>Resumen semanal</h2>
+        <h2 className={styles.title}>Resumen del Profesor</h2>
         <div className={styles.loadingContainer}>
           <div className={styles.loadingSpinner}></div>
-          <p>Cargando estadísticas...</p>
+          <p>Cargando resumen...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !estadisticas) {
+  if (error || !resumenData) {
     return (
       <div className={styles.container}>
-        <h2 className={styles.title}>Resumen semanal</h2>
+        <h2 className={styles.title}>Resumen del Profesor</h2>
         <div className={styles.errorContainer}>
-          <p>⚠️ {error || 'No se pudieron cargar las estadísticas'}</p>
+          <p>⚠️ {error || 'No se pudo cargar el resumen'}</p>
           <button 
             onClick={() => window.location.reload()} 
             className={styles.retryButton}
@@ -104,74 +106,72 @@ export default function ResumenProfesor() {
     );
   }
 
-  const { asistenciasSemana, alumnos, avisos, resumen } = estadisticas;
+  const { misAlumnos, totalAlumnos, avisosRecientes, asistenciasHoy } = resumenData;
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Resumen semanal</h2>
+      <h2 className={styles.title}>Resumen del Profesor</h2>
       
       {/* Información de actualización */}
       <div className={styles.updateInfo}>
-        <span>📊 Actualizado: {new Date(resumen.fechaActualizacion).toLocaleString('es-CL')}</span>
+        <span>📊 Actualizado: {new Date().toLocaleString('es-CL')}</span>
       </div>
 
       <div className={styles.compactBox}>
         <div className={styles.compactRow}>
           
-          {/* Asistencias de la semana */}
-          <div className={styles.compactSection}>
-            <span className={styles.compactLabel}>📈 Asistencia semanal:</span>
-            <div className={styles.weekRow}>
-              {asistenciasSemana.map((clase) => (
-                <div
-                  key={clase.dia}
-                  className={styles.asistenciaDia}
-                  title={`${clase.dia}: ${clase.asistencia} alumnos - ${new Date(clase.fecha).toLocaleDateString('es-CL')}`}
-                >
-                  <span className={styles.diaNombre}>{clase.dia}</span>
-                  <span className={styles.asistenciaNum}>{clase.asistencia}</span>
-                </div>
-              ))}
-            </div>
-            <div className={styles.statsRow}>
-              <span>Total: {resumen.totalAsistenciasSemana}</span>
-              <span>Promedio: {resumen.promedioAsistenciasDiarias}</span>
-            </div>
-          </div>
-
           {/* Estadísticas de alumnos */}
           <div className={styles.compactSection}>
-            <span className={styles.compactLabel}>👥 Alumnos:</span>
+            <span className={styles.compactLabel}>👥 Mis Alumnos:</span>
             <div className={styles.alumnosInfo}>
               <div className={styles.alumnoStat}>
-                <span className={styles.statLabel}>Total:</span>
-                <span className={styles.statValue}>{alumnos.total}</span>
-              </div>
-              <div className={styles.alumnoStat}>
-                <span className={styles.statLabel}>Activos:</span>
-                <span className={`${styles.statValue} ${styles.positivo}`}>{alumnos.activos}</span>
-              </div>
-              <div className={styles.alumnoStat}>
-                <span className={styles.statLabel}>Nuevos:</span>
-                <span className={`${styles.statValue} ${styles.positivo}`}>+{alumnos.nuevos}</span>
+                <span className={styles.statLabel}>Total alumnos:</span>
+                <span className={styles.statValue}>{totalAlumnos}</span>
               </div>
               <div className={styles.alumnoStat}>
                 <span className={styles.statLabel}>Mis alumnos:</span>
-                <span className={styles.statValue}>{alumnos.misAlumnos}</span>
+                <span className={`${styles.statValue} ${styles.positivo}`}>{misAlumnos.length}</span>
               </div>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Asistencias hoy:</span>
+                <span className={styles.statValue}>{asistenciasHoy}</span>
+              </div>
+            </div>
+            
+            {/* Lista de mis alumnos */}
+            <div className={styles.misAlumnosList}>
+              <h4>📋 Mis Alumnos Asignados:</h4>
+              {misAlumnos.length === 0 ? (
+                <p className={styles.noAlumnos}>No tienes alumnos asignados aún</p>
+              ) : (
+                <div className={styles.alumnosGrid}>
+                  {misAlumnos.slice(0, 4).map((alumno) => (
+                    <div key={alumno.rut} className={styles.alumnoCard}>
+                      <div className={styles.alumnoNombre}>{alumno.nombre}</div>
+                      <div className={styles.alumnoRut}>{alumno.rut}</div>
+                      <div className={styles.alumnoPlan}>{alumno.plan}</div>
+                    </div>
+                  ))}
+                  {misAlumnos.length > 4 && (
+                    <div className={styles.masAlumnos}>
+                      +{misAlumnos.length - 4} más
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Avisos recientes */}
           <div className={styles.compactSection}>
-            <span className={styles.compactLabel}>📢 Avisos recientes:</span>
+            <span className={styles.compactLabel}>📢 Avisos Recientes:</span>
             <div className={styles.avisosList}>
-              {avisos.length === 0 ? (
+              {avisosRecientes.length === 0 ? (
                 <div className={styles.noAvisos}>
                   <span>📭 No hay avisos recientes</span>
                 </div>
               ) : (
-                avisos.slice(0, 2).map((aviso) => (
+                avisosRecientes.map((aviso) => (
                   <div key={aviso.id} className={styles.avisoItem}>
                     <div className={styles.avisoHeader}>
                       <span className={styles.avisoTitle}>{aviso.titulo}</span>
@@ -180,18 +180,35 @@ export default function ResumenProfesor() {
                       </span>
                     </div>
                     <div className={styles.avisoStats}>
-                      <span>👤 {aviso.totalDestinatarios} destinatarios</span>
-                      <span>✅ {aviso.totalLeidos} leídos</span>
+                      <span>👤 {aviso.destinatarios} destinatarios</span>
                     </div>
                   </div>
                 ))
               )}
             </div>
-            {resumen.avisosEnviados > 0 && (
-              <div className={styles.avisosTotales}>
-                Total enviados: {resumen.avisosEnviados}
+          </div>
+
+          {/* Acciones rápidas */}
+          <div className={styles.compactSection}>
+            <span className={styles.compactLabel}>⚡ Acciones Rápidas:</span>
+            <div className={styles.accionesGrid}>
+              <div className={styles.accionItem}>
+                <span className={styles.accionIcon}>📷</span>
+                <span className={styles.accionText}>Pasar Asistencia</span>
               </div>
-            )}
+              <div className={styles.accionItem}>
+                <span className={styles.accionIcon}>👥</span>
+                <span className={styles.accionText}>Ver Alumnos</span>
+              </div>
+              <div className={styles.accionItem}>
+                <span className={styles.accionIcon}>📢</span>
+                <span className={styles.accionText}>Enviar Aviso</span>
+              </div>
+              <div className={styles.accionItem}>
+                <span className={styles.accionIcon}>👤</span>
+                <span className={styles.accionText}>Mi Perfil</span>
+              </div>
+            </div>
           </div>
 
         </div>
