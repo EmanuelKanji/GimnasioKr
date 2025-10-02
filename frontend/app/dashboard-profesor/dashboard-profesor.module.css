@@ -96,6 +96,7 @@
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  min-height: 48px; /* Tamaño mínimo para táctil */
   padding: 1rem 1.25rem;
   border: none;
   border-radius: 12px;
@@ -111,6 +112,8 @@
   overflow: hidden;
   will-change: transform, background-color;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent; /* Eliminar highlight en iOS */
+  user-select: none; /* Prevenir selección de texto */
 }
 
 .menuBtn::before {
@@ -248,26 +251,29 @@
   display: none;
   flex-direction: column;
   justify-content: space-between;
-  width: 32px;
-  height: 24px;
-  background: transparent;
+  width: 44px; /* Tamaño mínimo táctil */
+  height: 44px; /* Tamaño mínimo táctil */
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 8px; /* Padding interno para área táctil */
   position: fixed;
-  top: 28px;
-  left: 20px;
+  top: 20px;
+  left: 16px;
   z-index: 160;
   transition: all 0.3s ease;
   will-change: transform;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .hamburgerLine {
   width: 100%;
-  height: 3px;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+  height: 2.5px;
+  background: #0f172a;
+  border-radius: 2px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
 }
@@ -288,7 +294,12 @@
 
 .hamburger.active .hamburgerLine:nth-child(3) {
   transform: rotate(-45deg) translate(8px, -8px);
-  background: #fff;
+  background: #0f172a;
+}
+
+.hamburger:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 /* Overlay Premium */
@@ -318,14 +329,32 @@
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   color: #fff;
-  padding: 1.25rem 1.5rem 1.25rem 4.5rem; /* Padding left para no tapar hamburguesa */
+  padding: 1.25rem 1.5rem 1.25rem 4.5rem;
   z-index: 140;
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.2);
+  box-shadow: 
+    0 4px 24px rgba(15, 23, 42, 0.25),
+    0 1px 3px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   will-change: transform;
+  position: relative;
+}
+
+.mobileHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(34, 197, 94, 0.08) 0%, 
+    transparent 30%, 
+    transparent 70%, 
+    rgba(59, 130, 246, 0.08) 100%);
+  z-index: -1;
 }
 
 .mobileHeaderContent {
@@ -341,18 +370,26 @@
   font-weight: 700;
   margin: 0;
   color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.025em;
 }
 
 .userBadge {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  gap: 0.625rem;
+  padding: 0.625rem 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.userBadge:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
 .userAvatar {
@@ -428,8 +465,16 @@
   }
   
   .menuBtn {
-    padding: 0.875rem 1rem;
-    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 52px; /* Más grande para móvil */
+    border-radius: 14px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .menuBtn:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.15);
   }
   
   .content {
@@ -493,13 +538,18 @@
   
   .contentBox {
     max-width: 100%;
-    padding: 1.5rem 1rem;
+    padding: 2rem 1.5rem;
     min-height: 500px;
-    border-radius: 20px;
+    border-radius: 24px;
     margin-top: 0;
-    transform: translateZ(0); /* Force hardware acceleration */
+    transform: translateZ(0);
     background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.12);
+    box-shadow: 
+      0 8px 32px rgba(15, 23, 42, 0.15),
+      0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
   }
   
   .menuHeader {
@@ -542,26 +592,33 @@
 /* Móviles medianos (480px - 767px) */
 @media (max-width: 767px) {
   .hamburger {
-    width: 28px;
-    height: 20px;
-    top: 24px;
-    left: 16px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px;
-    border-radius: 4px;
-    backdrop-filter: blur(10px);
+    width: 48px; /* Mantener tamaño táctil */
+    height: 48px; /* Mantener tamaño táctil */
+    top: 18px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
   }
   
   .mobileHeader {
-    padding: 1rem 1.25rem;
+    padding: 1.125rem 1.5rem 1.125rem 4.25rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   }
   
   .mobileTitle {
-    font-size: 1.1rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   }
   
   .userBadge {
-    padding: 0.375rem 0.75rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
   }
   
   .userName {
@@ -569,18 +626,33 @@
   }
   
   .content {
-    margin-top: 70px;
-    padding: 0.875rem;
+    margin-top: 75px;
+    padding: 1rem;
   }
   
   .contentBox {
-    padding: 1.75rem 1.25rem;
-    min-height: 450px;
-    border-radius: 18px;
+    padding: 2rem 1.5rem;
+    min-height: 480px;
+    border-radius: 20px;
+    box-shadow: 
+      0 6px 28px rgba(15, 23, 42, 0.18),
+      0 1px 0 rgba(255, 255, 255, 0.8);
   }
   
   .menu {
     width: 280px;
+  }
+  
+  .menuBtn {
+    min-height: 56px; /* Aún más grande para móviles medianos */
+    padding: 1.125rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 16px;
+  }
+  
+  .menuBtn:active {
+    transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.2);
   }
   
   .menuFooter {
@@ -591,10 +663,15 @@
 /* Móviles pequeños (375px - 479px) */
 @media (max-width: 479px) {
   .hamburger {
-    width: 26px;
-    height: 18px;
-    top: 18px;
-    left: 18px;
+    width: 52px; /* Aún más grande para móviles pequeños */
+    height: 52px; /* Aún más grande para móviles pequeños */
+    top: 16px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px;
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   }
   
   .hamburgerLine {
@@ -604,28 +681,54 @@
   }
   
   .mobileHeader {
-    padding: 0.875rem 1rem 0.875rem 4rem;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 1rem 1.25rem 1rem 4.25rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    box-shadow: 
+      0 4px 20px rgba(15, 23, 42, 0.3),
+      0 1px 3px rgba(0, 0, 0, 0.15);
   }
   
   .mobileTitle {
-    font-size: 1rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
   
   .content {
-    margin-top: 65px;
-    padding: 0.75rem;
+    margin-top: 70px;
+    padding: 0.875rem;
   }
   
   .contentBox {
-    padding: 1.5rem 1rem;
-    min-height: 400px;
-    border-radius: 16px;
+    padding: 1.75rem 1.25rem;
+    min-height: 420px;
+    border-radius: 20px;
+    box-shadow: 
+      0 6px 24px rgba(15, 23, 42, 0.2),
+      0 1px 0 rgba(255, 255, 255, 0.8);
   }
   
   .menu {
     width: 100%;
     padding: 4rem 0 2rem 0;
+  }
+  
+  .menuBtn {
+    min-height: 60px; /* Máximo tamaño para móviles pequeños */
+    padding: 1.25rem 1.5rem;
+    font-size: 1.05rem;
+    border-radius: 18px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .menuBtn:active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.25);
+  }
+  
+  .menuBtnIcon {
+    width: 24px;
+    height: 24px;
   }
   
   .menuNav {

@@ -86,20 +86,76 @@
   color: #1e293b;
 }
 
-@media (max-width: 600px) {
+/* Responsive móvil mejorado */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.75rem;
+    gap: 1.25rem;
+  }
+  
+  .title {
+    font-size: 1.375rem;
+    margin-bottom: 1rem;
+  }
+  
   .inbox {
-    padding: 0.5rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(1, 44, 171, 0.12);
   }
+  
   .aviso {
-    padding: 0.75rem 0.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(1, 44, 171, 0.08);
+    margin-bottom: 0.75rem;
   }
+  
+  .avisoTitle {
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+  
+  .avisoDate {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .avisoMensaje {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+  }
+  
+  .inbox {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+  
+  .aviso {
+    padding: 0.875rem 1rem;
+    border-radius: 10px;
+  }
+  
   .avisoTitle {
     font-size: 1rem;
   }
+  
   .avisoDate {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
+  
   .avisoMensaje {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 }
