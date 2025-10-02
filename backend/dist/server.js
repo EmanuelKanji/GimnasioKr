@@ -31,7 +31,34 @@ app.use((0, helmet_1.default)());
 // Limitar a 100 peticiones por IP cada 15 minutos
 app.use((0, express_rate_limit_1.default)({ windowMs: 15 * 60 * 1000, max: 100 }));
 // Permitir solo el origen del frontend en producción
-app.use((0, cors_1.default)({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://kraccess.netlify.app',
+    'https://gimnasiokr.onrender.com'
+];
+if (process.env.CORS_ORIGIN) {
+    // Permitir múltiples orígenes separados por coma en la variable de entorno
+    process.env.CORS_ORIGIN.split(',').forEach(origin => {
+        if (origin && !allowedOrigins.includes(origin.trim())) {
+            allowedOrigins.push(origin.trim());
+        }
+    });
+}
+app.use((0, cors_1.default)({
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origen (como Postman) o si está en la lista
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200
+}));
 // ========================
 // Rutas
 // ========================

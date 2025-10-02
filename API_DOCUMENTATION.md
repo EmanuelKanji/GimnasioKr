@@ -203,3 +203,6 @@ curl -X GET http://localhost:4000/api/alumnos/me/perfil \
 3. **Escalabilidad**: Fácil agregar nuevos endpoints
 4. **Mantenibilidad**: Código más limpio y organizado
 5. **Documentación**: APIs bien documentadas y fáciles de entender
+
+
+

@@ -15,7 +15,7 @@ export default function AvisosAlumno() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/avisos', {
+  fetch('http://localhost:4000/api/alumno/avisos', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

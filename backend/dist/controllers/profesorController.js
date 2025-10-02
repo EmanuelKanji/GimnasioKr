@@ -3,8 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginProfesor = exports.actualizarPerfilProfesor = exports.obtenerPerfilProfesor = void 0;
+exports.loginProfesor = exports.obtenerEstadisticasProfesor = exports.obtenerMisAlumnos = exports.eliminarMiAlumno = exports.agregarMiAlumno = exports.actualizarPerfilProfesor = exports.obtenerPerfilProfesor = void 0;
 const Profesor_1 = __importDefault(require("../models/Profesor"));
+const Alumno_1 = __importDefault(require("../models/Alumno"));
+const Asistencia_1 = __importDefault(require("../models/Asistencia"));
+const Aviso_1 = __importDefault(require("../models/Aviso"));
 const obtenerPerfilProfesor = async (req, res) => {
     try {
         const rut = req.user?.rut;
@@ -30,6 +33,145 @@ const actualizarPerfilProfesor = async (req, res) => {
     }
 };
 exports.actualizarPerfilProfesor = actualizarPerfilProfesor;
+// Agregar alumno a "mis alumnos"
+const agregarMiAlumno = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        const { rutAlumno } = req.body;
+        // Verificar que el alumno existe
+        const alumno = await Alumno_1.default.findOne({ rut: rutAlumno });
+        if (!alumno) {
+            return res.status(404).json({ error: 'Alumno no encontrado' });
+        }
+        // Agregar alumno a la lista si no está ya agregado
+        const profesor = await Profesor_1.default.findOneAndUpdate({ rut, misAlumnos: { $ne: rutAlumno } }, { $push: { misAlumnos: rutAlumno } }, { new: true, upsert: true });
+        res.json({ message: 'Alumno agregado exitosamente', profesor });
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Error al agregar alumno' });
+    }
+};
+exports.agregarMiAlumno = agregarMiAlumno;
+// Eliminar alumno de "mis alumnos"
+const eliminarMiAlumno = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        const { rutAlumno } = req.body;
+        const profesor = await Profesor_1.default.findOneAndUpdate({ rut }, { $pull: { misAlumnos: rutAlumno } }, { new: true });
+        if (!profesor) {
+            return res.status(404).json({ error: 'Profesor no encontrado' });
+        }
+        res.json({ message: 'Alumno eliminado exitosamente', profesor });
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Error al eliminar alumno' });
+    }
+};
+exports.eliminarMiAlumno = eliminarMiAlumno;
+// Obtener "mis alumnos" con detalles completos
+const obtenerMisAlumnos = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        const profesor = await Profesor_1.default.findOne({ rut });
+        if (!profesor || !profesor.misAlumnos) {
+            return res.json([]);
+        }
+        // Obtener detalles completos de mis alumnos
+        const alumnos = await Alumno_1.default.find({ rut: { $in: profesor.misAlumnos } });
+        res.json(alumnos);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Error al obtener mis alumnos' });
+    }
+};
+exports.obtenerMisAlumnos = obtenerMisAlumnos;
+// Obtener estadísticas del profesor
+const obtenerEstadisticasProfesor = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        const profesor = await Profesor_1.default.findOne({ rut });
+        if (!profesor) {
+            return res.status(404).json({ error: 'Profesor no encontrado' });
+        }
+        // Obtener datos de la semana actual
+        const hoy = new Date();
+        const inicioSemana = new Date(hoy);
+        inicioSemana.setDate(hoy.getDate() - hoy.getDay()); // Domingo de esta semana
+        inicioSemana.setHours(0, 0, 0, 0);
+        const finSemana = new Date(inicioSemana);
+        finSemana.setDate(inicioSemana.getDate() + 6); // Sábado de esta semana
+        finSemana.setHours(23, 59, 59, 999);
+        // Obtener asistencias de la semana de todos los alumnos (para estadísticas generales)
+        const asistenciasSemana = await Asistencia_1.default.find({
+            fecha: { $gte: inicioSemana, $lte: finSemana }
+        });
+        // Agrupar asistencias por día
+        const asistenciasPorDia = [];
+        const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        for (let i = 0; i < 7; i++) {
+            const dia = new Date(inicioSemana);
+            dia.setDate(inicioSemana.getDate() + i);
+            const asistenciasDia = asistenciasSemana.filter(a => {
+                const fechaAsistencia = new Date(a.fecha);
+                return fechaAsistencia.toDateString() === dia.toDateString();
+            });
+            asistenciasPorDia.push({
+                dia: diasSemana[i],
+                asistencia: asistenciasDia.length,
+                fecha: dia.toISOString().split('T')[0]
+            });
+        }
+        // Estadísticas de alumnos
+        const totalAlumnos = await Alumno_1.default.countDocuments();
+        const alumnosActivos = await Alumno_1.default.countDocuments({
+            fechaFinPlan: { $gte: new Date() }
+        });
+        // Contar alumnos nuevos (agregados en la última semana)
+        const alumnosNuevos = await Alumno_1.default.countDocuments({
+            createdAt: { $gte: inicioSemana }
+        });
+        // Avisos del profesor (últimos 5)
+        const avisos = await Aviso_1.default.find({ profesor: rut })
+            .sort({ fecha: -1 })
+            .limit(5)
+            .select('titulo fecha leidoPor destinatarios');
+        // Calcular estadísticas de avisos
+        const avisosConEstadisticas = avisos.map(aviso => ({
+            id: aviso._id,
+            titulo: aviso.titulo,
+            fecha: aviso.fecha,
+            leido: aviso.leidoPor?.length > 0,
+            totalDestinatarios: aviso.destinatarios?.length || 0,
+            totalLeidos: aviso.leidoPor?.length || 0
+        }));
+        // Estadísticas de mis alumnos
+        const misAlumnosDetalles = await Alumno_1.default.find({
+            rut: { $in: profesor.misAlumnos || [] }
+        });
+        const estadisticas = {
+            asistenciasSemana: asistenciasPorDia,
+            alumnos: {
+                total: totalAlumnos,
+                activos: alumnosActivos,
+                nuevos: alumnosNuevos,
+                misAlumnos: misAlumnosDetalles.length
+            },
+            avisos: avisosConEstadisticas,
+            resumen: {
+                totalAsistenciasSemana: asistenciasSemana.length,
+                promedioAsistenciasDiarias: Math.round(asistenciasSemana.length / 7),
+                avisosEnviados: avisos.length,
+                fechaActualizacion: new Date()
+            }
+        };
+        res.json(estadisticas);
+    }
+    catch (err) {
+        console.error('Error al obtener estadísticas:', err);
+        res.status(500).json({ error: 'Error al obtener estadísticas del profesor' });
+    }
+};
+exports.obtenerEstadisticasProfesor = obtenerEstadisticasProfesor;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const loginProfesor = async (req, res) => {

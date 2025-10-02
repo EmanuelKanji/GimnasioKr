@@ -1,4 +1,24 @@
 /* dashboard-profesor.module.css - Diseño Premium Profesor */
+
+/* Smooth scrolling global y optimizaciones de performance */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Optimización GPU para mejor performance */
+.layout,
+.menu,
+.content,
+.contentBox {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Prevención de layout shifts */
+.layout {
+  contain: layout style paint;
+}
+
 .layout {
   display: flex;
   min-height: 100vh;
@@ -6,23 +26,25 @@
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   position: relative;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
 }
 
 /* Menú Lateral - Estilo Premium Profesor */
 .menu {
   width: 320px;
-  background: linear-gradient(165deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background: linear-gradient(165deg, #1e293b 0%, #475569 50%, #64748b 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
   padding: 2.5rem 0;
   box-shadow: 
-    4px 0 32px rgba(15, 23, 42, 0.15),
+    4px 0 32px rgba(30, 41, 59, 0.15),
     inset -1px 0 0 rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 100;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  will-change: transform;
 }
 
 .menu::before {
@@ -33,8 +55,8 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
   z-index: -1;
 }
 
@@ -89,6 +111,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   overflow: hidden;
+  will-change: transform, background-color;
+  touch-action: manipulation;
 }
 
 .menuBtn::before {
@@ -207,6 +231,8 @@
   border: 1px solid rgba(255, 255, 255, 0.9);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+  will-change: transform;
 }
 
 .contentBox::before {
@@ -233,8 +259,9 @@
   position: fixed;
   top: 24px;
   left: 24px;
-  z-index: 1000;
+  z-index: 150;
   transition: all 0.3s ease;
+  will-change: transform;
 }
 
 .hamburgerLine {
@@ -275,9 +302,10 @@
   height: 100%;
   background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(8px);
-  z-index: 99;
+  z-index: 90;
   opacity: 0;
   transition: opacity 0.4s ease;
+  will-change: opacity;
 }
 
 .mobileOverlay.active {
@@ -294,10 +322,11 @@
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: #fff;
   padding: 1.25rem 1.5rem;
-  z-index: 999;
+  z-index: 140;
   box-shadow: 0 4px 24px rgba(15, 23, 42, 0.2);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  will-change: transform;
 }
 
 .mobileHeaderContent {
@@ -420,6 +449,7 @@
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
+    overflow-x: hidden;
   }
   
   .menu {
@@ -434,6 +464,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    z-index: 120;
+    will-change: transform;
   }
   
   .menu.active {
@@ -464,6 +496,7 @@
     min-height: 500px;
     border-radius: 20px;
     margin-top: 0;
+    transform: translateZ(0); /* Force hardware acceleration */
   }
   
   .menuHeader {
@@ -476,6 +509,22 @@
     flex: 1;
     overflow-y: auto;
     padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+  
+  .menuNav::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .menuNav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .menuNav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
   }
   
   .menuFooter {
@@ -624,6 +673,34 @@
   
   .menuFooter {
     padding: 0.5rem 1.5rem 1rem;
+  }
+}
+
+/* Mejora de accesibilidad y focus states */
+.menuBtn:focus-visible,
+.hamburger:focus-visible {
+  outline: 3px solid #00F757;
+  outline-offset: 2px;
+}
+
+/* Estados de focus para touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .menuBtn:active {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(0.98);
+  }
+  
+  .hamburger:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Optimización para dispositivos con pantalla de baja densidad */
+@media (-webkit-max-device-pixel-ratio: 1) {
+  .contentBox {
+    box-shadow: 
+      0 4px 24px rgba(15, 23, 42, 0.06),
+      0 1px 0 rgba(255, 255, 255, 0.6);
   }
 }
 

@@ -7,6 +7,7 @@ export interface IProfesor extends Document {
   telefono: string;
   direccion: string;
   fechaNacimiento: string;
+  misAlumnos: string[]; // Array de RUTs de alumnos asignados
 }
 
 const ProfesorSchema: Schema = new Schema({
@@ -16,6 +17,7 @@ const ProfesorSchema: Schema = new Schema({
   telefono: { type: String, required: true },
   direccion: { type: String, required: true },
   fechaNacimiento: { type: String, required: true },
+  misAlumnos: [{ type: String, default: [] }], // Array de RUTs
 });
 
 export default mongoose.model<IProfesor>('Profesor', ProfesorSchema);

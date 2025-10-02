@@ -41,5 +41,6 @@ const ProfesorSchema = new mongoose_1.Schema({
     telefono: { type: String, required: true },
     direccion: { type: String, required: true },
     fechaNacimiento: { type: String, required: true },
+    misAlumnos: [{ type: String, default: [] }], // Array de RUTs
 });
 exports.default = mongoose_1.default.model('Profesor', ProfesorSchema);

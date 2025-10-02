@@ -234,7 +234,7 @@
   position: fixed;
   top: 24px;
   left: 24px;
-  z-index: 1000;
+  z-index: 1100; /* Más alto que todo */
   transition: all 0.3s ease;
 }
 
@@ -276,13 +276,15 @@
   height: 100%;
   background: rgba(10, 25, 49, 0.8);
   backdrop-filter: blur(8px);
-  z-index: 99;
+  z-index: 1000; /* Fijo, no dinámico */
   opacity: 0;
   transition: opacity 0.4s ease;
+  pointer-events: none; /* Por defecto no clickeable */
 }
 
 .mobileOverlay.active {
   opacity: 1;
+  pointer-events: auto; /* Clickeable cuando activo */
 }
 
 /* Header Móvil Premium */
@@ -295,7 +297,7 @@
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
   color: #fff;
   padding: 1.25rem 1.5rem;
-  z-index: 999;
+  z-index: 1050; /* Entre overlay y hamburger */
   box-shadow: 0 4px 24px rgba(1, 44, 171, 0.2);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -416,6 +418,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    z-index: 1025; /* Entre header y overlay */
   }
   
   .menu.active {

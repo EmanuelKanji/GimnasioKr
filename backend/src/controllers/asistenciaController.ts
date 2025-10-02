@@ -28,33 +28,151 @@ import Asistencia from '../models/Asistencia';
 
 export const registrarAsistencia = async (req: Request, res: Response) => {
   try {
-    const { rut } = req.body;
+    // Puede recibir solo RUT (legacy) o datos completos del QR (nuevo sistema)
+    const { rut, qrData } = req.body;
+    
+    // Validación básica - debe haber al menos un RUT
     if (!rut) {
-      return res.status(400).json({ message: 'El RUT es obligatorio.' });
+      return res.status(400).json({ 
+        message: 'El RUT es obligatorio.', 
+        codigo: 'RUT_REQUERIDO' 
+      });
     }
-    const asistencia = await Asistencia.create({ rut, fecha: new Date() });
 
-    // Actualizar el array de asistencias del alumno
-    const AlumnoModel = require('../models/Alumno').default;
+    // Función auxiliar para limpiar RUT
     const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
-    // Buscar todos los alumnos y comparar rut limpio
+    
+    // Buscar el alumno en la base de datos
+    const AlumnoModel = require('../models/Alumno').default;
     const alumnos = await AlumnoModel.find();
-  const alumno = alumnos.find((a: any) => limpiarRut(a.rut) === limpiarRut(rut));
-    if (alumno) {
-      // Forzar formato YYYY-MM-DD sin hora ni desfase
-      const hoy = new Date();
-      const yyyy = hoy.getFullYear();
-      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-      const dd = String(hoy.getDate()).padStart(2, '0');
-      const fechaHoy = `${yyyy}-${mm}-${dd}`;
-      if (!alumno.asistencias.includes(fechaHoy)) {
-        alumno.asistencias.push(fechaHoy);
-        await alumno.save();
+    const alumno = alumnos.find((a: any) => limpiarRut(a.rut) === limpiarRut(rut));
+    
+    // Verificar que el alumno existe
+    if (!alumno) {
+      return res.status(404).json({ 
+        message: 'Alumno no encontrado en el sistema.', 
+        codigo: 'ALUMNO_NO_ENCONTRADO' 
+      });
+    }
+
+    // ============= VALIDACIONES DE SEGURIDAD =============
+    
+    // 1. Validar que el plan del alumno esté activo (fechas)
+    const fechaActual = new Date();
+    const fechaInicioPlan = new Date(alumno.fechaInicioPlan);
+    const fechaFinPlan = new Date(alumno.fechaTerminoPlan);
+    
+    if (fechaActual < fechaInicioPlan) {
+      return res.status(403).json({ 
+        message: 'Tu plan aún no ha comenzado. Fecha de inicio: ' + fechaInicioPlan.toLocaleDateString('es-CL'),
+        codigo: 'PLAN_NO_INICIADO' 
+      });
+    }
+    
+    if (fechaActual > fechaFinPlan) {
+      return res.status(403).json({ 
+        message: 'Tu plan ha expirado. Fecha de término: ' + fechaFinPlan.toLocaleDateString('es-CL'),
+        codigo: 'PLAN_EXPIRADO' 
+      });
+    }
+
+    // 2. Validaciones adicionales para QR con timestamp (nuevo sistema de seguridad)
+    if (qrData) {
+      try {
+        const datosQR = JSON.parse(qrData);
+        
+        // Validar que el QR no haya expirado (timestamp)
+        const tiempoActual = Date.now();
+        if (datosQR.expiraEn && tiempoActual > datosQR.expiraEn) {
+          return res.status(403).json({ 
+            message: 'El QR ha expirado. Por favor, genera uno nuevo.',
+            codigo: 'QR_EXPIRADO' 
+          });
+        }
+        
+        // Validar que el QR no sea demasiado antiguo (máximo 10 minutos)
+        if (datosQR.timestamp && (tiempoActual - datosQR.timestamp) > (10 * 60 * 1000)) {
+          return res.status(403).json({ 
+            message: 'El QR es demasiado antiguo. Genera uno nuevo.',
+            codigo: 'QR_ANTIGUO' 
+          });
+        }
+        
+        // Validar que el RUT del QR coincida con el enviado
+        if (datosQR.rut && limpiarRut(datosQR.rut) !== limpiarRut(rut)) {
+          return res.status(400).json({ 
+            message: 'El RUT del QR no coincide.',
+            codigo: 'RUT_NO_COINCIDE' 
+          });
+        }
+        
+        // Validar fechas del plan en el QR (doble verificación)
+        if (datosQR.validoHasta && fechaActual > new Date(datosQR.validoHasta)) {
+          return res.status(403).json({ 
+            message: 'El plan en el QR ha expirado.',
+            codigo: 'PLAN_QR_EXPIRADO' 
+          });
+        }
+        
+        console.log(`✅ QR válido procesado - RUT: ${rut}, Token: ${datosQR.token}, Generado: ${new Date(datosQR.timestamp).toLocaleString()}`);
+        
+      } catch (parseError) {
+        return res.status(400).json({ 
+          message: 'Formato de QR inválido.',
+          codigo: 'QR_FORMATO_INVALIDO' 
+        });
       }
     }
 
-    res.status(201).json({ message: 'Asistencia registrada.', asistencia });
+    // 3. Verificar que no haya registrado asistencia el mismo día (evitar duplicados)
+    const hoy = new Date();
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    const fechaHoy = `${yyyy}-${mm}-${dd}`;
+    
+    if (alumno.asistencias.includes(fechaHoy)) {
+      return res.status(409).json({ 
+        message: 'Ya has registrado asistencia hoy.',
+        codigo: 'ASISTENCIA_YA_REGISTRADA',
+        fecha: fechaHoy
+      });
+    }
+
+    // ============= REGISTRO DE ASISTENCIA =============
+    
+    // Crear registro en la colección de asistencias
+    const asistencia = await Asistencia.create({ 
+      rut: limpiarRut(rut), 
+      fecha: new Date() 
+    });
+
+    // Actualizar el array de asistencias del alumno
+    alumno.asistencias.push(fechaHoy);
+    await alumno.save();
+
+    // Log de seguridad
+    console.log(`📝 Asistencia registrada - RUT: ${rut}, Fecha: ${fechaHoy}, Plan: ${alumno.plan}`);
+
+    // Respuesta exitosa con información adicional
+    res.status(201).json({ 
+      message: 'Asistencia registrada exitosamente.',
+      codigo: 'ASISTENCIA_REGISTRADA',
+      asistencia: {
+        rut: rut,
+        fecha: fechaHoy,
+        hora: new Date().toLocaleTimeString('es-CL'),
+        alumno: alumno.nombre,
+        plan: alumno.plan
+      }
+    });
+
   } catch (error) {
-    res.status(500).json({ message: 'Error al registrar asistencia', error });
+    console.error('❌ Error al registrar asistencia:', error);
+    res.status(500).json({ 
+      message: 'Error interno del servidor al registrar asistencia',
+      codigo: 'ERROR_SERVIDOR',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
   }
 };

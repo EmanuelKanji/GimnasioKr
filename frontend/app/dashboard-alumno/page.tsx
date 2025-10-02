@@ -224,7 +224,7 @@ export default function DashboardAlumno() {
       </aside>
 
       {/* Contenido Principal Premium */}
-      <main className={styles.content} style={{ zIndex: menuOpen ? 1 : 1001 }}>
+      <main className={styles.content}>
         <div className={styles.contentBox}>
           {view === "inicio" && <InicioAlumno />}
           {view === "asistencia" && <AsistenciaAlumno />}

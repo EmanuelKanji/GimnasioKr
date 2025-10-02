@@ -91,6 +91,56 @@
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 1rem;
   border: 1px solid #e2e8f0;
+  position: relative;
+  z-index: 10;
+}
+
+/* Estilos para el componente QR Reader */
+.qrSection :global(#qr-reader) {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(1, 44, 171, 0.15);
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  margin: 0 auto;
+}
+
+.qrSection :global(#qr-reader video) {
+  border-radius: 0.75rem;
+  object-fit: cover;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.qrSection :global(#qr-reader canvas) {
+  border-radius: 0.75rem;
+}
+
+.qrSection :global(#qr-reader > div) {
+  border-radius: 1rem;
+}
+
+/* Botón de reiniciar escáner */
+.qrSection button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 0.9rem;
+}
+
+.qrSection button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
 }
 
 .sectionLabel {

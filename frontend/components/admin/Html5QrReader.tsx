@@ -23,21 +23,47 @@ export default function Html5QrReader({ onScan }: Html5QrReaderProps) {
       async (decodedText) => {
         if (scanOnceRef.current) return;
         if (decodedText) {
-          const rutMatch = decodedText.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
-          if (rutMatch) {
-            const cleanRut = rutMatch[1].replace(/\.|-/g, '');
-            scanOnceRef.current = true;
-            onScan(cleanRut);
-            setScanning(false);
-            // Detener el escáner
-            if (scannerRef.current) {
-              const state = scannerRef.current.getState && scannerRef.current.getState();
-              if (state === 2 || state === 3) {
-                await scannerRef.current.stop();
-                await scannerRef.current.clear();
-              } else {
-                await scannerRef.current.clear();
+          scanOnceRef.current = true;
+          
+          // Intentar parsear como JSON (nuevo formato)
+          try {
+            const qrData = JSON.parse(decodedText);
+            if (qrData.rut && qrData.timestamp) {
+              // QR nuevo formato - enviar datos completos
+              console.log('📱 QR nuevo formato escaneado:', qrData);
+              onScan(decodedText); // Enviar JSON completo
+            } else {
+              // JSON pero sin estructura esperada, buscar RUT
+              const rutMatch = decodedText.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
+              if (rutMatch) {
+                const cleanRut = rutMatch[1].replace(/\.|-/g, '');
+                onScan(cleanRut);
               }
+            }
+          } catch {
+            // No es JSON, buscar RUT directamente (formato legacy)
+            const rutMatch = decodedText.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
+            if (rutMatch) {
+              const cleanRut = rutMatch[1].replace(/\.|-/g, '');
+              console.log('📱 QR legacy escaneado:', cleanRut);
+              onScan(cleanRut);
+            } else {
+              // Si no encuentra RUT, enviar texto completo
+              console.log('📱 QR formato desconocido:', decodedText);
+              onScan(decodedText);
+            }
+          }
+          
+          setScanning(false);
+          
+          // Detener el escáner
+          if (scannerRef.current) {
+            const state = scannerRef.current.getState && scannerRef.current.getState();
+            if (state === 2 || state === 3) {
+              await scannerRef.current.stop();
+              await scannerRef.current.clear();
+            } else {
+              await scannerRef.current.clear();
             }
           }
         }

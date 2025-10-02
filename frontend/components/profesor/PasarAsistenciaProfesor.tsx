@@ -12,28 +12,94 @@ export default function PasarAsistencia() {
   // Estado para mostrar el lector QR
   const [showCamera, setShowCamera] = useState(false);
 
-  // Registrar asistencia al escanear QR con cámara
+  // Registrar asistencia al escanear QR con cámara (sistema mejorado con validaciones)
   const handleScanCamera = async (data: string | null | undefined) => {
     if (!data || data === 'undefined') return; // Evita procesar "undefined" string
-    setQrResult(data);
+    
     const token = localStorage.getItem('token');
+    let rutParaEnviar = data;
+    let qrDataParaEnviar = null;
+    
     try {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
+      // Intentar parsear como JSON (nuevo formato con timestamp y token)
+      const datosQR = JSON.parse(data);
+      
+      // Si tiene la estructura del nuevo QR, extraer RUT y enviar datos completos
+      if (datosQR.rut && datosQR.timestamp) {
+        rutParaEnviar = datosQR.rut;
+        qrDataParaEnviar = data; // Enviar QR completo para validaciones adicionales
+        
+        console.log('📱 QR nuevo formato detectado:', {
+          rut: datosQR.rut,
+          plan: datosQR.plan,
+          generado: new Date(datosQR.timestamp).toLocaleString(),
+          expira: new Date(datosQR.expiraEn).toLocaleString()
+        });
+      }
+    } catch {
+      // Si no se puede parsear, asumir que es solo un RUT (formato legacy)
+      console.log('📱 QR formato legacy detectado (solo RUT):', data);
+    }
+    
+    try {
+      // Enviar solicitud al backend con validaciones mejoradas
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ rut: data })
+        body: JSON.stringify({ 
+          rut: rutParaEnviar,
+          qrData: qrDataParaEnviar // Datos adicionales para validación de seguridad
+        })
       });
+      
       const result = await res.json();
+      
       if (res.ok) {
-        setQrResult(`${data} - ${new Date().toLocaleString()}`);
+        // Mostrar resultado exitoso con información detallada
+        const mensaje = `✅ Asistencia registrada exitosamente
+        
+👤 Alumno: ${result.asistencia?.alumno || 'N/A'}
+🆔 RUT: ${result.asistencia?.rut || rutParaEnviar}
+📅 Fecha: ${result.asistencia?.fecha || 'Hoy'}
+⏰ Hora: ${result.asistencia?.hora || new Date().toLocaleTimeString('es-CL')}
+💼 Plan: ${result.asistencia?.plan || 'N/A'}`;
+        
+        setQrResult(mensaje);
+        
+        // Limpiar resultado después de 5 segundos
+        setTimeout(() => {
+          setQrResult('');
+        }, 5000);
+        
       } else {
-        setQrResult(`Error: ${result.message}`);
+        // Mostrar errores específicos según el código de error
+        let mensajeError = `❌ Error: ${result.message}`;
+        
+        switch (result.codigo) {
+          case 'PLAN_EXPIRADO':
+            mensajeError = `🚫 Plan expirado\n\n${result.message}\n\nEl alumno debe renovar su plan.`;
+            break;
+          case 'QR_EXPIRADO':
+            mensajeError = `⏰ QR expirado\n\n${result.message}\n\nSolicita al alumno que genere un nuevo QR.`;
+            break;
+          case 'ASISTENCIA_YA_REGISTRADA':
+            mensajeError = `✅ Ya registrado\n\nEste alumno ya registró asistencia hoy (${result.fecha}).`;
+            break;
+          case 'ALUMNO_NO_ENCONTRADO':
+            mensajeError = `❓ Alumno no encontrado\n\nVerifica que el RUT sea correcto: ${rutParaEnviar}`;
+            break;
+          default:
+            mensajeError = `❌ Error: ${result.message}`;
+        }
+        
+        setQrResult(mensajeError);
       }
-    } catch {
-      setQrResult('Error de conexión con el servidor.');
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      setQrResult('🌐 Error de conexión con el servidor.\n\nVerifica tu conexión a internet.');
     }
   };
 
