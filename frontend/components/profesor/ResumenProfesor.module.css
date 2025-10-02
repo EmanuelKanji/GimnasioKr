@@ -311,6 +311,18 @@
   transition: all 0.3s ease;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(1, 44, 171, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  text-decoration: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .accionItem:hover {
@@ -318,6 +330,17 @@
   box-shadow: 0 4px 16px rgba(1, 44, 171, 0.15);
   border-color: #012CAB;
   background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+}
+
+.accionItem:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(1, 44, 171, 0.2);
+  background: linear-gradient(135deg, #e8edff 0%, #d6e2ff 100%);
+}
+
+.accionItem:focus {
+  outline: 2px solid #012CAB;
+  outline-offset: 2px;
 }
 
 .accionIcon {

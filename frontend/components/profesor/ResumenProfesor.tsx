@@ -15,7 +15,11 @@ interface ResumenData {
   asistenciasHoy: number;
 }
 
-export default function ResumenProfesor() {
+interface ResumenProfesorProps {
+  onViewChange?: (view: "asistencia" | "alumnos" | "avisos" | "perfil") => void;
+}
+
+export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) {
   const [resumenData, setResumenData] = useState<ResumenData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -192,22 +196,38 @@ export default function ResumenProfesor() {
           <div className={styles.compactSection}>
             <span className={styles.compactLabel}>⚡ Acciones Rápidas:</span>
             <div className={styles.accionesGrid}>
-              <div className={styles.accionItem}>
+              <button 
+                className={styles.accionItem}
+                onClick={() => onViewChange?.('asistencia')}
+                title="Ir a Pasar Asistencia"
+              >
                 <span className={styles.accionIcon}>📷</span>
                 <span className={styles.accionText}>Pasar Asistencia</span>
-              </div>
-              <div className={styles.accionItem}>
+              </button>
+              <button 
+                className={styles.accionItem}
+                onClick={() => onViewChange?.('alumnos')}
+                title="Ver Lista de Alumnos"
+              >
                 <span className={styles.accionIcon}>👥</span>
                 <span className={styles.accionText}>Ver Alumnos</span>
-              </div>
-              <div className={styles.accionItem}>
+              </button>
+              <button 
+                className={styles.accionItem}
+                onClick={() => onViewChange?.('avisos')}
+                title="Enviar Aviso a Alumnos"
+              >
                 <span className={styles.accionIcon}>📢</span>
                 <span className={styles.accionText}>Enviar Aviso</span>
-              </div>
-              <div className={styles.accionItem}>
+              </button>
+              <button 
+                className={styles.accionItem}
+                onClick={() => onViewChange?.('perfil')}
+                title="Ver Mi Perfil"
+              >
                 <span className={styles.accionIcon}>👤</span>
                 <span className={styles.accionText}>Mi Perfil</span>
-              </div>
+              </button>
             </div>
           </div>
 

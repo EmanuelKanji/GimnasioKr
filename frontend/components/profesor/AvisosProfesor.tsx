@@ -58,7 +58,12 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
         body: JSON.stringify({
           titulo,
           mensaje,
-          destinatarios: misAlumnos.map(a => (a.rut ?? '').replace(/\.|-/g, '').toUpperCase()),
+          destinatarios: misAlumnos.map(a => {
+            const rut = a.rut ?? '';
+            const rutLimpio = rut.replace(/\.|-/g, '').toUpperCase();
+            console.log(`📤 Enviando aviso a alumno: ${a.nombre} (${rutLimpio})`);
+            return rutLimpio;
+          }),
         }),
       });
       if (!res.ok) throw new Error('Error al enviar aviso');

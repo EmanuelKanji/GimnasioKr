@@ -31,34 +31,73 @@ app.use(express.json());
 app.use(helmet());
 // Limitar a 100 peticiones por IP cada 15 minutos
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
-// Permitir solo el origen del frontend en producción
+// Configuración de CORS mejorada
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://127.0.0.1:3000',
   'https://kraccess.netlify.app',
-  'https://gimnasiokr.onrender.com'
+  'https://gimnasiokr.onrender.com',
+  'https://gymmaster-pro.netlify.app' // Agregar tu dominio de Netlify si es diferente
 ];
+
+// Agregar orígenes desde variables de entorno
 if (process.env.CORS_ORIGIN) {
-  // Permitir múltiples orígenes separados por coma en la variable de entorno
   process.env.CORS_ORIGIN.split(',').forEach(origin => {
-    if (origin && !allowedOrigins.includes(origin.trim())) {
-      allowedOrigins.push(origin.trim());
+    const cleanOrigin = origin.trim();
+    if (cleanOrigin && !allowedOrigins.includes(cleanOrigin)) {
+      allowedOrigins.push(cleanOrigin);
     }
   });
 }
-app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir peticiones sin origen (como Postman) o si está en la lista
+
+// Configuración CORS más permisiva para desarrollo
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // En desarrollo, permitir cualquier origen local
+    if (process.env.NODE_ENV === 'development') {
+      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+    }
+    
+    // En producción, verificar lista de orígenes permitidos
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn(`🚫 CORS bloqueado para origen: ${origin}`);
+      callback(new Error(`Origen no permitido por CORS: ${origin}`));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
+  ],
+  exposedHeaders: ['Authorization'],
+  optionsSuccessStatus: 200,
+  preflightContinue: false
+};
+
+app.use(cors(corsOptions));
+
+// Middleware adicional para manejar preflight requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400'); // 24 horas
+    return res.status(200).end();
+  }
+  next();
+});
 
 // ========================
 // Rutas

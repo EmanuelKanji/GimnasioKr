@@ -325,7 +325,7 @@ export default function DashboardProfesor() {
       {/* Contenido Principal Premium */}
       <main className={styles.content}>
         <div className={styles.contentBox}>
-          {view === "resumen" && <ResumenProfesor />}
+          {view === "resumen" && <ResumenProfesor onViewChange={setView} />}
           {view === "asistencia" && <PasarAsistenciaProfesor />}
           {view === "alumnos" && (
             <ListaAlumnosProfesor

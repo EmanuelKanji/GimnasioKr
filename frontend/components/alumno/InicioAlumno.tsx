@@ -34,11 +34,11 @@ export default function InicioAlumno() {
       setPlan(planData.plan || null);
       
       // Fetch avisos
-      const avisosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/avisos', {
+      const avisosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/alumno', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const avisosData = await avisosRes.json();
-      setAvisos(avisosData.avisos || []);
+      setAvisos(Array.isArray(avisosData) ? avisosData : []);
       
       setLoading(false);
     } catch (error) {

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CORS - GymMaster Pro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test de CORS - GymMaster Pro</h1>
+    
+    <div class="test">
+        <h3>Configuración Actual</h3>
+        <p><strong>API URL:</strong> <span id="apiUrl">Cargando...</span></p>
+        <p><strong>Origen actual:</strong> <span id="currentOrigin">Cargando...</span></p>
+    </div>
+
+    <div class="test">
+        <h3>Pruebas de Conectividad</h3>
+        <button onclick="testHealth()">Test Health Check</button>
+        <button onclick="testCORS()">Test CORS Preflight</button>
+        <button onclick="testAuth()">Test Autenticación</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Configuración
+        const API_URL = 'https://gimnasiokr.onrender.com'; // Cambiar por tu URL de backend
+        document.getElementById('apiUrl').textContent = API_URL;
+        document.getElementById('currentOrigin').textContent = window.location.origin;
+
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = isSuccess ? 'success' : 'error';
+            div.innerHTML = `<strong>${isSuccess ? '✅' : '❌'}</strong> ${message}`;
+            results.appendChild(div);
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_URL}/`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    addResult(`Health check exitoso: ${text}`);
+                } else {
+                    addResult(`Health check falló: ${response.status} ${response.statusText}`, false);
+                }
+            } catch (error) {
+                addResult(`Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        async function testCORS() {
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'OPTIONS',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test'
+                    }
+                });
+                
+                if (response.ok) {
+                    addResult('CORS preflight exitoso');
+                } else {
+                    addResult(`CORS preflight falló: ${response.status}`, false);
+                }
+            } catch (error) {
+                addResult(`Error CORS: ${error.message}`, false);
+            }
+        }
+
+        async function testAuth() {
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'test@test.com',
+                        password: 'test123'
+                    })
+                });
+                
+                if (response.ok) {
+                    addResult('Autenticación CORS exitosa');
+                } else {
+                    addResult(`Autenticación CORS falló: ${response.status}`, false);
+                }
+            } catch (error) {
+                addResult(`Error de autenticación: ${error.message}`, false);
+            }
+        }
+    </script>
+</body>
+</html>

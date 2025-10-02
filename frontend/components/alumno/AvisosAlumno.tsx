@@ -15,17 +15,38 @@ export default function AvisosAlumno() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-  fetch('http://localhost:4000/api/alumno/avisos', {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/alumno', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => {
-        setAvisos(data.avisos || []);
+        // El backend devuelve un array directo de avisos
+        const avisosFormateados = Array.isArray(data) ? data.map(aviso => ({
+          id: aviso._id || aviso.id,
+          titulo: aviso.titulo,
+          mensaje: aviso.mensaje,
+          fecha: aviso.fecha,
+          leido: false // Por ahora siempre false, después implementaremos el estado de leído
+        })) : [];
+        setAvisos(avisosFormateados);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(error => {
+        console.error('Error cargando avisos:', error);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <div className={styles.container}>Cargando avisos...</div>;
