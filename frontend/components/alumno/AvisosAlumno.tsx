@@ -16,9 +16,13 @@ export default function AvisosAlumno() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
+      console.log('❌ No hay token de autenticación');
       setLoading(false);
       return;
     }
+
+    console.log('🔍 Cargando avisos para alumno...');
+    console.log('🔍 URL:', process.env.NEXT_PUBLIC_API_URL + '/api/avisos/alumno');
 
     fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/alumno', {
       headers: {
@@ -26,12 +30,14 @@ export default function AvisosAlumno() {
       },
     })
       .then(res => {
+        console.log('📡 Respuesta del servidor:', res.status, res.statusText);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         return res.json();
       })
       .then(data => {
+        console.log('📬 Datos recibidos del servidor:', data);
         // El backend devuelve un array directo de avisos
         const avisosFormateados = Array.isArray(data) ? data.map(aviso => ({
           id: aviso._id || aviso.id,
@@ -40,11 +46,12 @@ export default function AvisosAlumno() {
           fecha: aviso.fecha,
           leido: false // Por ahora siempre false, después implementaremos el estado de leído
         })) : [];
+        console.log('📬 Avisos formateados:', avisosFormateados);
         setAvisos(avisosFormateados);
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error cargando avisos:', error);
+        console.error('❌ Error cargando avisos:', error);
         setLoading(false);
       });
   }, []);

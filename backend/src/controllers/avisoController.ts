@@ -18,16 +18,24 @@ export const crearAviso = async (req: AuthRequest, res: Response) => {
     
     console.log(`📝 Profesor ${profesor} creando aviso para ${destinatarios.length} alumnos:`, destinatarios);
     
+    // Limpiar y normalizar RUTs de destinatarios
+    const destinatariosLimpios = destinatarios.map(rut => {
+      const rutLimpio = rut.replace(/\.|-/g, '').toUpperCase();
+      console.log(`📤 RUT original: ${rut} -> RUT limpio: ${rutLimpio}`);
+      return rutLimpio;
+    });
+    
     const aviso = new Aviso({ 
       titulo, 
       mensaje, 
       profesor, 
-      destinatarios: destinatarios.map(rut => rut.replace(/\.|-/g, '').toUpperCase())
+      destinatarios: destinatariosLimpios
     });
     
     await aviso.save();
     
     console.log(`✅ Aviso creado exitosamente con ID: ${aviso._id}`);
+    console.log(`✅ Destinatarios finales:`, aviso.destinatarios);
     
     res.status(201).json(aviso);
   } catch (err) {
@@ -60,12 +68,24 @@ export const obtenerAvisosAlumno = async (req: AuthRequest, res: Response) => {
     const rutLimpio = rut.replace(/\.|-/g, '').toUpperCase();
     
     console.log(`🔍 Buscando avisos para alumno RUT: ${rutLimpio}`);
+    console.log(`🔍 RUT original: ${rut}`);
     
+    // Buscar avisos con diferentes formatos de RUT
     const avisos = await Aviso.find({ 
-      destinatarios: { $in: [rutLimpio, rut] } // Buscar tanto con formato limpio como original
+      destinatarios: { 
+        $in: [
+          rutLimpio,           // RUT limpio: 123456789
+          rut,                 // RUT original: 12.345.678-9
+          rut.replace(/\./g, ''), // RUT sin puntos: 12345678-9
+          rut.replace(/-/g, ''),  // RUT sin guión: 12.345.6789
+          rut.replace(/\.|-/g, '').replace(/(\d)(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4'), // Formato con puntos y guión
+          rut.replace(/\.|-/g, '').replace(/(\d)(\d{3})(\d{3})(\d{1})/, '$1$2$3$4')     // Formato sin separadores
+        ]
+      }
     }).sort({ fecha: -1 });
     
     console.log(`📬 Encontrados ${avisos.length} avisos para el alumno`);
+    console.log(`📬 Avisos encontrados:`, avisos.map(a => ({ titulo: a.titulo, destinatarios: a.destinatarios })));
     
     res.json(avisos);
   } catch (err) {
