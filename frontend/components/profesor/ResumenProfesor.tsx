@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import styles from './ResumenProfesor.module.css';
-import mobileStyles from './ResumenProfesor-mobile.module.css';
 import { HttpClient } from '../../lib/httpClient';
 import type { Alumno } from '../../../shared/types';
 
@@ -40,19 +39,7 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
   const [resumenData, setResumenData] = useState<ResumenData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Detectar dispositivo móvil
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Obtener datos del resumen usando el endpoint de estadísticas
   useEffect(() => {
@@ -134,14 +121,13 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
     cargarResumen();
   }, []);
 
-  const currentStyles = isMobile ? mobileStyles : styles;
 
   if (loading) {
     return (
-      <div className={currentStyles.container}>
-        <h2 className={currentStyles.title}>Resumen del Profesor</h2>
-        <div className={currentStyles.loadingContainer}>
-          <div className={currentStyles.loadingSpinner}></div>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Resumen del Profesor</h2>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
           <p>Cargando resumen...</p>
         </div>
       </div>
@@ -150,13 +136,13 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
 
   if (error || !resumenData) {
     return (
-      <div className={currentStyles.container}>
-        <h2 className={currentStyles.title}>Resumen del Profesor</h2>
-        <div className={currentStyles.errorContainer}>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Resumen del Profesor</h2>
+        <div className={styles.errorContainer}>
           <p>⚠️ {error || 'No se pudo cargar el resumen'}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className={currentStyles.retryButton}
+            className={styles.retryButton}
           >
             🔄 Reintentar
           </button>
@@ -168,68 +154,68 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
   const { misAlumnos, totalAlumnos, avisosRecientes, asistenciasHoy, estadisticasDetalladas } = resumenData;
 
   return (
-    <div className={currentStyles.container}>
-      <h2 className={currentStyles.title}>Resumen del Profesor</h2>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Resumen del Profesor</h2>
       
       {/* Información de actualización */}
-      <div className={currentStyles.updateInfo}>
+      <div className={styles.updateInfo}>
         <span>📊 Actualizado: {new Date().toLocaleString('es-CL')}</span>
       </div>
 
-      <div className={currentStyles.compactBox}>
-        <div className={currentStyles.compactRow}>
+      <div className={styles.compactBox}>
+        <div className={styles.compactRow}>
           
           {/* Estadísticas de alumnos */}
-          <div className={currentStyles.compactSection}>
-            <span className={currentStyles.compactLabel}>👥 Mis Alumnos:</span>
-            <div className={currentStyles.alumnosInfo}>
-              <div className={currentStyles.alumnoStat}>
-                <span className={currentStyles.statLabel}>Total alumnos:</span>
-                <span className={currentStyles.statValue}>{totalAlumnos}</span>
+          <div className={styles.compactSection}>
+            <span className={styles.compactLabel}>👥 Mis Alumnos:</span>
+            <div className={styles.alumnosInfo}>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Total alumnos:</span>
+                <span className={styles.statValue}>{totalAlumnos}</span>
               </div>
-              <div className={currentStyles.alumnoStat}>
-                <span className={currentStyles.statLabel}>Mis alumnos:</span>
-                <span className={`${currentStyles.statValue} ${currentStyles.positivo}`}>{misAlumnos.length}</span>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Mis alumnos:</span>
+                <span className={`${styles.statValue} ${styles.positivo}`}>{misAlumnos.length}</span>
               </div>
-              <div className={currentStyles.alumnoStat}>
-                <span className={currentStyles.statLabel}>Asistencias hoy:</span>
-                <span className={currentStyles.statValue}>{asistenciasHoy}</span>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Asistencias hoy:</span>
+                <span className={styles.statValue}>{asistenciasHoy}</span>
               </div>
-              <div className={currentStyles.alumnoStat}>
-                <span className={currentStyles.statLabel}>Asistencias semana:</span>
-                <span className={currentStyles.statValue}>{estadisticasDetalladas.resumen.asistenciasMisAlumnosSemana}</span>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Asistencias semana:</span>
+                <span className={styles.statValue}>{estadisticasDetalladas.resumen.asistenciasMisAlumnosSemana}</span>
               </div>
-              <div className={currentStyles.alumnoStat}>
-                <span className={currentStyles.statLabel}>Promedio diario:</span>
-                <span className={currentStyles.statValue}>{estadisticasDetalladas.resumen.promedioAsistenciasDiarias}</span>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Promedio diario:</span>
+                <span className={styles.statValue}>{estadisticasDetalladas.resumen.promedioAsistenciasDiarias}</span>
               </div>
-              <div className={currentStyles.alumnoStat}>
-                <span className={currentStyles.statLabel}>Total semana:</span>
-                <span className={currentStyles.statValue}>{estadisticasDetalladas.resumen.totalAsistenciasSemana}</span>
+              <div className={styles.alumnoStat}>
+                <span className={styles.statLabel}>Total semana:</span>
+                <span className={styles.statValue}>{estadisticasDetalladas.resumen.totalAsistenciasSemana}</span>
               </div>
             </div>
             
             {/* Lista de mis alumnos con estadísticas */}
-            <div className={currentStyles.misAlumnosList}>
+            <div className={styles.misAlumnosList}>
               <h4>📋 Mis Alumnos Asignados:</h4>
               {estadisticasDetalladas.misAlumnosDetallado.length === 0 ? (
-                <p className={currentStyles.noAlumnos}>No tienes alumnos asignados aún</p>
+                <p className={styles.noAlumnos}>No tienes alumnos asignados aún</p>
               ) : (
-                <div className={currentStyles.alumnosGrid}>
+                <div className={styles.alumnosGrid}>
                   {estadisticasDetalladas.misAlumnosDetallado.slice(0, 4).map((alumno) => (
-                    <div key={alumno.rut} className={currentStyles.alumnoCard}>
-                      <div className={currentStyles.alumnoNombre}>{alumno.nombre}</div>
-                      <div className={currentStyles.alumnoRut}>{alumno.rut}</div>
-                      <div className={currentStyles.alumnoPlan}>{alumno.plan}</div>
-                      <div className={currentStyles.alumnoStats}>
-                        <span className={currentStyles.statItem}>
+                    <div key={alumno.rut} className={styles.alumnoCard}>
+                      <div className={styles.alumnoNombre}>{alumno.nombre}</div>
+                      <div className={styles.alumnoRut}>{alumno.rut}</div>
+                      <div className={styles.alumnoPlan}>{alumno.plan}</div>
+                      <div className={styles.alumnoStats}>
+                        <span className={styles.statItem}>
                           📅 {alumno.asistenciasSemana} esta semana
                         </span>
-                        <span className={`${currentStyles.statItem} ${alumno.asistioHoy ? currentStyles.asistioHoy : currentStyles.noAsistioHoy}`}>
+                        <span className={`${styles.statItem} ${alumno.asistioHoy ? styles.asistioHoy : styles.noAsistioHoy}`}>
                           {alumno.asistioHoy ? '✅ Hoy' : '❌ No hoy'}
                         </span>
                         {alumno.ultimaAsistencia && (
-                          <span className={currentStyles.statItem}>
+                          <span className={styles.statItem}>
                             🕒 {new Date(alumno.ultimaAsistencia).toLocaleDateString('es-CL')}
                           </span>
                         )}
@@ -237,7 +223,7 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
                     </div>
                   ))}
                   {estadisticasDetalladas.misAlumnosDetallado.length > 4 && (
-                    <div className={currentStyles.masAlumnos}>
+                    <div className={styles.masAlumnos}>
                       +{estadisticasDetalladas.misAlumnosDetallado.length - 4} más
                     </div>
                   )}
@@ -247,23 +233,23 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
           </div>
 
           {/* Avisos recientes */}
-          <div className={currentStyles.compactSection}>
-            <span className={currentStyles.compactLabel}>📢 Avisos Recientes:</span>
-            <div className={currentStyles.avisosList}>
+          <div className={styles.compactSection}>
+            <span className={styles.compactLabel}>📢 Avisos Recientes:</span>
+            <div className={styles.avisosList}>
               {avisosRecientes.length === 0 ? (
-                <div className={currentStyles.noAvisos}>
+                <div className={styles.noAvisos}>
                   <span>📭 No hay avisos recientes</span>
                 </div>
               ) : (
                 avisosRecientes.map((aviso) => (
-                  <div key={aviso.id} className={currentStyles.avisoItem}>
-                    <div className={currentStyles.avisoHeader}>
-                      <span className={currentStyles.avisoTitle}>{aviso.titulo}</span>
-                      <span className={currentStyles.avisoDate}>
+                  <div key={aviso.id} className={styles.avisoItem}>
+                    <div className={styles.avisoHeader}>
+                      <span className={styles.avisoTitle}>{aviso.titulo}</span>
+                      <span className={styles.avisoDate}>
                         {new Date(aviso.fecha).toLocaleDateString('es-CL')}
                       </span>
                     </div>
-                    <div className={currentStyles.avisoStats}>
+                    <div className={styles.avisoStats}>
                       <span>👤 {aviso.destinatarios} destinatarios</span>
                     </div>
                   </div>
@@ -273,40 +259,40 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
           </div>
 
           {/* Acciones rápidas */}
-          <div className={currentStyles.compactSection}>
-            <span className={currentStyles.compactLabel}>⚡ Acciones Rápidas:</span>
-            <div className={currentStyles.accionesGrid}>
+          <div className={styles.compactSection}>
+            <span className={styles.compactLabel}>⚡ Acciones Rápidas:</span>
+            <div className={styles.accionesGrid}>
               <button 
-                className={currentStyles.accionItem}
+                className={styles.accionItem}
                 onClick={() => onViewChange?.('asistencia')}
                 title="Ir a Pasar Asistencia"
               >
-                <span className={currentStyles.accionIcon}>📷</span>
-                <span className={currentStyles.accionText}>Pasar Asistencia</span>
+                <span className={styles.accionIcon}>📷</span>
+                <span className={styles.accionText}>Pasar Asistencia</span>
               </button>
               <button 
-                className={currentStyles.accionItem}
+                className={styles.accionItem}
                 onClick={() => onViewChange?.('alumnos')}
                 title="Ver Lista de Alumnos"
               >
-                <span className={currentStyles.accionIcon}>👥</span>
-                <span className={currentStyles.accionText}>Ver Alumnos</span>
+                <span className={styles.accionIcon}>👥</span>
+                <span className={styles.accionText}>Ver Alumnos</span>
               </button>
               <button 
-                className={currentStyles.accionItem}
+                className={styles.accionItem}
                 onClick={() => onViewChange?.('avisos')}
                 title="Enviar Aviso a Alumnos"
               >
-                <span className={currentStyles.accionIcon}>📢</span>
-                <span className={currentStyles.accionText}>Enviar Aviso</span>
+                <span className={styles.accionIcon}>📢</span>
+                <span className={styles.accionText}>Enviar Aviso</span>
               </button>
               <button 
-                className={currentStyles.accionItem}
+                className={styles.accionItem}
                 onClick={() => onViewChange?.('perfil')}
                 title="Ver Mi Perfil"
               >
-                <span className={currentStyles.accionIcon}>👤</span>
-                <span className={currentStyles.accionText}>Mi Perfil</span>
+                <span className={styles.accionIcon}>👤</span>
+                <span className={styles.accionText}>Mi Perfil</span>
               </button>
             </div>
           </div>

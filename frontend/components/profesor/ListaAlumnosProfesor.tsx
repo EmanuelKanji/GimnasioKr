@@ -1,7 +1,6 @@
 'use client';
 
 import styles from './ListaAlumnosProfesor.module.css';
-import mobileStyles from './ListaAlumnosProfesor-mobile.module.css';
 import { useEffect, useState } from 'react';
 
 import type { Alumno } from '../../../shared/types';
@@ -17,19 +16,7 @@ interface ListaAlumnosProfesorProps {
 export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumno, eliminarAlumno, loading = false }: ListaAlumnosProfesorProps) {
   const [rutSearch, setRutSearch] = useState('');
   const [nombreSearch, setNombreSearch] = useState('');
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Detectar dispositivo móvil
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -52,38 +39,37 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
     return rutOk && nombreOk && !yaAgregado;
   });
 
-  const currentStyles = isMobile ? mobileStyles : styles;
 
   return (
-    <div className={currentStyles.container}>
-      <h3 className={currentStyles.title}>Mis alumnos</h3>
+    <div className={styles.container}>
+      <h3 className={styles.title}>Mis alumnos</h3>
       {/* Listado de mis alumnos */}
-      <div className={currentStyles.tableContainer}>
-        <table className={currentStyles.table}>
-          <thead className={currentStyles.tableHead}>
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead className={styles.tableHead}>
             <tr>
-              <th className={currentStyles.tableHeader}>Nombre</th>
-              <th className={currentStyles.tableHeader}>RUT</th>
-              <th className={currentStyles.tableHeader}>Plan</th>
-              <th className={currentStyles.tableHeader}>Inicio</th>
-              <th className={currentStyles.tableHeader}>Acción</th>
+              <th className={styles.tableHeader}>Nombre</th>
+              <th className={styles.tableHeader}>RUT</th>
+              <th className={styles.tableHeader}>Plan</th>
+              <th className={styles.tableHeader}>Inicio</th>
+              <th className={styles.tableHeader}>Acción</th>
             </tr>
           </thead>
           <tbody>
             {misAlumnos.map((alumno, index) => (
-              <tr key={index} className={currentStyles.tableRow}>
-                <td className={currentStyles.tableCell} data-label="Nombre">{alumno.nombre}</td>
-                <td className={currentStyles.tableCell} data-label="RUT">{alumno.rut}</td>
-                <td className={currentStyles.tableCell} data-label="Plan"><span className={currentStyles.planBadge}>{alumno.plan}</span></td>
-                <td className={currentStyles.tableCell} data-label="Inicio"><span className={currentStyles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
-                <td className={currentStyles.tableCell} data-label="Acción">
+              <tr key={index} className={styles.tableRow}>
+                <td className={styles.tableCell} data-label="Nombre">{alumno.nombre}</td>
+                <td className={styles.tableCell} data-label="RUT">{alumno.rut}</td>
+                <td className={styles.tableCell} data-label="Plan"><span className={styles.planBadge}>{alumno.plan}</span></td>
+                <td className={styles.tableCell} data-label="Inicio"><span className={styles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
+                <td className={styles.tableCell} data-label="Acción">
                   <button onClick={() => eliminarAlumno(alumno.rut ?? '')} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Eliminar</button>
                 </td>
               </tr>
             ))}
             {misAlumnos.length === 0 && (
               <tr>
-                <td colSpan={5} className={currentStyles.emptyStateCell}>No has agregado alumnos.</td>
+                <td colSpan={5} className={styles.emptyStateCell}>No has agregado alumnos.</td>
               </tr>
             )}
           </tbody>
@@ -116,35 +102,35 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
           />
         </div>
       </div>
-      <div className={currentStyles.tableContainer}>
+      <div className={styles.tableContainer}>
         {loading ? (
           <p>Cargando alumnos...</p>
         ) : (
-          <table className={currentStyles.table}>
-            <thead className={currentStyles.tableHead}>
+          <table className={styles.table}>
+            <thead className={styles.tableHead}>
               <tr>
-                <th className={currentStyles.tableHeader}>Nombre</th>
-                <th className={currentStyles.tableHeader}>RUT</th>
-                <th className={currentStyles.tableHeader}>Plan</th>
-                <th className={currentStyles.tableHeader}>Inicio</th>
-                <th className={currentStyles.tableHeader}>Acción</th>
+                <th className={styles.tableHeader}>Nombre</th>
+                <th className={styles.tableHeader}>RUT</th>
+                <th className={styles.tableHeader}>Plan</th>
+                <th className={styles.tableHeader}>Inicio</th>
+                <th className={styles.tableHeader}>Acción</th>
               </tr>
             </thead>
             <tbody>
               {filteredInscritos.map((alumno, index) => (
-                <tr key={index} className={currentStyles.tableRow}>
-                  <td className={currentStyles.tableCell} data-label="Nombre">{alumno.nombre}</td>
-                  <td className={currentStyles.tableCell} data-label="RUT">{alumno.rut}</td>
-                  <td className={currentStyles.tableCell} data-label="Plan"><span className={currentStyles.planBadge}>{alumno.plan}</span></td>
-                  <td className={currentStyles.tableCell} data-label="Inicio"><span className={currentStyles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
-                  <td className={currentStyles.tableCell} data-label="Acción">
+                <tr key={index} className={styles.tableRow}>
+                  <td className={styles.tableCell} data-label="Nombre">{alumno.nombre}</td>
+                  <td className={styles.tableCell} data-label="RUT">{alumno.rut}</td>
+                  <td className={styles.tableCell} data-label="Plan"><span className={styles.planBadge}>{alumno.plan}</span></td>
+                  <td className={styles.tableCell} data-label="Inicio"><span className={styles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
+                  <td className={styles.tableCell} data-label="Acción">
                     <button onClick={() => agregarAlumno(alumno)} style={{ color: 'green', border: 'none', background: 'none', cursor: 'pointer' }}>Agregar</button>
                   </td>
                 </tr>
               ))}
               {filteredInscritos.length === 0 && (
                 <tr>
-                  <td colSpan={5} className={currentStyles.emptyStateCell}>No hay alumnos para agregar.</td>
+                  <td colSpan={5} className={styles.emptyStateCell}>No hay alumnos para agregar.</td>
                 </tr>
               )}
             </tbody>

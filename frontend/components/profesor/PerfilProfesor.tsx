@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import styles from './PerfilProfesor.module.css';
-import mobileStyles from './PerfilProfesor-mobile.module.css';
 import { HttpClient } from '../../lib/httpClient';
 
 interface PerfilInfo {
@@ -28,21 +27,9 @@ interface PerfilProfesorData {
 }
 
 export default function PerfilProfesor() {
-  const [isMobile, setIsMobile] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [changePasswordMode, setChangePasswordMode] = useState(false);
 
-  // Detectar dispositivo móvil
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
   const [form, setForm] = useState<PerfilInfo>({
     nombre: '',
     rut: '',
@@ -227,144 +214,143 @@ export default function PerfilProfesor() {
     }
   };
 
-  const currentStyles = isMobile ? mobileStyles : styles;
 
   return (
-    <div className={currentStyles.container}>
-      <h2 className={currentStyles.title}>Mi Perfil</h2>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Mi Perfil</h2>
       
       {loading ? (
-        <div className={currentStyles.loadingContainer}>
-          <div className={currentStyles.loadingSpinner}></div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
           <p>Cargando perfil...</p>
         </div>
       ) : (
         <>
           {/* Mensajes de estado */}
           {error && (
-            <div className={currentStyles.errorMessage}>
+            <div className={styles.errorMessage}>
               <span>⚠️ {error}</span>
             </div>
           )}
           {success && (
-            <div className={currentStyles.successMessage}>
+            <div className={styles.successMessage}>
               <span>✅ {success}</span>
             </div>
           )}
 
-          <div className={currentStyles.perfilBox}>
+          <div className={styles.perfilBox}>
             {/* Información básica */}
-            <div className={currentStyles.section}>
-              <h3 className={currentStyles.sectionTitle}>Información Personal</h3>
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>Información Personal</h3>
               
-              <div className={currentStyles.infoRow}>
-                <span className={currentStyles.label}>Nombre:</span>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Nombre:</span>
                 {editMode ? (
-                  <div className={currentStyles.inputGroup}>
+                  <div className={styles.inputGroup}>
                     <input 
                       name="nombre" 
                       value={form.nombre} 
                       onChange={handleChange} 
-                      className={`${currentStyles.input} ${validationErrors.nombre ? currentStyles.inputError : ''}`}
+                      className={`${styles.input} ${validationErrors.nombre ? styles.inputError : ''}`}
                       placeholder="Ingresa tu nombre completo"
                     />
                     {validationErrors.nombre && (
-                      <span className={currentStyles.errorText}>{validationErrors.nombre}</span>
+                      <span className={styles.errorText}>{validationErrors.nombre}</span>
                     )}
                   </div>
                 ) : (
-                  <span className={currentStyles.value}>{form.nombre || 'No especificado'}</span>
+                  <span className={styles.value}>{form.nombre || 'No especificado'}</span>
                 )}
               </div>
 
-              <div className={currentStyles.infoRow}>
-                <span className={currentStyles.label}>RUT:</span>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>RUT:</span>
                 <input 
                   name="rut" 
                   value={form.rut} 
-                  className={`${currentStyles.input} ${currentStyles.readOnly}`} 
+                  className={`${styles.input} ${styles.readOnly}`} 
                   readOnly 
                 />
               </div>
 
-              <div className={currentStyles.infoRow}>
-                <span className={currentStyles.label}>Correo:</span>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Correo:</span>
                 {editMode ? (
-                  <div className={currentStyles.inputGroup}>
+                  <div className={styles.inputGroup}>
                     <input 
                       name="email" 
                       type="email"
                       value={form.email} 
                       onChange={handleChange} 
-                      className={`${currentStyles.input} ${validationErrors.email ? currentStyles.inputError : ''}`}
+                      className={`${styles.input} ${validationErrors.email ? styles.inputError : ''}`}
                       placeholder="correo@ejemplo.com"
                     />
                     {validationErrors.email && (
-                      <span className={currentStyles.errorText}>{validationErrors.email}</span>
+                      <span className={styles.errorText}>{validationErrors.email}</span>
                     )}
                   </div>
                 ) : (
-                  <span className={currentStyles.value}>{form.email || 'No especificado'}</span>
+                  <span className={styles.value}>{form.email || 'No especificado'}</span>
                 )}
               </div>
 
-              <div className={currentStyles.infoRow}>
-                <span className={currentStyles.label}>Teléfono:</span>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Teléfono:</span>
                 {editMode ? (
-                  <div className={currentStyles.inputGroup}>
+                  <div className={styles.inputGroup}>
                     <input 
                       name="telefono" 
                       value={form.telefono} 
                       onChange={handleChange} 
-                      className={`${currentStyles.input} ${validationErrors.telefono ? currentStyles.inputError : ''}`}
+                      className={`${styles.input} ${validationErrors.telefono ? styles.inputError : ''}`}
                       placeholder="+56 9 1234 5678"
                     />
                     {validationErrors.telefono && (
-                      <span className={currentStyles.errorText}>{validationErrors.telefono}</span>
+                      <span className={styles.errorText}>{validationErrors.telefono}</span>
                     )}
                   </div>
                 ) : (
-                  <span className={currentStyles.value}>{form.telefono || 'No especificado'}</span>
+                  <span className={styles.value}>{form.telefono || 'No especificado'}</span>
                 )}
               </div>
 
-              <div className={currentStyles.infoRow}>
-                <span className={currentStyles.label}>Dirección:</span>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Dirección:</span>
                 {editMode ? (
-                  <div className={currentStyles.inputGroup}>
+                  <div className={styles.inputGroup}>
                     <input 
                       name="direccion" 
                       value={form.direccion} 
                       onChange={handleChange} 
-                      className={`${currentStyles.input} ${validationErrors.direccion ? currentStyles.inputError : ''}`}
+                      className={`${styles.input} ${validationErrors.direccion ? styles.inputError : ''}`}
                       placeholder="Calle 123, Comuna, Región"
                     />
                     {validationErrors.direccion && (
-                      <span className={currentStyles.errorText}>{validationErrors.direccion}</span>
+                      <span className={styles.errorText}>{validationErrors.direccion}</span>
                     )}
                   </div>
                 ) : (
-                  <span className={currentStyles.value}>{form.direccion || 'No especificado'}</span>
+                  <span className={styles.value}>{form.direccion || 'No especificado'}</span>
                 )}
               </div>
 
-              <div className={currentStyles.infoRow}>
-                <span className={currentStyles.label}>Fecha de nacimiento:</span>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Fecha de nacimiento:</span>
                 {editMode ? (
-                  <div className={currentStyles.inputGroup}>
+                  <div className={styles.inputGroup}>
                     <input 
                       name="fechaNacimiento" 
                       type="date" 
                       value={form.fechaNacimiento} 
                       onChange={handleChange} 
-                      className={`${currentStyles.input} ${validationErrors.fechaNacimiento ? currentStyles.inputError : ''}`}
+                      className={`${styles.input} ${validationErrors.fechaNacimiento ? styles.inputError : ''}`}
                     />
                     {validationErrors.fechaNacimiento && (
-                      <span className={currentStyles.errorText}>{validationErrors.fechaNacimiento}</span>
+                      <span className={styles.errorText}>{validationErrors.fechaNacimiento}</span>
                     )}
                   </div>
                 ) : (
-                  <span className={currentStyles.value}>
+                  <span className={styles.value}>
                     {form.fechaNacimiento ? new Date(form.fechaNacimiento).toLocaleDateString('es-CL') : 'No especificado'}
                   </span>
                 )}
@@ -373,13 +359,13 @@ export default function PerfilProfesor() {
 
             {/* Cambio de contraseña */}
             {editMode && (
-              <div className={currentStyles.section}>
-                <div className={currentStyles.sectionHeader}>
-                  <h3 className={currentStyles.sectionTitle}>Seguridad</h3>
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Seguridad</h3>
                   <button 
                     type="button" 
                     onClick={togglePasswordMode}
-                    className={currentStyles.toggleButton}
+                    className={styles.toggleButton}
                   >
                     {changePasswordMode ? 'Cancelar cambio' : 'Cambiar contraseña'}
                   </button>
@@ -387,36 +373,36 @@ export default function PerfilProfesor() {
 
                 {changePasswordMode && (
                   <>
-                    <div className={currentStyles.infoRow}>
-                      <span className={currentStyles.label}>Nueva contraseña:</span>
-                      <div className={currentStyles.inputGroup}>
+                    <div className={styles.infoRow}>
+                      <span className={styles.label}>Nueva contraseña:</span>
+                      <div className={styles.inputGroup}>
                         <input 
                           name="password" 
                           type="password"
                           value={form.password} 
                           onChange={handleChange} 
-                          className={`${currentStyles.input} ${validationErrors.password ? currentStyles.inputError : ''}`}
+                          className={`${styles.input} ${validationErrors.password ? styles.inputError : ''}`}
                           placeholder="Mínimo 6 caracteres"
                         />
                         {validationErrors.password && (
-                          <span className={currentStyles.errorText}>{validationErrors.password}</span>
+                          <span className={styles.errorText}>{validationErrors.password}</span>
                         )}
                       </div>
                     </div>
 
-                    <div className={currentStyles.infoRow}>
-                      <span className={currentStyles.label}>Confirmar contraseña:</span>
-                      <div className={currentStyles.inputGroup}>
+                    <div className={styles.infoRow}>
+                      <span className={styles.label}>Confirmar contraseña:</span>
+                      <div className={styles.inputGroup}>
                         <input 
                           name="confirmPassword" 
                           type="password"
                           value={form.confirmPassword} 
                           onChange={handleChange} 
-                          className={`${currentStyles.input} ${validationErrors.confirmPassword ? currentStyles.inputError : ''}`}
+                          className={`${styles.input} ${validationErrors.confirmPassword ? styles.inputError : ''}`}
                           placeholder="Repite la contraseña"
                         />
                         {validationErrors.confirmPassword && (
-                          <span className={currentStyles.errorText}>{validationErrors.confirmPassword}</span>
+                          <span className={styles.errorText}>{validationErrors.confirmPassword}</span>
                         )}
                       </div>
                     </div>
@@ -427,11 +413,11 @@ export default function PerfilProfesor() {
           </div>
 
           {/* Botones de acción */}
-          <div className={currentStyles.actionButtons}>
+          <div className={styles.actionButtons}>
             {editMode ? (
               <>
                 <button 
-                  className={`${currentStyles.button} ${currentStyles.saveButton}`} 
+                  className={`${styles.button} ${styles.saveButton}`} 
                   type="button" 
                   onClick={handleSave}
                   disabled={saving}
@@ -439,7 +425,7 @@ export default function PerfilProfesor() {
                   {saving ? 'Guardando...' : 'Guardar información'}
                 </button>
                 <button 
-                  className={`${currentStyles.button} ${currentStyles.cancelButton}`} 
+                  className={`${styles.button} ${styles.cancelButton}`} 
                   type="button" 
                   onClick={handleCancel}
                 >
@@ -448,7 +434,7 @@ export default function PerfilProfesor() {
               </>
             ) : (
               <button 
-                className={`${currentStyles.button} ${currentStyles.editButton}`} 
+                className={`${styles.button} ${styles.editButton}`} 
                 type="button" 
                 onClick={() => setEditMode(true)}
               >

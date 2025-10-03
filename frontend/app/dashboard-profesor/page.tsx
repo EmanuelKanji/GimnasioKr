@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import styles from "./dashboard-profesor.module.css";
-import mobileStyles from "./dashboard-profesor-mobile-professional.module.css";
 import ResumenProfesor from "../../components/profesor/ResumenProfesor";
 import PasarAsistenciaProfesor from "../../components/profesor/PasarAsistenciaProfesor";
 import ListaAlumnosProfesor from "../../components/profesor/ListaAlumnosProfesor";
@@ -65,23 +64,11 @@ export default function DashboardProfesor() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [perfilProfesor, setPerfilProfesor] = useState<{nombre: string} | null>(null);
   const [loadingPerfil, setLoadingPerfil] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
   // Lista de todos los alumnos inscritos (fetch desde backend)
   const [alumnosInscritos, setAlumnosInscritos] = useState<Alumno[]>([]);
   const [loadingAlumnos, setLoadingAlumnos] = useState(true);
-  // Detectar dispositivo móvil
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Verificar autenticación y obtener perfil del profesor
   useEffect(() => {
@@ -244,103 +231,102 @@ export default function DashboardProfesor() {
     return perfilProfesor.nombre.split(' ')[0];
   };
 
-  const currentStyles = isMobile ? mobileStyles : styles;
   
   return (
-    <div className={currentStyles.layout}>
+    <div className={styles.layout}>
       {/* Botón Hamburguesa Premium */}
       <button 
-        className={`${currentStyles.hamburger} ${menuOpen ? currentStyles.active : ''}`}
+        className={`${styles.hamburger} ${menuOpen ? styles.active : ''}`}
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Abrir menú"
       >
-        <span className={currentStyles.hamburgerLine}></span>
-        <span className={currentStyles.hamburgerLine}></span>
-        <span className={currentStyles.hamburgerLine}></span>
+        <span className={styles.hamburgerLine}></span>
+        <span className={styles.hamburgerLine}></span>
+        <span className={styles.hamburgerLine}></span>
       </button>
 
       {/* Header Móvil Premium */}
-      <header className={currentStyles.mobileHeader}>
-        <div className={currentStyles.mobileHeaderContent}>
-          <h1 className={currentStyles.mobileTitle}>Profesor Portal</h1>
-          <div className={currentStyles.userBadge}>
-            <div className={currentStyles.userAvatar}>
+      <header className={styles.mobileHeader}>
+        <div className={styles.mobileHeaderContent}>
+          <h1 className={styles.mobileTitle}>Profesor Portal</h1>
+          <div className={styles.userBadge}>
+            <div className={styles.userAvatar}>
               {getUserInitial()}
             </div>
-            <span className={currentStyles.userName}>{getUserName()}</span>
+            <span className={styles.userName}>{getUserName()}</span>
           </div>
         </div>
       </header>
 
       {/* Overlay Premium */}
       <div 
-        className={`${currentStyles.mobileOverlay} ${menuOpen ? currentStyles.active : ''}`}
+        className={`${styles.mobileOverlay} ${menuOpen ? styles.active : ''}`}
         onClick={handleOverlayClick}
       />
 
       {/* Menú Lateral Premium */}
-      <aside className={`${currentStyles.menu} ${menuOpen ? currentStyles.active : ''}`}>
-        <div className={currentStyles.menuHeader}>
-          <h2 className={currentStyles.menuTitle}>Profesor Portal</h2>
-          <p className={currentStyles.menuSubtitle}>Panel de control del profesor</p>
+      <aside className={`${styles.menu} ${menuOpen ? styles.active : ''}`}>
+        <div className={styles.menuHeader}>
+          <h2 className={styles.menuTitle}>Profesor Portal</h2>
+          <p className={styles.menuSubtitle}>Panel de control del profesor</p>
         </div>
 
-        <nav className={currentStyles.menuNav}>
+        <nav className={styles.menuNav}>
           <button
             onClick={() => handleViewChange("resumen")}
-            className={`${currentStyles.menuBtn} ${view === "resumen" ? currentStyles.active : ""}`}
+            className={`${styles.menuBtn} ${view === "resumen" ? styles.active : ""}`}
           >
             <HomeIcon />
-            <span className={currentStyles.menuBtnText}>Resumen</span>
+            <span className={styles.menuBtnText}>Resumen</span>
           </button>
           <button
             onClick={() => handleViewChange("asistencia")}
-            className={`${currentStyles.menuBtn} ${view === "asistencia" ? currentStyles.active : ""}`}
+            className={`${styles.menuBtn} ${view === "asistencia" ? styles.active : ""}`}
           >
             <ClipboardCheckIcon />
-            <span className={currentStyles.menuBtnText}>Asistencia</span>
+            <span className={styles.menuBtnText}>Asistencia</span>
           </button>
           <button
             onClick={() => handleViewChange("alumnos")}
-            className={`${currentStyles.menuBtn} ${view === "alumnos" ? currentStyles.active : ""}`}
+            className={`${styles.menuBtn} ${view === "alumnos" ? styles.active : ""}`}
           >
             <UsersIcon />
-            <span className={currentStyles.menuBtnText}>Alumnos</span>
+            <span className={styles.menuBtnText}>Alumnos</span>
           </button>
           <button
             onClick={() => handleViewChange("avisos")}
-            className={`${currentStyles.menuBtn} ${view === "avisos" ? currentStyles.active : ""}`}
+            className={`${styles.menuBtn} ${view === "avisos" ? styles.active : ""}`}
           >
             <BellIcon />
-            <span className={currentStyles.menuBtnText}>Avisos</span>
+            <span className={styles.menuBtnText}>Avisos</span>
           </button>
           <button
             onClick={() => handleViewChange("perfil")}
-            className={`${currentStyles.menuBtn} ${view === "perfil" ? currentStyles.active : ""}`}
+            className={`${styles.menuBtn} ${view === "perfil" ? styles.active : ""}`}
           >
             <UserIcon />
-            <span className={currentStyles.menuBtnText}>Perfil</span>
+            <span className={styles.menuBtnText}>Perfil</span>
           </button>
         </nav>
 
-        <div className={currentStyles.menuFooter}>
+        <div className={styles.menuFooter}>
           <button
             onClick={() => {
               localStorage.removeItem('token');
               localStorage.removeItem('user');
               router.replace('/login-profesor');
             }}
-            className={`${currentStyles.menuBtn} ${currentStyles.menuBtnLogout}`}
+            className={`${styles.menuBtn} ${styles.menuBtnLogout}`}
           >
             <LogoutIcon />
-            <span className={currentStyles.menuBtnText}>Cerrar sesión</span>
+            <span className={styles.menuBtnText}>Cerrar sesión</span>
           </button>
         </div>
       </aside>
 
       {/* Contenido Principal Premium */}
-      <main className={currentStyles.content}>
-        <div className={currentStyles.contentBox}>
+      <main className={styles.content}>
+        <div className={styles.contentBox}>
           {view === "resumen" && <ResumenProfesor onViewChange={setView} />}
           {view === "asistencia" && <PasarAsistenciaProfesor />}
           {view === "alumnos" && (

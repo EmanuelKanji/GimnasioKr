@@ -2,29 +2,16 @@
 import { useRef, useState, useEffect } from 'react';
 import Html5QrReader from '../admin/Html5QrReader';
 import styles from './PasarAsistenciaProfesor.module.css';
-import mobileStyles from './PasarAsistenciaProfesor-mobile.module.css';
 
 export default function PasarAsistencia() {
   const [qrResult, setQrResult] = useState('');
   const [rut, setRut] = useState('');
   const [rutResult, setRutResult] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   // Estado para mostrar el lector QR
   const [showCamera, setShowCamera] = useState(false);
 
-  // Detectar dispositivo móvil
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Registrar asistencia al escanear QR con cámara (sistema mejorado con validaciones)
   const handleScanCamera = async (data: string | null | undefined) => {
@@ -182,24 +169,23 @@ export default function PasarAsistencia() {
     setRut('');
   };
 
-  const currentStyles = isMobile ? mobileStyles : styles;
 
   return (
-    <div className={currentStyles.container}>
-      <h2 className={currentStyles.title}>Pasar Asistencia (QR o RUT)</h2>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Pasar Asistencia (QR o RUT)</h2>
       
-      <button className={currentStyles.cameraButton} onClick={() => setShowCamera(!showCamera)} type="button">
-        <span className={currentStyles.cameraIcon}>📷</span>
+      <button className={styles.cameraButton} onClick={() => setShowCamera(!showCamera)} type="button">
+        <span className={styles.cameraIcon}>📷</span>
         {showCamera ? 'Cerrar cámara QR' : 'Abrir cámara para escanear QR'}
       </button>
       {showCamera && (
-        <div className={currentStyles.qrSection}>
+        <div className={styles.qrSection}>
           <Html5QrReader onScan={handleScanCamera} />
         </div>
       )}
       
-      <div className={currentStyles.qrSection}>
-        <label htmlFor="qr-input" className={currentStyles.sectionLabel}>
+      <div className={styles.qrSection}>
+        <label htmlFor="qr-input" className={styles.sectionLabel}>
           O escanea el QR con el lector físico:
         </label>
         <input
@@ -207,51 +193,51 @@ export default function PasarAsistencia() {
           ref={inputRef}
           type="text"
           placeholder="Enfoca el lector aquí y escanea el QR"
-          className={currentStyles.qrInput}
+          className={styles.qrInput}
           onChange={handleInput}
           autoFocus
         />
       </div>
       
-      <div className={currentStyles.separator}>O</div>
+      <div className={styles.separator}>O</div>
       
-      <form onSubmit={handleRutSubmit} className={currentStyles.rutForm}>
-        <label htmlFor="rut-input" className={currentStyles.rutLabel}>
+      <form onSubmit={handleRutSubmit} className={styles.rutForm}>
+        <label htmlFor="rut-input" className={styles.rutLabel}>
           Ingresa el RUT del alumno:
         </label>
         <input
           id="rut-input"
           type="text"
           placeholder="RUT del alumno"
-          className={currentStyles.rutInput}
+          className={styles.rutInput}
           value={rut}
           onChange={handleRutChange}
           required
         />
-        <button type="submit" className={currentStyles.submitButton}>
+        <button type="submit" className={styles.submitButton}>
           Registrar Asistencia por RUT
         </button>
       </form>
       
       {qrResult && (
-        <div className={`${currentStyles.resultAlert} ${currentStyles.resultSuccess}`}>
-          <div className={currentStyles.resultContent}>
-            <span className={currentStyles.resultIcon}>✅</span>
-            <div className={currentStyles.resultText}>
+        <div className={`${styles.resultAlert} ${styles.resultSuccess}`}>
+          <div className={styles.resultContent}>
+            <span className={styles.resultIcon}>✅</span>
+            <div className={styles.resultText}>
               Último QR leído: 
-              <span className={currentStyles.monoText}>{qrResult}</span>
+              <span className={styles.monoText}>{qrResult}</span>
             </div>
           </div>
         </div>
       )}
       
       {rutResult && (
-        <div className={`${currentStyles.resultAlert} ${currentStyles.resultSuccess}`}>
-          <div className={currentStyles.resultContent}>
-            <span className={currentStyles.resultIcon}>✅</span>
-            <div className={currentStyles.resultText}>
+        <div className={`${styles.resultAlert} ${styles.resultSuccess}`}>
+          <div className={styles.resultContent}>
+            <span className={styles.resultIcon}>✅</span>
+            <div className={styles.resultText}>
               Último RUT registrado: 
-              <span className={currentStyles.monoText}>{rutResult}</span>
+              <span className={styles.monoText}>{rutResult}</span>
             </div>
           </div>
         </div>
