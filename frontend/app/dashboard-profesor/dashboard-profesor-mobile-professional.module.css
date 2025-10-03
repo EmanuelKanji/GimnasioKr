@@ -1,0 +1,470 @@
+/* DASHBOARD PROFESOR - DISEÑO MÓVIL PROFESIONAL */
+
+/* ===== LAYOUT PRINCIPAL ===== */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  contain: layout style paint;
+  scroll-behavior: smooth;
+}
+
+/* ===== MENÚ MÓVIL PROFESIONAL ===== */
+.menu {
+  width: 100%;
+  background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  box-shadow: 0 4px 20px rgba(30, 41, 59, 0.2);
+  position: relative;
+  z-index: 100;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.menu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(0, 247, 87, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+  z-index: -1;
+}
+
+.menuHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+
+.menuTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.025em;
+}
+
+.menuSubtitle {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.menuNav {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 0 1rem;
+}
+
+.menuBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 80px;
+  padding: 1rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.menuBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.menuBtn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.menuBtn.active {
+  background: linear-gradient(135deg, #00F757 0%, #22c55e 100%);
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 247, 87, 0.3);
+  border-color: rgba(0, 247, 87, 0.5);
+}
+
+.menuBtnIcon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+.menuBtnText {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== HEADER MÓVIL ===== */
+.mobileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 140;
+}
+
+.mobileHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(0, 247, 87, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+  z-index: -1;
+}
+
+.mobileTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.025em;
+  flex: 1;
+  margin-left: 1rem;
+}
+
+.hamburger {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  z-index: 160;
+}
+
+.hamburger:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.hamburger:active {
+  transform: scale(0.95);
+}
+
+.hamburgerLine {
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active .hamburgerLine:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active .hamburgerLine:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active .hamburgerLine:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* ===== OVERLAY MÓVIL ===== */
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.mobileOverlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* ===== CONTENIDO PRINCIPAL ===== */
+.content {
+  flex: 1;
+  padding: 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 10;
+}
+
+.contentBox {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 15;
+  min-height: calc(100vh - 200px);
+}
+
+/* ===== BADGE DE USUARIO ===== */
+.userBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.userBadge:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.userName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== ESTADOS DE CARGA ===== */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #64748b;
+  font-size: 1rem;
+  gap: 1rem;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f1f5f9;
+  border-top: 3px solid #00F757;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #dc2626;
+  font-size: 1rem;
+  gap: 1rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablets (768px - 1023px) */
+@media (min-width: 768px) {
+  .layout {
+    flex-direction: row;
+  }
+  
+  .menu {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+  }
+  
+  .menuNav {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .menuBtn {
+    flex-direction: row;
+    justify-content: flex-start;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .menuBtnIcon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .menuBtnText {
+    font-size: 0.875rem;
+  }
+  
+  .content {
+    margin-left: 280px;
+    padding: 2rem;
+  }
+  
+  .contentBox {
+    padding: 2rem;
+    border-radius: 16px;
+  }
+  
+  .mobileHeader {
+    display: none;
+  }
+  
+  .mobileOverlay {
+    display: none;
+  }
+}
+
+/* Laptops (1024px+) */
+@media (min-width: 1024px) {
+  .menu {
+    width: 320px;
+  }
+  
+  .content {
+    margin-left: 320px;
+    padding: 2.5rem;
+  }
+  
+  .contentBox {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* ===== OPTIMIZACIONES DE RENDIMIENTO ===== */
+.layout,
+.menu,
+.content,
+.contentBox {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .layout,
+  .menu,
+  .menuBtn,
+  .hamburger,
+  .userBadge {
+    transition: none;
+    animation: none;
+  }
+  
+  .loadingSpinner {
+    animation: none;
+    border-top-color: #f1f5f9;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+@media (prefers-color-scheme: dark) {
+  .layout {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  }
+  
+  .contentBox {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+}
+
+/* ===== ALTO CONTRASTE ===== */
+@media (prefers-contrast: high) {
+  .menuBtn,
+  .hamburger,
+  .userBadge {
+    border-width: 2px;
+  }
+  
+  .contentBox {
+    border-width: 2px;
+  }
+}

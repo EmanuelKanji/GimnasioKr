@@ -94,9 +94,9 @@ const obtenerEstadisticasProfesor = async (req, res) => {
             return res.status(404).json({ error: 'Profesor no encontrado' });
         }
         // Obtener datos de la semana actual
-        const hoy = new Date();
-        const inicioSemana = new Date(hoy);
-        inicioSemana.setDate(hoy.getDate() - hoy.getDay()); // Domingo de esta semana
+        const fechaActual = new Date();
+        const inicioSemana = new Date(fechaActual);
+        inicioSemana.setDate(fechaActual.getDate() - fechaActual.getDay()); // Domingo de esta semana
         inicioSemana.setHours(0, 0, 0, 0);
         const finSemana = new Date(inicioSemana);
         finSemana.setDate(inicioSemana.getDate() + 6); // Sábado de esta semana
@@ -148,6 +148,37 @@ const obtenerEstadisticasProfesor = async (req, res) => {
         const misAlumnosDetalles = await Alumno_1.default.find({
             rut: { $in: profesor.misAlumnos || [] }
         });
+        // Obtener RUTs de mis alumnos para filtrar asistencias
+        const rutsMisAlumnos = misAlumnosDetalles.map(alumno => alumno.rut);
+        // Asistencias de mis alumnos en la semana actual
+        const asistenciasMisAlumnos = await Asistencia_1.default.find({
+            rut: { $in: rutsMisAlumnos },
+            fecha: { $gte: inicioSemana, $lte: finSemana }
+        });
+        // Asistencias de mis alumnos hoy
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const finHoy = new Date(hoy);
+        finHoy.setHours(23, 59, 59, 999);
+        const asistenciasHoyMisAlumnos = await Asistencia_1.default.find({
+            rut: { $in: rutsMisAlumnos },
+            fecha: { $gte: hoy, $lte: finHoy }
+        });
+        // Estadísticas detalladas de mis alumnos
+        const estadisticasMisAlumnos = misAlumnosDetalles.map(alumno => {
+            const asistenciasAlumno = asistenciasMisAlumnos.filter(a => a.rut === alumno.rut);
+            const asistenciasHoyAlumno = asistenciasHoyMisAlumnos.filter(a => a.rut === alumno.rut);
+            return {
+                rut: alumno.rut,
+                nombre: alumno.nombre,
+                plan: alumno.plan,
+                asistenciasSemana: asistenciasAlumno.length,
+                asistioHoy: asistenciasHoyAlumno.length > 0,
+                ultimaAsistencia: asistenciasAlumno.length > 0
+                    ? asistenciasAlumno.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())[0].fecha
+                    : null
+            };
+        });
         const estadisticas = {
             asistenciasSemana: asistenciasPorDia,
             alumnos: {
@@ -156,9 +187,12 @@ const obtenerEstadisticasProfesor = async (req, res) => {
                 nuevos: alumnosNuevos || 0,
                 misAlumnos: misAlumnosDetalles.length || 0
             },
+            misAlumnosDetallado: estadisticasMisAlumnos || [],
             avisos: avisosConEstadisticas || [],
             resumen: {
                 totalAsistenciasSemana: asistenciasSemana.length || 0,
+                asistenciasMisAlumnosSemana: asistenciasMisAlumnos.length || 0,
+                asistenciasHoyMisAlumnos: asistenciasHoyMisAlumnos.length || 0,
                 promedioAsistenciasDiarias: Math.round((asistenciasSemana.length || 0) / 7),
                 avisosEnviados: avisos.length || 0,
                 fechaActualizacion: new Date()

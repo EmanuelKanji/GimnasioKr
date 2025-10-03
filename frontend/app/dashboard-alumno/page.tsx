@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import styles from "./dashboard-alumno.module.css";
+import mobileStyles from "./dashboard-alumno-mobile.module.css";
 import AsistenciaAlumno from "../../components/alumno/AsistenciaAlumno";
 import PlanAlumno from "../../components/alumno/PlanAlumno";
 import PerfilAlumno from "../../components/alumno/PerfilAlumno";
@@ -11,14 +12,14 @@ import type { PerfilInfo } from '../../../shared/types';
 
 // Iconos SVG como componentes
 const HomeIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <polyline points="9 22 9 12 15 12 15 22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 const CalendarIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -27,28 +28,28 @@ const CalendarIcon = () => (
 );
 
 const BookIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 const UserIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <circle cx="12" cy="7" r="4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 const BellIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 const QrIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <rect x="3" y="3" width="6" height="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <rect x="15" y="3" width="6" height="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <rect x="3" y="15" width="6" height="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -59,7 +60,7 @@ const QrIcon = () => (
 );
 
 const LogoutIcon = () => (
-  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <svg className="menuBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <polyline points="16 17 21 12 16 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="21" y1="12" x2="9" y2="12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -72,10 +73,23 @@ export default function DashboardAlumno() {
   >("inicio");
   
   const [menuOpen, setMenuOpen] = useState(false);
-    const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
   const [loadingPerfil, setLoadingPerfil] = useState(true);
   const [asistenciasMes, setAsistenciasMes] = useState<string[]>([]);
   const [limiteClases, setLimiteClases] = useState<'12' | '8' | 'todos_los_dias'>('todos_los_dias');
+
+  // Detectar dispositivo móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const cargarDatos = async () => {
     try {
@@ -166,99 +180,101 @@ export default function DashboardAlumno() {
     return perfil.nombre.split(' ')[0];
   };
 
+  const currentStyles = isMobile ? mobileStyles : styles;
+
   return (
-    <div className={styles.layout}>
+    <div className={currentStyles.layout}>
       {/* Botón Hamburguesa Premium */}
       <button 
-        className={`${styles.hamburger} ${menuOpen ? styles.active : ''}`}
+        className={`${currentStyles.hamburger} ${menuOpen ? currentStyles.active : ''}`}
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Abrir menú"
       >
-        <span className={styles.hamburgerLine}></span>
-        <span className={styles.hamburgerLine}></span>
-        <span className={styles.hamburgerLine}></span>
+        <span className={currentStyles.hamburgerLine}></span>
+        <span className={currentStyles.hamburgerLine}></span>
+        <span className={currentStyles.hamburgerLine}></span>
       </button>
 
       {/* Header Móvil Premium */}
-      <header className={styles.mobileHeader}>
-        <div className={styles.mobileHeaderContent}>
-          <h1 className={styles.mobileTitle}></h1>
-          <div className={styles.userBadge}>
-            <div className={styles.userAvatar}>
+      <header className={currentStyles.mobileHeader}>
+        <div className={currentStyles.mobileHeaderContent}>
+          <h1 className={currentStyles.mobileTitle}></h1>
+          <div className={currentStyles.userBadge}>
+            <div className={currentStyles.userAvatar}>
               {getUserInitial()}
             </div>
-            <span className={styles.userName}>{getUserName()}</span>
+            <span className={currentStyles.userName}>{getUserName()}</span>
           </div>
         </div>
       </header>
 
       {/* Overlay Premium */}
       <div 
-        className={`${styles.mobileOverlay} ${menuOpen ? styles.active : ''}`}
+        className={`${currentStyles.mobileOverlay} ${menuOpen ? currentStyles.active : ''}`}
         onClick={handleOverlayClick}
         style={{ zIndex: menuOpen ? 999 : -1, pointerEvents: menuOpen ? 'auto' : 'none' }}
       />
 
       {/* Menú Lateral Premium */}
-      <aside className={`${styles.menu} ${menuOpen ? styles.active : ''}`} style={{ zIndex: menuOpen ? 1000 : 500 }}>
-        <div className={styles.menuHeader}>
-          <h3 className={styles.menuTitle}>Alumno</h3>
-          <p className={styles.menuSubtitle}>Panel de control del alumno</p>
+      <aside className={`${currentStyles.menu} ${menuOpen ? currentStyles.active : ''}`} style={{ zIndex: menuOpen ? 1000 : 500 }}>
+        <div className={currentStyles.menuHeader}>
+          <h3 className={currentStyles.menuTitle}>Alumno</h3>
+          <p className={currentStyles.menuSubtitle}>Panel de control del alumno</p>
         </div>
 
-        <nav className={styles.menuNav}>
+        <nav className={currentStyles.menuNav}>
           <button
             onClick={() => handleViewChange("inicio")}
-            className={`${styles.menuBtn} ${view === "inicio" ? styles.active : ""}`}
+            className={`${currentStyles.menuBtn} ${view === "inicio" ? currentStyles.active : ""}`}
           >
             <HomeIcon />
             Inicio
           </button>
           <button
             onClick={() => handleViewChange("asistencia")}
-            className={`${styles.menuBtn} ${view === "asistencia" ? styles.active : ""}`}
+            className={`${currentStyles.menuBtn} ${view === "asistencia" ? currentStyles.active : ""}`}
           >
             <CalendarIcon />
             Mi asistencia
           </button>
           <button
             onClick={() => handleViewChange("plan")}
-            className={`${styles.menuBtn} ${view === "plan" ? styles.active : ""}`}
+            className={`${currentStyles.menuBtn} ${view === "plan" ? currentStyles.active : ""}`}
           >
             <BookIcon />
             Mi plan
           </button>
           <button
             onClick={() => handleViewChange("perfil")}
-            className={`${styles.menuBtn} ${view === "perfil" ? styles.active : ""}`}
+            className={`${currentStyles.menuBtn} ${view === "perfil" ? currentStyles.active : ""}`}
           >
             <UserIcon />
             Perfil
           </button>
           <button
             onClick={() => handleViewChange("avisos")}
-            className={`${styles.menuBtn} ${view === "avisos" ? styles.active : ""}`}
+            className={`${currentStyles.menuBtn} ${view === "avisos" ? currentStyles.active : ""}`}
           >
             <BellIcon />
             Avisos
           </button>
           <button
             onClick={() => handleViewChange("qr")}
-            className={`${styles.menuBtn} ${view === "qr" ? styles.active : ""}`}
+            className={`${currentStyles.menuBtn} ${view === "qr" ? currentStyles.active : ""}`}
           >
             <QrIcon />
             Mi QR
           </button>
         </nav>
 
-        <div className={styles.menuFooter}>
+        <div className={currentStyles.menuFooter}>
           <button
             onClick={() => {
               localStorage.removeItem('token');
               localStorage.removeItem('user');
               window.location.href = '/login-alumno';
             }}
-            className={`${styles.menuBtn} ${styles.menuBtnLogout}`}
+            className={`${currentStyles.menuBtn} ${currentStyles.menuBtnLogout}`}
           >
             <LogoutIcon />
             Cerrar sesión
@@ -267,8 +283,8 @@ export default function DashboardAlumno() {
       </aside>
 
       {/* Contenido Principal Premium */}
-      <main className={styles.content}>
-        <div className={styles.contentBox}>
+      <main className={currentStyles.content}>
+        <div className={currentStyles.contentBox}>
           {view === "inicio" && <InicioAlumno />}
           {view === "asistencia" && <AsistenciaAlumno />}
           {view === "plan" && <PlanAlumno />}
@@ -276,7 +292,7 @@ export default function DashboardAlumno() {
           {view === "avisos" && <AvisosAlumno />}
           {view === "qr" && (
             loadingPerfil ? (
-              <div className={styles.loadingState}>Cargando QR...</div>
+              <div className={currentStyles.loadingState}>Cargando QR...</div>
             ) : perfil ? (
               <QrAlumno
                 rut={perfil?.rut ?? ''}
@@ -287,7 +303,7 @@ export default function DashboardAlumno() {
                 asistenciasMes={asistenciasMes}
               />
             ) : (
-              <div className={styles.errorState}>No se encontró el perfil del alumno.</div>
+              <div className={currentStyles.errorState}>No se encontró el perfil del alumno.</div>
             )
           )}
         </div>

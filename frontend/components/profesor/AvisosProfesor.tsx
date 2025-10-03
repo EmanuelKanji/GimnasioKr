@@ -8,6 +8,7 @@ export interface Aviso {
   leido: boolean;
 }
 import styles from './AvisosProfesor.module.css';
+import mobileStyles from './AvisosProfesor-mobile.module.css';
 import { useState, useEffect } from 'react';
 
 import type { Alumno } from '../../../shared/types';
@@ -17,6 +18,19 @@ interface AvisosProfesorProps {
 }
 
 export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar dispositivo móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
 // Recibe los alumnos de "mis alumnos" como prop
   const [avisosLocal, setAvisosLocal] = useState<Aviso[]>([]);
@@ -77,10 +91,12 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
     setEnviando(false);
   };
 
+  const currentStyles = isMobile ? mobileStyles : styles;
+
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Avisos y mensajes</h2>
-      <form className={styles.formAviso} onSubmit={handleEnviarAviso} style={{ marginBottom: '2rem' }}>
+    <div className={currentStyles.container}>
+      <h2 className={currentStyles.title}>Avisos y mensajes</h2>
+      <form className={currentStyles.formAviso} onSubmit={handleEnviarAviso} style={{ marginBottom: '2rem' }}>
         {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
         <div style={{ marginBottom: '1rem' }}>
           <label htmlFor="titulo">Título:</label>
@@ -118,17 +134,17 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
           {enviando ? 'Enviando...' : 'Enviar aviso'}
         </button>
       </form>
-      <div className={styles.inbox}>
+      <div className={currentStyles.inbox}>
         {avisosLocal.length === 0 && (
-          <div className={styles.emptyState}>No tienes avisos nuevos.</div>
+          <div className={currentStyles.emptyState}>No tienes avisos nuevos.</div>
         )}
         {avisosLocal.map((aviso, idx) => (
-          <div key={aviso.id || idx} className={`${styles.aviso} ${aviso.leido ? styles.leido : styles.noleido}`}>
-            <div className={styles.avisoHeader}>
-              <span className={styles.avisoTitle}>{aviso.titulo}</span>
-              <span className={styles.avisoDate}>{new Date(aviso.fecha).toLocaleDateString('es-CL')}</span>
+          <div key={aviso.id || idx} className={`${currentStyles.aviso} ${aviso.leido ? currentStyles.leido : currentStyles.noleido}`}>
+            <div className={currentStyles.avisoHeader}>
+              <span className={currentStyles.avisoTitle}>{aviso.titulo}</span>
+              <span className={currentStyles.avisoDate}>{new Date(aviso.fecha).toLocaleDateString('es-CL')}</span>
             </div>
-            <div className={styles.avisoMensaje}>{aviso.mensaje}</div>
+            <div className={currentStyles.avisoMensaje}>{aviso.mensaje}</div>
           </div>
         ))}
       </div>
