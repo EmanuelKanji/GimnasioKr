@@ -1,7 +1,5 @@
 /* AvisosProfesor.module.css - Diseño Unificado con Design Tokens */
 
-@import '../../styles/design-tokens.css';
-
 /* ===== CONTENEDOR PRINCIPAL ===== */
 .container {
   width: 100%;

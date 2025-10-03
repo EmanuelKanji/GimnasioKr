@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Design Tokens</title>
+    <style>
+        /* Importar design tokens */
+        @import url('./styles/design-tokens.css');
+        
+        body {
+            font-family: var(--font-family-primary);
+            margin: 0;
+            padding: 20px;
+            background: var(--gradient-surface);
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--color-white);
+            border-radius: var(--border-radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-primary);
+            border: var(--border-width-thin) solid var(--color-gray-200);
+        }
+        
+        .test-title {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-gray-900);
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: var(--space-8);
+            padding: var(--space-6);
+            background: var(--gradient-surface);
+            border-radius: var(--border-radius-xl);
+            border: var(--border-width-thin) solid var(--color-gray-200);
+        }
+        
+        .test-section h3 {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+            margin-bottom: var(--space-4);
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+        
+        .color-item {
+            padding: var(--space-4);
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            font-weight: var(--font-weight-medium);
+            color: var(--color-white);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .primary { background: var(--color-primary); }
+        .secondary { background: var(--color-secondary); color: var(--color-gray-900); }
+        .success { background: var(--color-success); }
+        .error { background: var(--color-error); }
+        .warning { background: var(--color-warning); }
+        
+        .button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-6);
+            border: none;
+            border-radius: var(--border-radius-lg);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            box-shadow: var(--shadow-md);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-white);
+        }
+        
+        .button-primary {
+            background: var(--gradient-primary);
+        }
+        
+        .button-secondary {
+            background: var(--gradient-secondary);
+            color: var(--color-gray-900);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .spacing-demo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin: var(--space-4) 0;
+        }
+        
+        .spacing-box {
+            background: var(--color-primary);
+            border-radius: var(--border-radius-md);
+        }
+        
+        .space-1 { width: var(--space-1); height: var(--space-1); }
+        .space-2 { width: var(--space-2); height: var(--space-2); }
+        .space-4 { width: var(--space-4); height: var(--space-4); }
+        .space-8 { width: var(--space-8); height: var(--space-8); }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🎨 Test Design Tokens</h1>
+        
+        <div class="test-section">
+            <h3>Colores</h3>
+            <div class="color-grid">
+                <div class="color-item primary">Primary</div>
+                <div class="color-item secondary">Secondary</div>
+                <div class="color-item success">Success</div>
+                <div class="color-item error">Error</div>
+                <div class="color-item warning">Warning</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Botones</h3>
+            <button class="button button-primary">Botón Primary</button>
+            <button class="button button-secondary">Botón Secondary</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Espaciado</h3>
+            <div class="spacing-demo">
+                <div class="spacing-box space-1"></div>
+                <span>space-1 (4px)</span>
+            </div>
+            <div class="spacing-demo">
+                <div class="spacing-box space-2"></div>
+                <span>space-2 (8px)</span>
+            </div>
+            <div class="spacing-demo">
+                <div class="spacing-box space-4"></div>
+                <span>space-4 (16px)</span>
+            </div>
+            <div class="spacing-demo">
+                <div class="spacing-box space-8"></div>
+                <span>space-8 (32px)</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Tipografía</h3>
+            <p style="font-size: var(--font-size-xs);">Texto XS</p>
+            <p style="font-size: var(--font-size-sm);">Texto SM</p>
+            <p style="font-size: var(--font-size-base);">Texto Base</p>
+            <p style="font-size: var(--font-size-lg);">Texto LG</p>
+            <p style="font-size: var(--font-size-xl);">Texto XL</p>
+            <p style="font-size: var(--font-size-2xl);">Texto 2XL</p>
+        </div>
+    </div>
+</body>
+</html>

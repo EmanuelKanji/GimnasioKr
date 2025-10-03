@@ -1,7 +1,5 @@
 /* dashboard-alumno.module.css - Diseño Unificado con Design Tokens */
 
-@import '../../styles/design-tokens.css';
-
 /* ===== LAYOUT PRINCIPAL ===== */
 .layout {
   display: flex;
