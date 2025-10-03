@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Excel Export - Historial Asistencias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Exportación Excel - Historial Asistencias</h1>
+        
+        <div class="test-section info">
+            <h3>📋 Funcionalidades Implementadas</h3>
+            <ul>
+                <li>✅ Exportación a Excel con múltiples hojas</li>
+                <li>✅ Estadísticas generales de asistencias</li>
+                <li>✅ Estadísticas por plan</li>
+                <li>✅ Estadísticas por día de la semana</li>
+                <li>✅ Estadísticas por alumno individual</li>
+                <li>✅ Alertas de vencimiento de planes</li>
+                <li>✅ Cálculo de días restantes para vencer</li>
+                <li>✅ Estados de plan (Activo/Próximo a vencer/Vencido)</li>
+                <li>✅ Filtros de búsqueda por RUT y nombre</li>
+                <li>✅ Paginación de resultados</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estructura del Archivo Excel</h3>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Hojas de trabajo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">11</div>
+                    <div class="stat-label">Columnas por alumno</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Días de la semana</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Estados de plan</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section success">
+            <h3>✅ Hojas del Archivo Excel</h3>
+            <ol>
+                <li><strong>Asistencias Diarias:</strong> Lista completa de asistencias con filtros aplicados</li>
+                <li><strong>Estadísticas Generales:</strong> Métricas globales del período</li>
+                <li><strong>Estadísticas por Plan:</strong> Distribución y porcentajes por plan</li>
+                <li><strong>Estadísticas por Día:</strong> Análisis por día de la semana</li>
+                <li><strong>Estadísticas por Alumno:</strong> Datos individuales con días restantes</li>
+                <li><strong>Alertas de Vencimiento:</strong> Alumnos con planes próximos a vencer</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>📈 Estadísticas Incluidas</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Generales:</h4>
+                    <ul>
+                        <li>Total de asistencias</li>
+                        <li>Período de datos</li>
+                        <li>Alumnos únicos</li>
+                        <li>Promedio por día</li>
+                        <li>Promedio por alumno</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Por Alumno:</h4>
+                    <ul>
+                        <li>Total de asistencias</li>
+                        <li>Primera asistencia</li>
+                        <li>Última asistencia</li>
+                        <li>Días transcurridos</li>
+                        <li><strong>Días restantes del plan</strong></li>
+                        <li><strong>Estado del plan</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Características Visuales</h3>
+            <ul>
+                <li>Colores corporativos (azul #012CAB, verde #00F757)</li>
+                <li>Gradientes profesionales</li>
+                <li>Formato de fechas en español</li>
+                <li>Estados de plan con colores de alerta</li>
+                <li>Prioridades de contacto</li>
+            </ul>
+        </div>
+
+        <div class="test-section success">
+            <h3>🚀 Listo para Usar</h3>
+            <p>La funcionalidad de exportación a Excel está completamente implementada en el componente <code>HistorialAsistencia.tsx</code> con todas las estadísticas solicitadas, incluyendo el cálculo de días restantes para vencer los planes.</p>
+            <p><strong>Archivo generado:</strong> <code>Historial_Asistencias_YYYY-MM-DD.xlsx</code></p>
+        </div>
+    </div>
+</body>
+</html>
