@@ -36,7 +36,7 @@ const allowedOrigins = [
     'http://127.0.0.1:3000',
     'https://kraccess.netlify.app',
     'https://gimnasiokr.onrender.com',
-    'https://gymmaster-pro.netlify.app' // Agregar tu dominio de Netlify si es diferente
+    'https://gymmaster-pro.netlify.app'
 ];
 // Agregar orígenes desde variables de entorno
 if (process.env.CORS_ORIGIN) {
