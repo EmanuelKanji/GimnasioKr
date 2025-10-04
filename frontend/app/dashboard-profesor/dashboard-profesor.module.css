@@ -89,6 +89,10 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: auto;
 }
 
 .hamburger:hover {
@@ -116,6 +120,15 @@
 
 .hamburger.active .hamburgerLine:nth-child(3) {
   transform: rotate(-45deg) translate(6px, -6px);
+}
+
+.hamburger:active {
+  transform: scale(0.95);
+}
+
+.hamburger:focus {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
 }
 
 /* Overlay móvil */
