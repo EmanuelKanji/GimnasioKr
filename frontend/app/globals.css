@@ -654,3 +654,102 @@ textarea::placeholder {
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-out; }
 .animate-slideInLeft { animation: slideInLeft 0.3s ease-out; }
 .animate-slideInRight { animation: slideInRight 0.3s ease-out; }
+
+/* ===== MEJORAS DE TOUCH PARA MÓVILES ===== */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Mejoras de touch para elementos interactivos */
+button, 
+input, 
+textarea, 
+select, 
+a[role="button"],
+[role="button"],
+.clickable {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Asegurar que los elementos interactivos sean tocables */
+button:not(:disabled),
+input:not(:disabled),
+textarea:not(:disabled),
+select:not(:disabled),
+a:not([disabled]),
+[role="button"]:not([disabled]),
+.clickable:not([disabled]) {
+  pointer-events: auto;
+  z-index: 1;
+  position: relative;
+}
+
+/* Mejorar la respuesta táctil */
+button:active,
+input:active,
+textarea:active,
+select:active,
+a:active,
+[role="button"]:active,
+.clickable:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Asegurar que los contenedores no bloqueen el touch */
+.container,
+.content,
+.main,
+section,
+article,
+div[class*="container"],
+div[class*="content"],
+div[class*="box"] {
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mejoras específicas para móviles */
+@media (max-width: 768px) {
+  button, 
+  input, 
+  textarea, 
+  select, 
+  a[role="button"],
+  [role="button"],
+  .clickable {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 16px; /* Evita zoom en iOS */
+  }
+  
+  /* Asegurar que los overlays no bloqueen el touch cuando están inactivos */
+  .overlay:not(.active),
+  .mobileOverlay:not(.active) {
+    pointer-events: none;
+  }
+  
+  .overlay.active,
+  .mobileOverlay.active {
+    pointer-events: auto;
+  }
+}

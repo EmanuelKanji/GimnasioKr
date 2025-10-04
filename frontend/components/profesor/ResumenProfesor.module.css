@@ -463,6 +463,12 @@
   overflow: hidden;
   transform: translateZ(0);
   backface-visibility: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: auto;
+  z-index: 10;
 }
 
 .accionItem::before {
