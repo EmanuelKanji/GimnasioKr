@@ -83,7 +83,7 @@
   position: fixed;
   top: 1rem;
   left: 1rem;
-  z-index: 1200;
+  z-index: 2000 !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   -webkit-tap-highlight-color: transparent;
@@ -360,6 +360,7 @@
   
   .hamburger {
     display: flex;
+    z-index: 2000 !important;
   }
   
   .menu {
@@ -440,7 +441,7 @@
     right: auto;
     width: 40px;
     height: 40px;
-    z-index: 2000;
+    z-index: 2000 !important;
   }
   
   .menu {
@@ -474,7 +475,7 @@
     right: auto;
     width: 36px;
     height: 36px;
-    z-index: 2000;
+    z-index: 2000 !important;
   }
   
   .hamburgerLine {

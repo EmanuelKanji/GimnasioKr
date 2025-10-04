@@ -694,8 +694,6 @@ a:not([disabled]),
 [role="button"]:not([disabled]),
 .clickable:not([disabled]) {
   pointer-events: auto;
-  z-index: 1;
-  position: relative;
 }
 
 /* Mejorar la respuesta táctil */
