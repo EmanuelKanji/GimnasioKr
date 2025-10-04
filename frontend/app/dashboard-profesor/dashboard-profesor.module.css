@@ -18,7 +18,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 500;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -435,9 +435,9 @@
   }
   
   .hamburger {
-    top: 2rem;
-    right: 1rem;
-    left: auto;
+    top: 0.5rem;
+    left: 0.5rem;
+    right: auto;
     width: 40px;
     height: 40px;
     z-index: 2000;
@@ -469,9 +469,9 @@
   }
   
   .hamburger {
-    top: 1.75rem;
-    right: 0.75rem;
-    left: auto;
+    top: 0.5rem;
+    left: 0.5rem;
+    right: auto;
     width: 36px;
     height: 36px;
     z-index: 2000;
