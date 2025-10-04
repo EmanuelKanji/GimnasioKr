@@ -63,7 +63,12 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
                 <td className={styles.tableCell} data-label="Plan"><span className={styles.planBadge}>{alumno.plan}</span></td>
                 <td className={styles.tableCell} data-label="Inicio"><span className={styles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
                 <td className={styles.tableCell} data-label="Acción">
-                  <button onClick={() => eliminarAlumno(alumno.rut ?? '')} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Eliminar</button>
+                  <button 
+                    onClick={() => eliminarAlumno(alumno.rut ?? '')} 
+                    className={`${styles.actionButton} ${styles.eliminar}`}
+                  >
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
@@ -77,34 +82,37 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
       </div>
 
       {/* Buscador y listado de alumnos inscritos */}
-      <h4 style={{ marginTop: '2rem' }}>Buscar y agregar alumnos inscritos</h4>
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <div>
-          <label htmlFor="rut-search" style={{ marginRight: '0.5rem' }}>Buscar por RUT:</label>
-          <input
-            id="rut-search"
-            type="text"
-            value={rutSearch}
-            onChange={e => setRutSearch(e.target.value.replace(/\D/g, '').toUpperCase())}
-            placeholder="Ej: 12345678K"
-            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '180px' }}
-          />
-        </div>
-        <div>
-          <label htmlFor="nombre-search" style={{ marginRight: '0.5rem' }}>Buscar por Nombre:</label>
-          <input
-            id="nombre-search"
-            type="text"
-            value={nombreSearch}
-            onChange={e => setNombreSearch(e.target.value)}
-            placeholder="Ej: Juan"
-            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc', width: '180px' }}
-          />
+      <div className={styles.searchContainer}>
+        <h4 className={styles.searchTitle}>Buscar y agregar alumnos inscritos</h4>
+        <p className={styles.searchSubtitle}>Encuentra alumnos inscritos para agregarlos a tu lista</p>
+        <div className={styles.searchInputs}>
+          <div className={styles.searchGroup}>
+            <label htmlFor="rut-search" className={styles.searchLabel}>Buscar por RUT:</label>
+            <input
+              id="rut-search"
+              type="text"
+              value={rutSearch}
+              onChange={e => setRutSearch(e.target.value.replace(/\D/g, '').toUpperCase())}
+              placeholder="Ej: 12345678K"
+              className={styles.searchInput}
+            />
+          </div>
+          <div className={styles.searchGroup}>
+            <label htmlFor="nombre-search" className={styles.searchLabel}>Buscar por Nombre:</label>
+            <input
+              id="nombre-search"
+              type="text"
+              value={nombreSearch}
+              onChange={e => setNombreSearch(e.target.value)}
+              placeholder="Ej: Juan"
+              className={styles.searchInput}
+            />
+          </div>
         </div>
       </div>
       <div className={styles.tableContainer}>
         {loading ? (
-          <p>Cargando alumnos...</p>
+          <div className={styles.loading}>Cargando alumnos...</div>
         ) : (
           <table className={styles.table}>
             <thead className={styles.tableHead}>
@@ -124,7 +132,12 @@ export default function ListaAlumnosProfesor({ alumnos, misAlumnos, agregarAlumn
                   <td className={styles.tableCell} data-label="Plan"><span className={styles.planBadge}>{alumno.plan}</span></td>
                   <td className={styles.tableCell} data-label="Inicio"><span className={styles.date}>{formatDate(alumno.fechaInicioPlan)}</span></td>
                   <td className={styles.tableCell} data-label="Acción">
-                    <button onClick={() => agregarAlumno(alumno)} style={{ color: 'green', border: 'none', background: 'none', cursor: 'pointer' }}>Agregar</button>
+                    <button 
+                      onClick={() => agregarAlumno(alumno)} 
+                      className={`${styles.actionButton} ${styles.agregar}`}
+                    >
+                      Agregar
+                    </button>
                   </td>
                 </tr>
               ))}

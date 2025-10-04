@@ -50,18 +50,25 @@ if (process.env.CORS_ORIGIN) {
 // Configuración CORS más permisiva para desarrollo
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Permitir requests sin origin (ej: Postman, mobile apps)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
     // En desarrollo, permitir cualquier origen local
     if (process.env.NODE_ENV === 'development') {
-      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      if (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.')) {
         return callback(null, true);
       }
     }
     
     // En producción, verificar lista de orígenes permitidos
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin)) {
+      console.log(`✅ CORS permitido para origen: ${origin}`);
       callback(null, true);
     } else {
       console.warn(`🚫 CORS bloqueado para origen: ${origin}`);
+      console.log(`📋 Orígenes permitidos: ${allowedOrigins.join(', ')}`);
       callback(new Error(`Origen no permitido por CORS: ${origin}`));
     }
   },
@@ -85,14 +92,35 @@ app.use(cors(corsOptions));
 
 // Middleware adicional para manejar preflight requests
 app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Log de la petición para debugging
+  console.log(`🌐 Petición ${req.method} desde: ${origin} a ${req.path}`);
+  
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // 24 horas
-    return res.status(200).end();
+    // Verificar si el origen está permitido
+    if (!origin || allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin || '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Max-Age', '86400'); // 24 horas
+      res.header('Access-Control-Expose-Headers', 'Authorization');
+      console.log(`✅ Preflight permitido para: ${origin}`);
+      return res.status(200).end();
+    } else {
+      console.warn(`🚫 Preflight bloqueado para: ${origin}`);
+      return res.status(403).json({ error: 'CORS: Origen no permitido' });
+    }
   }
+  
+  // Para peticiones no-OPTIONS, agregar headers CORS
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Expose-Headers', 'Authorization');
+  }
+  
   next();
 });
 
