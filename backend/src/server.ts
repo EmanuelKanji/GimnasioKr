@@ -33,11 +33,8 @@ app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 // Configuración de CORS mejorada
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
   'https://kraccess.netlify.app',
-  'https://gimnasiokr.onrender.com',
-  'https://gymmaster-pro.netlify.app'
+  'https://gimnasiokr.onrender.com', // Agregar tu dominio de Netlify si es diferente
 ];
 
 // Agregar orígenes desde variables de entorno

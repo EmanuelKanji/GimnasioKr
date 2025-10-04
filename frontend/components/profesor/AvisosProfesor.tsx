@@ -1,25 +1,16 @@
 'use client';
 
-export interface Aviso {
-  id: string;
-  titulo: string;
-  mensaje: string;
-  fecha: string;
-  leido: boolean;
-}
 import styles from './AvisosProfesor.module.css';
 import { useState, useEffect } from 'react';
 
-import type { Alumno } from '../../../shared/types';
+import type { Aviso, Alumno } from '../../../shared/types';
 
 interface AvisosProfesorProps {
   misAlumnos: Alumno[];
 }
 
 export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps) {
-
-
-// Recibe los alumnos de "mis alumnos" como prop
+  // Recibe los alumnos de "mis alumnos" como prop
   const [avisosLocal, setAvisosLocal] = useState<Aviso[]>([]);
   const [titulo, setTitulo] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -30,7 +21,8 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/profesor', {
+    
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/profesor', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -47,10 +39,12 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
     e.preventDefault();
     setError('');
     if (!titulo.trim() || !mensaje.trim() || misAlumnos.length === 0) return;
+    
     setEnviando(true);
     const token = localStorage.getItem('token');
+    
     try {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,56 +61,77 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
           }),
         }),
       });
+      
       if (!res.ok) throw new Error('Error al enviar aviso');
+      
       const nuevoAviso = await res.json();
       setAvisosLocal(prev => [nuevoAviso, ...prev]);
       setTitulo('');
       setMensaje('');
     } catch (err) {
       setError('No se pudo enviar el aviso.');
+    } finally {
+      setEnviando(false);
     }
-    setEnviando(false);
   };
 
 
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Avisos y mensajes</h2>
-      <form className={styles.formAviso} onSubmit={handleEnviarAviso} style={{ marginBottom: '2rem' }}>
-        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="titulo">Título:</label>
+      <form className={styles.formAviso} onSubmit={handleEnviarAviso}>
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="titulo" className={styles.label}>Título:</label>
           <input
             id="titulo"
             type="text"
             value={titulo}
             onChange={e => setTitulo(e.target.value)}
             required
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc' }}
+            className={styles.input}
+            placeholder="Ingresa el título del aviso"
           />
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="mensaje">Mensaje:</label>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="mensaje" className={styles.label}>Mensaje:</label>
           <textarea
             id="mensaje"
             value={mensaje}
             onChange={e => setMensaje(e.target.value)}
             required
             rows={3}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #ccc' }}
+            className={styles.textarea}
+            placeholder="Escribe tu mensaje aquí..."
           />
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Alumnos destinatarios:</label>
-          <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+        
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Alumnos destinatarios:</label>
+          <div className={styles.destinatariosList}>
             {misAlumnos.length === 0 ? (
-              <li style={{ color: 'gray' }}>No tienes alumnos agregados.</li>
+              <div className={styles.emptyDestinatarios}>
+                No tienes alumnos agregados.
+              </div>
             ) : (
-              misAlumnos.map(al => <li key={al.rut}>{al.nombre} ({al.rut})</li>)
+              <ul className={styles.destinatariosUl}>
+                {misAlumnos.map(al => (
+                  <li key={al.rut} className={styles.destinatarioItem}>
+                    {al.nombre} ({al.rut})
+                  </li>
+                ))}
+              </ul>
             )}
-          </ul>
+          </div>
         </div>
-        <button type="submit" disabled={enviando || !titulo.trim() || !mensaje.trim() || misAlumnos.length === 0} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: '#0070f3', color: 'white', border: 'none', cursor: 'pointer' }}>
+        
+        <button 
+          type="submit" 
+          disabled={enviando || !titulo.trim() || !mensaje.trim() || misAlumnos.length === 0} 
+          className={styles.submitButton}
+        >
           {enviando ? 'Enviando...' : 'Enviar aviso'}
         </button>
       </form>
@@ -125,12 +140,17 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
           <div className={styles.emptyState}>No tienes avisos nuevos.</div>
         )}
         {avisosLocal.map((aviso, idx) => (
-          <div key={aviso.id || idx} className={`${styles.aviso} ${aviso.leido ? styles.leido : styles.noleido}`}>
+          <div key={aviso._id || idx} className={`${styles.aviso} ${styles.noleido}`}>
             <div className={styles.avisoHeader}>
               <span className={styles.avisoTitle}>{aviso.titulo}</span>
-              <span className={styles.avisoDate}>{new Date(aviso.fecha).toLocaleDateString('es-CL')}</span>
+              <span className={styles.avisoDate}>{aviso.fecha ? new Date(aviso.fecha).toLocaleDateString('es-CL') : 'Sin fecha'}</span>
             </div>
             <div className={styles.avisoMensaje}>{aviso.mensaje}</div>
+            {aviso.destinatarios && aviso.destinatarios.length > 0 && (
+              <div className={styles.avisoDestinatarios}>
+                <strong>Para:</strong> {aviso.destinatarios.length} alumno(s)
+              </div>
+            )}
           </div>
         ))}
       </div>

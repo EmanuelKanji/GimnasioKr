@@ -145,7 +145,7 @@ export default function InicioAlumno() {
             <span className={styles.compactLabel}>Avisos:</span>
             <div className={styles.avisosList}>
                 {avisos.slice(0, 2).map((aviso, idx) => (
-                <div key={idx} className={aviso.leido ? styles.leido : styles.noleido}>
+                <div key={idx} className={styles.noleido}>
                   <span className={styles.avisoTitle}>{aviso.titulo}</span>
                   <span className={styles.avisoDate}>{aviso.fecha ? new Date(aviso.fecha).toLocaleDateString('es-CL') : ''}</span>
                 </div>

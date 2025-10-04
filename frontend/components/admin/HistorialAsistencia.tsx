@@ -139,7 +139,7 @@ export default function HistorialAsistencia() {
       XLSX.utils.book_append_sheet(workbook, wsDias, 'Estadísticas por Día');
 
       // Hoja 5: Estadísticas por Alumno
-      const alumnosData: { [key: string]: any } = {};
+      const alumnosData: { [key: string]: { nombre: string; rut: string; asistencias: Date[]; plan: string; email: string; telefono: string; fechaInicioPlan: string; fechaTerminoPlan: string } } = {};
       filtered.forEach(item => {
         const rut = item.rut || 'Sin RUT';
         if (!alumnosData[rut]) {
@@ -149,7 +149,9 @@ export default function HistorialAsistencia() {
             asistencias: [],
             plan: item.plan || '',
             email: item.email || '',
-            telefono: item.telefono || ''
+            telefono: item.telefono || '',
+            fechaInicioPlan: '',
+            fechaTerminoPlan: ''
           };
         }
         if (item.fecha) {
@@ -161,7 +163,7 @@ export default function HistorialAsistencia() {
         ['Nombre', 'RUT', 'Email', 'Teléfono', 'Plan', 'Total Asistencias', 'Primera Asistencia', 'Última Asistencia', 'Días Transcurridos', 'Días Restantes Plan', 'Estado Plan']
       ];
 
-      Object.values(alumnosData).forEach((alumno: any) => {
+      Object.values(alumnosData).forEach((alumno) => {
         if (alumno.asistencias.length > 0) {
           const primeraAsistencia = new Date(Math.min(...alumno.asistencias.map((d: Date) => d.getTime())));
           const ultimaAsistencia = new Date(Math.max(...alumno.asistencias.map((d: Date) => d.getTime())));
@@ -177,11 +179,11 @@ export default function HistorialAsistencia() {
             alumno.email,
             alumno.telefono,
             alumno.plan,
-            alumno.asistencias.length,
+            alumno.asistencias.length.toString(),
             primeraAsistencia.toLocaleDateString('es-CL'),
             ultimaAsistencia.toLocaleDateString('es-CL'),
-            diasTranscurridos,
-            diasRestantes,
+            diasTranscurridos.toString(),
+            diasRestantes.toString(),
             estadoPlan
           ]);
         }
@@ -195,7 +197,7 @@ export default function HistorialAsistencia() {
         ['Nombre', 'RUT', 'Email', 'Plan', 'Días Restantes', 'Estado', 'Prioridad']
       ];
 
-      Object.values(alumnosData).forEach((alumno: any) => {
+      Object.values(alumnosData).forEach((alumno) => {
         const diasRestantes = Math.floor(Math.random() * 30) + 1; // Simulado
         const estadoPlan = obtenerEstadoPlan(diasRestantes);
         let prioridad = '';
@@ -216,7 +218,7 @@ export default function HistorialAsistencia() {
             alumno.rut,
             alumno.email,
             alumno.plan,
-            diasRestantes,
+            diasRestantes.toString(),
             estadoPlan,
             prioridad
           ]);
@@ -275,7 +277,6 @@ export default function HistorialAsistencia() {
           {exporting ? 'Exportando...' : '📊 Exportar Excel'}
         </button>
       </div>
-      <div className={styles.searchBox} style={{ marginBottom: '1.5rem' }}>
       <div className={styles.searchBox} style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
         <div>
           <label htmlFor="rut-search" style={{ marginRight: '0.5rem' }}>Buscar por RUT (sin puntos ni guion):</label>
@@ -352,7 +353,6 @@ export default function HistorialAsistencia() {
           )}
         </div>
       )}
-      </div>
     </div>
   );
 }

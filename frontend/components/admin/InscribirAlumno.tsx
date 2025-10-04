@@ -1,17 +1,16 @@
 'use client';
-import type { Alumno, Plan } from '../../../shared/types';
+import type { InscribirAlumnoForm, Plan } from '../../../shared/types';
 import { useState, useEffect } from 'react';
 import styles from './InscribirAlumno.module.css';
 
-
 export default function InscribirAlumnoForm() {
-  const [form, setForm] = useState<Alumno>({
+  const [form, setForm] = useState<InscribirAlumnoForm>({
     nombre: '',
     telefono: '',
     rut: '',
     direccion: '',
     fechaNacimiento: '',
-    plan: 'mensual',
+    plan: '',
     fechaInicioPlan: '',
     duracion: 'mensual',
     monto: 0,
@@ -19,7 +18,7 @@ export default function InscribirAlumnoForm() {
     email: '',
     limiteClases: 'todos_los_dias',
   });
-  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
+  const [alumnos, setAlumnos] = useState<InscribirAlumnoForm[]>([]);
   const [planes, setPlanes] = useState<Plan[]>([]);
   const [loadingPlanes, setLoadingPlanes] = useState(true);
 
@@ -62,7 +61,7 @@ export default function InscribirAlumnoForm() {
       if (planSeleccionado) {
         setForm({ 
           ...form, 
-          plan: planSeleccionado.nombre,
+          plan: planId, // Guardar el ID del plan
           duracion: planSeleccionado.duracion,
           monto: planSeleccionado.precio,
           limiteClases: planSeleccionado.limiteClases || 'todos_los_dias'
@@ -104,7 +103,7 @@ export default function InscribirAlumnoForm() {
           rut: '',
           direccion: '',
           fechaNacimiento: '',
-          plan: 'mensual',
+          plan: '',
           fechaInicioPlan: '',
           duracion: 'mensual',
           monto: 0,
@@ -190,7 +189,7 @@ export default function InscribirAlumnoForm() {
         />
         <select
           name="plan"
-          value={planes.find(p => p.nombre === form.plan)?._id || ''}
+          value={form.plan}
           onChange={handleChange}
           className={styles.select}
           required
@@ -219,7 +218,7 @@ export default function InscribirAlumnoForm() {
           <div className={styles.planInfo}>
             <h4 className={styles.planInfoTitle}>Información del Plan Seleccionado:</h4>
             <div className={styles.planDetails}>
-              <span><strong>Plan:</strong> {form.plan}</span>
+              <span><strong>Plan:</strong> {planes.find(p => p._id === form.plan)?.nombre || form.plan}</span>
               <span><strong>Duración:</strong> {form.duracion}</span>
               <span><strong>Precio:</strong> ${form.monto?.toLocaleString()}</span>
               <span><strong>Límite:</strong> {form.limiteClases === '12' ? '12 clases al mes' : 
