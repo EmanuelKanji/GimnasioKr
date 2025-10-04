@@ -436,10 +436,11 @@
   
   .hamburger {
     top: 0.75rem;
-    left: 0.75rem;
+    right: 0.75rem;
+    left: auto;
     width: 40px;
     height: 40px;
-    z-index: 1300;
+    z-index: 1500;
   }
   
   .menu {
@@ -469,10 +470,11 @@
   
   .hamburger {
     top: 0.5rem;
-    left: 0.5rem;
+    right: 0.5rem;
+    left: auto;
     width: 36px;
     height: 36px;
-    z-index: 1300;
+    z-index: 1500;
   }
   
   .hamburgerLine {
