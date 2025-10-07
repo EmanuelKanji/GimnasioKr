@@ -98,6 +98,9 @@ exports.schemas = {
         password: joi_1.default.string().min(6).required().messages({
             'string.min': 'La contraseña debe tener al menos 6 caracteres',
             'any.required': 'La contraseña es requerida'
+        }),
+        limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
+            'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
         })
     }),
     // Crear plan
