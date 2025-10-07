@@ -178,8 +178,8 @@ app.use('/api/profesor', profesorRoutes_1.default);
 app.use(logging_1.errorLogger);
 // Middleware para manejo de errores
 app.use(logging_1.errorHandler);
-// Ruta 404
-app.use('*', (req, res) => {
+// Ruta 404 - debe ir al final de todas las rutas
+app.use((req, res) => {
     res.status(404).json({
         error: 'Ruta no encontrada',
         path: req.originalUrl,
