@@ -10,6 +10,14 @@ const profesorController_1 = require("../controllers/profesorController");
 const authController_1 = require("../controllers/authController");
 const validation_1 = require("../middleware/validation");
 const router = express_1.default.Router();
+// Ruta GET para verificar que el endpoint funciona
+router.get('/login', (req, res) => {
+    res.json({
+        message: 'Endpoint de login disponible',
+        method: 'POST requerido',
+        endpoint: '/api/auth/login'
+    });
+});
 // Ruta unificada para login (recomendada)
 router.post('/login', (0, validation_1.validate)(validation_1.schemas.login), authController_1.loginUser);
 // Rutas específicas por rol (mantener compatibilidad)

@@ -7,6 +7,15 @@ import { validate, schemas } from '../middleware/validation';
 
 const router = express.Router();
 
+// Ruta GET para verificar que el endpoint funciona
+router.get('/login', (req, res) => {
+  res.json({ 
+    message: 'Endpoint de login disponible', 
+    method: 'POST requerido',
+    endpoint: '/api/auth/login'
+  });
+});
+
 // Ruta unificada para login (recomendada)
 router.post('/login', validate(schemas.login), loginUser);
 
