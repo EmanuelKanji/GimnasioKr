@@ -50,6 +50,9 @@ exports.schemas = {
         rut: joi_1.default.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
             'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
             'any.required': 'El RUT es requerido'
+        }),
+        limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
+            'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
         })
     }),
     // Crear alumno
@@ -101,6 +104,9 @@ exports.schemas = {
         }),
         limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
             'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
+        }),
+        fechaTerminoPlan: joi_1.default.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().messages({
+            'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD'
         })
     }),
     // Crear plan
@@ -129,6 +135,9 @@ exports.schemas = {
         duracion: joi_1.default.string().valid('mensual', 'trimestral', 'anual').required().messages({
             'any.only': 'La duración debe ser mensual, trimestral o anual',
             'any.required': 'La duración es requerida'
+        }),
+        limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
+            'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
         })
     }),
     // Registrar asistencia

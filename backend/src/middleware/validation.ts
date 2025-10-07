@@ -49,6 +49,9 @@ export const schemas = {
     rut: Joi.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
       'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
       'any.required': 'El RUT es requerido'
+    }),
+    limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({
+      'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
     })
   }),
 
@@ -101,6 +104,9 @@ export const schemas = {
     }),
     limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({
       'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
+    }),
+    fechaTerminoPlan: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().messages({
+      'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD'
     })
   }),
 
@@ -133,6 +139,9 @@ export const schemas = {
     duracion: Joi.string().valid('mensual', 'trimestral', 'anual').required().messages({
       'any.only': 'La duración debe ser mensual, trimestral o anual',
       'any.required': 'La duración es requerida'
+    }),
+    limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({
+      'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
     })
   }),
 
