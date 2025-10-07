@@ -98,6 +98,13 @@ export const loginAlumno = async (req: Request, res: Response) => {
 
   // Buscar rut del alumno usando el campo rut del usuario
   const alumno = await Alumno.findOne({ rut: user.rut });
+
+    // Verificar que JWT_SECRET esté definida
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET no está definida en las variables de entorno');
+      return res.status(500).json({ error: 'Error de configuración del servidor' });
+    }
+
     // Generar JWT con rut
     const token = jwt.sign(
       { 
@@ -106,7 +113,7 @@ export const loginAlumno = async (req: Request, res: Response) => {
         role: user.role,
         rut: alumno ? alumno.rut : undefined
       },
-      (process.env.JWT_SECRET as Secret) || 'fallback_secret',
+      process.env.JWT_SECRET as Secret,
       { expiresIn: (process.env.JWT_EXPIRES_IN as SignOptions['expiresIn']) || '24h' }
     );
 

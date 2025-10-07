@@ -68,7 +68,7 @@ export default function AvisosProfesor({ misAlumnos = [] }: AvisosProfesorProps)
       setAvisosLocal(prev => [nuevoAviso, ...prev]);
       setTitulo('');
       setMensaje('');
-    } catch (err) {
+      } catch {
       setError('No se pudo enviar el aviso.');
     } finally {
       setEnviando(false);

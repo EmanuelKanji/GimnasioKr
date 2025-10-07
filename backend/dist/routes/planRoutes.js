@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const planController_1 = require("../controllers/planController");
+const validation_1 = require("../middleware/validation");
 const router = (0, express_1.Router)();
 router.get('/', planController_1.obtenerPlanes);
-router.post('/', planController_1.crearPlan);
+router.post('/', (0, validation_1.validate)(validation_1.schemas.createPlan), planController_1.crearPlan);
 router.delete('/:id', planController_1.eliminarPlan);
 exports.default = router;

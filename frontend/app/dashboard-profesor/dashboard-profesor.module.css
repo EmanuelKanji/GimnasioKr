@@ -436,7 +436,7 @@
   }
   
   .hamburger {
-    top: 0.5rem;
+    top: -0.5rem;
     left: 0.5rem;
     right: auto;
     width: 40px;
@@ -470,7 +470,7 @@
   }
   
   .hamburger {
-    top: 0.5rem;
+    top: -0.5rem;
     left: 0.5rem;
     right: auto;
     width: 36px;

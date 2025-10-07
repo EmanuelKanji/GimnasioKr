@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import Html5QrReader from '../admin/Html5QrReader';
 import styles from './PasarAsistenciaProfesor.module.css';
 

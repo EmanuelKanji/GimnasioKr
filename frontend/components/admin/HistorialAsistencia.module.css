@@ -140,12 +140,44 @@
   border-collapse: collapse;
   font-size: 0.95rem;
   position: relative;
+  table-layout: fixed;
 }
 
 /* Table Header */
 .table thead {
   background: linear-gradient(135deg, #012CAB 0%, #1e40af 100%);
   position: relative;
+}
+
+/* Column Widths */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 25%; /* Nombre */
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 15%; /* RUT */
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 20%; /* Fecha */
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 10%; /* Email */
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 20%; /* Teléfono */
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 10%; /* Plan */
 }
 
 .table thead::after {
@@ -168,6 +200,8 @@
   font-size: 0.8rem;
   position: relative;
   transition: all 0.3s ease;
+  vertical-align: top;
+  white-space: nowrap;
 }
 
 .table th:hover {
@@ -227,6 +261,8 @@
   font-weight: 500;
   position: relative;
   transition: all 0.3s ease;
+  vertical-align: top;
+  text-align: left;
 }
 
 /* Striped Rows */

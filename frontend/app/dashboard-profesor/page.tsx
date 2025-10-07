@@ -63,7 +63,7 @@ export default function DashboardProfesor() {
   
   const [menuOpen, setMenuOpen] = useState(false);
   const [perfilProfesor, setPerfilProfesor] = useState<{nombre: string} | null>(null);
-  const [loadingPerfil, setLoadingPerfil] = useState(true);
+  // const [loadingPerfil, setLoadingPerfil] = useState(true);
   const router = useRouter();
 
   // Lista de todos los alumnos inscritos (fetch desde backend)
@@ -92,10 +92,10 @@ export default function DashboardProfesor() {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       setPerfilProfesor({ nombre: payload.username || 'Profesor' });
-      setLoadingPerfil(false);
+      // setLoadingPerfil(false);
     } catch {
       setPerfilProfesor({ nombre: 'Profesor' });
-      setLoadingPerfil(false);
+      // setLoadingPerfil(false);
     }
   }, [router]);
 

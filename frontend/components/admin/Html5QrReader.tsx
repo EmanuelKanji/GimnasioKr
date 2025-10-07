@@ -68,7 +68,7 @@ export default function Html5QrReader({ onScan }: Html5QrReaderProps) {
           }
         }
       },
-      (error) => {
+      () => {
         // Puedes manejar errores aquí si lo deseas
       }
     );

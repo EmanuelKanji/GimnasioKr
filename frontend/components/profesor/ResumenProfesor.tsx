@@ -172,15 +172,15 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
               <div className={styles.alumnoStat}>
                 <span className={styles.statLabel}>Total alumnos:</span>
                 <span className={styles.statValue}>{totalAlumnos}</span>
-              </div>
+                </div>
               <div className={styles.alumnoStat}>
                 <span className={styles.statLabel}>Mis alumnos:</span>
                 <span className={`${styles.statValue} ${styles.positivo}`}>{misAlumnos.length}</span>
-              </div>
+            </div>
               <div className={styles.alumnoStat}>
                 <span className={styles.statLabel}>Asistencias hoy:</span>
                 <span className={styles.statValue}>{asistenciasHoy}</span>
-              </div>
+          </div>
               <div className={styles.alumnoStat}>
                 <span className={styles.statLabel}>Asistencias semana:</span>
                 <span className={styles.statValue}>{estadisticasDetalladas.resumen.asistenciasMisAlumnosSemana}</span>
@@ -219,7 +219,7 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
                             🕒 {new Date(alumno.ultimaAsistencia).toLocaleDateString('es-CL')}
                           </span>
                         )}
-                      </div>
+              </div>
                     </div>
                   ))}
                   {estadisticasDetalladas.misAlumnosDetallado.length > 4 && (
@@ -244,7 +244,7 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
                 avisosRecientes.map((aviso) => (
                   <div key={aviso.id} className={styles.avisoItem}>
                     <div className={styles.avisoHeader}>
-                      <span className={styles.avisoTitle}>{aviso.titulo}</span>
+                  <span className={styles.avisoTitle}>{aviso.titulo}</span>
                       <span className={styles.avisoDate}>
                         {new Date(aviso.fecha).toLocaleDateString('es-CL')}
                       </span>
@@ -256,7 +256,7 @@ export default function ResumenProfesor({ onViewChange }: ResumenProfesorProps) 
                 ))
               )}
             </div>
-          </div>
+                </div>
 
           {/* Acciones rápidas */}
           <div className={styles.compactSection}>

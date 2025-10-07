@@ -8,11 +8,12 @@ import {
   obtenerAvisosAlumno 
 } from '../controllers/alumnoController';
 import { requireRole } from '../middleware/auth';
+import { validate, schemas } from '../middleware/validation';
 
 const router = Router();
 
 // Rutas para administradores - gestión de alumnos
-router.post('/', requireRole(['admin']), crearAlumno);
+router.post('/', requireRole(['admin']), validate(schemas.createAlumno), crearAlumno);
 router.get('/', requireRole(['admin', 'profesor']), obtenerAlumnos);
 
 // Rutas para alumnos autenticados - sus propios datos

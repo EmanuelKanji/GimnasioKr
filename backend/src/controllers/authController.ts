@@ -33,6 +33,12 @@ export const loginUser = async (req: Request, res: Response) => {
   // RUT encontrado para alumno: debug
     }
 
+    // Verificar que JWT_SECRET esté definida
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET no está definida en las variables de entorno');
+      return res.status(500).json({ error: 'Error de configuración del servidor' });
+    }
+
     // Generar JWT
     const token = jwt.sign(
       { 
@@ -41,7 +47,7 @@ export const loginUser = async (req: Request, res: Response) => {
         role: user.role,
         rut: rut
       },
-      (process.env.JWT_SECRET as Secret) || 'fallback_secret',
+      process.env.JWT_SECRET as Secret,
       { expiresIn: (process.env.JWT_EXPIRES_IN as SignOptions['expiresIn']) || '24h' }
     );
 

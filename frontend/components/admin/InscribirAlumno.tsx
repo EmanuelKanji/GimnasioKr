@@ -43,7 +43,7 @@ export default function InscribirAlumnoForm() {
           }
         }
       } catch (error) {
-        console.error('Error cargando planes:', error);
+        console.error('Error cargando planes');
       } finally {
         setLoadingPlanes(false);
       }

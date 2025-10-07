@@ -35,15 +35,15 @@ export default function HistorialAsistencia() {
   }, []);
 
   // Funciones de cálculo de estadísticas
-  const calcularDiasRestantes = (fechaInicio: string, duracion: number) => {
-    const inicio = new Date(fechaInicio);
-    const vencimiento = new Date(inicio);
-    vencimiento.setMonth(vencimiento.getMonth() + duracion);
-    const hoy = new Date();
-    const diffTime = vencimiento.getTime() - hoy.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffDays);
-  };
+  // const calcularDiasRestantes = (fechaInicio: string, duracion: number) => {
+  //   const inicio = new Date(fechaInicio);
+  //   const vencimiento = new Date(inicio);
+  //   vencimiento.setMonth(vencimiento.getMonth() + duracion);
+  //   const hoy = new Date();
+  //   const diffTime = vencimiento.getTime() - hoy.getTime();
+  //   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  //   return Math.max(0, diffDays);
+  // };
 
   const obtenerEstadoPlan = (diasRestantes: number) => {
     if (diasRestantes === 0) return 'Vencido';
@@ -51,17 +51,111 @@ export default function HistorialAsistencia() {
     return 'Activo';
   };
 
-  const obtenerColorEstado = (diasRestantes: number) => {
-    if (diasRestantes === 0) return '#ef4444'; // Rojo
-    if (diasRestantes <= 7) return '#f59e0b'; // Amarillo
-    return '#22c55e'; // Verde
-  };
+  // const obtenerColorEstado = (diasRestantes: number) => {
+  //   if (diasRestantes === 0) return '#ef4444'; // Rojo
+  //   if (diasRestantes <= 7) return '#f59e0b'; // Amarillo
+  //   return '#22c55e'; // Verde
+  // };
 
-  // Función de exportación a Excel
+  // Función de exportación a Excel mejorada
   const exportarExcel = async () => {
     setExporting(true);
     try {
       const workbook = XLSX.utils.book_new();
+
+      // Función mejorada para aplicar formato a las hojas
+      const aplicarFormatoHoja = (worksheet: XLSX.WorkSheet, titulo: string, columnas: string[]) => {
+        // Obtener datos existentes
+        const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+        const existingData: (string | number)[][] = [];
+        
+        for (let R = range.s.r; R <= range.s.r + range.e.r; ++R) {
+          const row: (string | number)[] = [];
+          for (let C = range.s.c; C <= range.s.c + range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            const cell = worksheet[cellAddress];
+            row.push(cell ? cell.v : '');
+          }
+          existingData.push(row);
+        }
+        
+        // Limpiar hoja
+        worksheet['!ref'] = undefined;
+        
+        // Agregar título principal con formato especial
+        XLSX.utils.sheet_add_aoa(worksheet, [[titulo]], { origin: 'A1' });
+        XLSX.utils.sheet_add_aoa(worksheet, [['']], { origin: 'A2' }); // Línea en blanco
+        
+        // Agregar encabezados
+        XLSX.utils.sheet_add_aoa(worksheet, [columnas], { origin: 'A3' });
+        
+        // Agregar datos
+        if (existingData.length > 0) {
+          XLSX.utils.sheet_add_aoa(worksheet, existingData, { origin: 'A4' });
+        }
+        
+        // Configurar anchos de columna optimizados
+        const colWidths = columnas.map((col) => {
+          // Anchos específicos según el tipo de columna
+          if (col.includes('Nombre') || col.includes('Email')) return { wch: 25 };
+          if (col.includes('RUT') || col.includes('Teléfono')) return { wch: 15 };
+          if (col.includes('Fecha') || col.includes('Hora')) return { wch: 18 };
+          if (col.includes('Plan') || col.includes('Estado')) return { wch: 12 };
+          if (col.includes('Cantidad') || col.includes('Porcentaje')) return { wch: 15 };
+          if (col.includes('Días') || col.includes('Total')) return { wch: 18 };
+          return { wch: 20 }; // Ancho por defecto
+        });
+        worksheet['!cols'] = colWidths;
+        
+        // Aplicar estilos mejorados
+        const newRange = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+        
+        // Título principal (A1)
+        const titleCell = worksheet['A1'];
+        if (titleCell) {
+          titleCell.s = {
+            font: { bold: true, size: 16, color: { rgb: '012CAB' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            fill: { fgColor: { rgb: 'F0F4FF' } }
+          };
+        }
+        
+        // Encabezados (fila 3)
+        for (let C = newRange.s.c; C <= newRange.s.c + newRange.e.c; ++C) {
+          const cellAddress = XLSX.utils.encode_cell({ r: 2, c: C }); // Fila 3 (índice 2)
+          if (!worksheet[cellAddress]) worksheet[cellAddress] = { v: '' };
+          worksheet[cellAddress].s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            fill: { fgColor: { rgb: '012CAB' } },
+            border: {
+              top: { style: 'thin', color: { rgb: '000000' } },
+              bottom: { style: 'thin', color: { rgb: '000000' } },
+              left: { style: 'thin', color: { rgb: '000000' } },
+              right: { style: 'thin', color: { rgb: '000000' } }
+            }
+          };
+        }
+        
+        // Datos (desde fila 4)
+        for (let R = 3; R <= newRange.s.r + newRange.e.r; ++R) {
+          for (let C = newRange.s.c; C <= newRange.s.c + newRange.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!worksheet[cellAddress]) worksheet[cellAddress] = { v: '' };
+            worksheet[cellAddress].s = {
+              alignment: { horizontal: 'center', vertical: 'center' },
+              border: {
+                top: { style: 'thin', color: { rgb: 'CCCCCC' } },
+                bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
+                left: { style: 'thin', color: { rgb: 'CCCCCC' } },
+                right: { style: 'thin', color: { rgb: 'CCCCCC' } }
+              }
+            };
+          }
+        }
+        
+        return worksheet;
+      };
 
       // Hoja 1: Asistencias Diarias
       const asistenciasData = filtered.map(item => ({
@@ -75,7 +169,9 @@ export default function HistorialAsistencia() {
       }));
 
       const wsAsistencias = XLSX.utils.json_to_sheet(asistenciasData);
-      XLSX.utils.book_append_sheet(workbook, wsAsistencias, 'Asistencias Diarias');
+      const wsAsistenciasFormateada = aplicarFormatoHoja(wsAsistencias, '📊 HISTORIAL DE ASISTENCIAS DIARIAS', 
+        ['Nombre', 'RUT', 'Email', 'Teléfono', 'Plan', 'Fecha', 'Hora']);
+      XLSX.utils.book_append_sheet(workbook, wsAsistenciasFormateada, 'Asistencias Diarias');
 
       // Hoja 2: Estadísticas Generales
       const fechaInicio = filtered.length > 0 ? new Date(Math.min(...filtered.map(item => new Date(item.fecha || '').getTime()))) : new Date();
@@ -94,7 +190,9 @@ export default function HistorialAsistencia() {
       ];
 
       const wsEstadisticas = XLSX.utils.aoa_to_sheet(estadisticasGenerales);
-      XLSX.utils.book_append_sheet(workbook, wsEstadisticas, 'Estadísticas Generales');
+      const wsEstadisticasFormateada = aplicarFormatoHoja(wsEstadisticas, '📈 ESTADÍSTICAS GENERALES DEL GIMNASIO', 
+        ['Métrica', 'Valor']);
+      XLSX.utils.book_append_sheet(workbook, wsEstadisticasFormateada, 'Estadísticas Generales');
 
       // Hoja 3: Estadísticas por Plan
       const planesCount: { [key: string]: number } = {};
@@ -112,7 +210,9 @@ export default function HistorialAsistencia() {
       });
 
       const wsPlanes = XLSX.utils.aoa_to_sheet(estadisticasPlanes);
-      XLSX.utils.book_append_sheet(workbook, wsPlanes, 'Estadísticas por Plan');
+      const wsPlanesFormateada = aplicarFormatoHoja(wsPlanes, '💳 ANÁLISIS DE PLANES DE SUSCRIPCIÓN', 
+        ['Plan', 'Cantidad', 'Porcentaje']);
+      XLSX.utils.book_append_sheet(workbook, wsPlanesFormateada, 'Estadísticas por Plan');
 
       // Hoja 4: Estadísticas por Día de la Semana
       const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -136,7 +236,9 @@ export default function HistorialAsistencia() {
       });
 
       const wsDias = XLSX.utils.aoa_to_sheet(estadisticasDias);
-      XLSX.utils.book_append_sheet(workbook, wsDias, 'Estadísticas por Día');
+      const wsDiasFormateada = aplicarFormatoHoja(wsDias, '📅 ANÁLISIS DE ASISTENCIAS POR DÍA DE LA SEMANA', 
+        ['Día de la Semana', 'Cantidad', 'Porcentaje']);
+      XLSX.utils.book_append_sheet(workbook, wsDiasFormateada, 'Estadísticas por Día');
 
       // Hoja 5: Estadísticas por Alumno
       const alumnosData: { [key: string]: { nombre: string; rut: string; asistencias: Date[]; plan: string; email: string; telefono: string; fechaInicioPlan: string; fechaTerminoPlan: string } } = {};
@@ -190,7 +292,9 @@ export default function HistorialAsistencia() {
       });
 
       const wsAlumnos = XLSX.utils.aoa_to_sheet(estadisticasAlumnos);
-      XLSX.utils.book_append_sheet(workbook, wsAlumnos, 'Estadísticas por Alumno');
+      const wsAlumnosFormateada = aplicarFormatoHoja(wsAlumnos, '👥 ESTADÍSTICAS DETALLADAS POR ALUMNO', 
+        ['Nombre', 'RUT', 'Email', 'Teléfono', 'Plan', 'Total Asistencias', 'Primera Asistencia', 'Última Asistencia', 'Días Transcurridos', 'Días Restantes', 'Estado Plan']);
+      XLSX.utils.book_append_sheet(workbook, wsAlumnosFormateada, 'Estadísticas por Alumno');
 
       // Hoja 6: Alertas de Vencimiento
       const alertasVencimiento = [
@@ -226,7 +330,9 @@ export default function HistorialAsistencia() {
       });
 
       const wsAlertas = XLSX.utils.aoa_to_sheet(alertasVencimiento);
-      XLSX.utils.book_append_sheet(workbook, wsAlertas, 'Alertas de Vencimiento');
+      const wsAlertasFormateada = aplicarFormatoHoja(wsAlertas, '⚠️ ALERTAS DE VENCIMIENTO DE PLANES', 
+        ['Nombre', 'RUT', 'Email', 'Plan', 'Días Restantes', 'Estado', 'Prioridad']);
+      XLSX.utils.book_append_sheet(workbook, wsAlertasFormateada, 'Alertas de Vencimiento');
 
       // Generar y descargar archivo
       const fechaActual = new Date().toISOString().split('T')[0];

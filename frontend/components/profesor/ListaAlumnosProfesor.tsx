@@ -1,7 +1,7 @@
 'use client';
 
 import styles from './ListaAlumnosProfesor.module.css';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { Alumno } from '../../../shared/types';
 

@@ -23,12 +23,17 @@ const loginAdmin = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ error: 'Credenciales inválidas' });
         }
+        // Verificar que JWT_SECRET esté definida
+        if (!process.env.JWT_SECRET) {
+            console.error('JWT_SECRET no está definida en las variables de entorno');
+            return res.status(500).json({ error: 'Error de configuración del servidor' });
+        }
         // Generar JWT
         const token = jsonwebtoken_1.default.sign({
             id: user._id,
             username: user.username,
             role: user.role
-        }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+        }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
         return res.status(200).json({
             message: 'Login admin exitoso',
             token,

@@ -18,7 +18,12 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     return res.status(401).json({ error: 'Token de acceso requerido' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, decoded) => {
+  // Verificar que JWT_SECRET esté definida
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ error: 'Error de configuración del servidor' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: 'Token inválido o expirado' });
     }

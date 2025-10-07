@@ -72,10 +72,10 @@ export default function InicioAlumno() {
   // Calcular la semana actual (lunes a domingo)
   const today = new Date();
   const weekDates = generateCurrentWeek(today);
-  const weekDatesISO = weekDates.map(toISODate);
+  // const weekDatesISO = weekDates.map(toISODate);
 
   // Filtrar asistencias solo de la semana actual
-  const asistenciasSemana = diasAsistidos.filter((d) => weekDatesISO.includes(d));
+  // const asistenciasSemana = diasAsistidos.filter((d) => weekDatesISO.includes(d));
 
   // Generar calendario mensual para mostrar en el resumen
   const calendar = generateMonthlyCalendar(today.getFullYear(), today.getMonth());
@@ -95,7 +95,7 @@ export default function InicioAlumno() {
               {/* Semana actual */}
               <div className={styles.weekRow}>
                 <span className={styles.weekLabel}>Esta semana:</span>
-                {weekDates.map((date, idx) => {
+                {weekDates.map((date) => {
                   const asistido = isAsistido(date, diasAsistidos);
                   return (
                     <div
@@ -144,8 +144,8 @@ export default function InicioAlumno() {
           <div className={styles.compactSection}>
             <span className={styles.compactLabel}>Avisos:</span>
             <div className={styles.avisosList}>
-                {avisos.slice(0, 2).map((aviso, idx) => (
-                <div key={idx} className={styles.noleido}>
+                {avisos.slice(0, 2).map((aviso) => (
+                <div key={aviso.titulo} className={styles.noleido}>
                   <span className={styles.avisoTitle}>{aviso.titulo}</span>
                   <span className={styles.avisoDate}>{aviso.fecha ? new Date(aviso.fecha).toLocaleDateString('es-CL') : ''}</span>
                 </div>

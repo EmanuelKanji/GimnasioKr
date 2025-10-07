@@ -10,12 +10,18 @@ const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 // ========================
 // Configuración principal
 // ========================
 // 1. Variables de entorno
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
-// 2. Importaciones de rutas y utilidades
+// 2. Crear directorio de logs si no existe
+const logsDir = path_1.default.join(__dirname, '../logs');
+if (!fs_1.default.existsSync(logsDir)) {
+    fs_1.default.mkdirSync(logsDir, { recursive: true });
+}
+// 3. Importaciones de rutas y utilidades
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const alumnoRoutes_1 = __importDefault(require("./routes/alumnoRoutes"));
@@ -24,12 +30,40 @@ const db_1 = require("./config/db");
 const planRoutes_1 = __importDefault(require("./routes/planRoutes"));
 const avisoRoutes_1 = __importDefault(require("./routes/avisoRoutes"));
 const profesorRoutes_1 = __importDefault(require("./routes/profesorRoutes"));
-// 3. Inicialización de Express y middlewares
+const healthController_1 = require("./controllers/healthController");
+const logging_1 = require("./middleware/logging");
+const logger_1 = __importDefault(require("./config/logger"));
+// 4. Inicialización de Express y middlewares
 const app = (0, express_1.default)();
-app.use(express_1.default.json());
-app.use((0, helmet_1.default)());
-// Limitar a 100 peticiones por IP cada 15 minutos
-app.use((0, express_rate_limit_1.default)({ windowMs: 15 * 60 * 1000, max: 100 }));
+// Trust proxy para obtener IP real en producción
+app.set('trust proxy', 1);
+// Middlewares de seguridad y logging
+app.use((0, helmet_1.default)({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+}));
+// Rate limiting más estricto para producción
+const limiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: process.env.NODE_ENV === 'production' ? 50 : 100, // Más estricto en producción
+    message: {
+        error: 'Demasiadas peticiones desde esta IP, intenta de nuevo en 15 minutos'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
+// Logging de requests
+app.use(logging_1.requestLogger);
+// Body parsing con límite de tamaño
+app.use(express_1.default.json({ limit: '10mb' }));
+app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 // Configuración de CORS mejorada
 const allowedOrigins = [
     'https://kraccess.netlify.app',
@@ -117,8 +151,16 @@ app.use((req, res, next) => {
 // ========================
 // Rutas
 // ========================
+// Health checks (sin autenticación)
+app.get('/health', healthController_1.healthCheck);
+app.get('/ready', healthController_1.readinessCheck);
 app.get('/', (_req, res) => {
-    res.send('API Gym Backend funcionando');
+    res.json({
+        message: 'API Gym Backend funcionando',
+        version: process.env.npm_package_version || '1.0.0',
+        environment: process.env.NODE_ENV || 'development',
+        timestamp: new Date().toISOString()
+    });
 });
 // Rutas de autenticación
 app.use('/api/auth', authRoutes_1.default);
@@ -132,9 +174,17 @@ app.use('/api/profesor', profesorRoutes_1.default);
 // ========================
 // Manejo de errores global
 // ========================
-app.use((err, _req, res, _next) => {
-    console.error(err);
-    res.status(500).json({ error: err.message || 'Error interno del servidor' });
+// Middleware para logging de errores
+app.use(logging_1.errorLogger);
+// Middleware para manejo de errores
+app.use(logging_1.errorHandler);
+// Ruta 404
+app.use('*', (req, res) => {
+    res.status(404).json({
+        error: 'Ruta no encontrada',
+        path: req.originalUrl,
+        method: req.method
+    });
 });
 // ========================
 // Inicialización y conexión
@@ -147,10 +197,17 @@ app.listen(PORT, async () => {
     try {
         await (0, db_1.connectDB)();
         await ensureAdminUser();
-        // 🚀 Backend corriendo en http://localhost:${PORT}
-        // ✅ Conexión a MongoDB exitosa
+        logger_1.default.info('🚀 Servidor iniciado', {
+            port: PORT,
+            environment: process.env.NODE_ENV || 'development',
+            version: process.env.npm_package_version || '1.0.0'
+        });
+        console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
+        console.log(`✅ Conexión a MongoDB exitosa`);
     }
     catch (err) {
+        logger_1.default.error('❌ Error al iniciar servidor', { error: err });
         console.error('❌ Error al conectar a MongoDB:', err);
+        process.exit(1);
     }
 });

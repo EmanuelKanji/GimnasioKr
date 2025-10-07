@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import styles from './CrearUsuarioForm.module.css';
 
-type Props = unknown;
+// type Props = unknown;
 
-export default function CrearUsuarioForm(props: Props) {
+export default function CrearUsuarioForm() {
   const [role, setRole] = useState<'alumno' | 'profesor'>('alumno');
   const [rut, setRut] = useState('');
   const [email, setEmail] = useState('');
@@ -34,7 +34,7 @@ export default function CrearUsuarioForm(props: Props) {
       } else {
         setMessage('❌ ' + (data.error || 'Error al crear usuario'));
       }
-    } catch (err) {
+    } catch {
       setMessage('❌ Error de red');
     }
     setLoading(false);

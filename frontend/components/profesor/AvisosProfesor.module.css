@@ -705,9 +705,9 @@
 @media (prefers-color-scheme: dark) {
   .container {
     background: transparent;
-  }
-  
-  .title {
+}
+
+.title {
     color: var(--dark-text-primary);
   }
   

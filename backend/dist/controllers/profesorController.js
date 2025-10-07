@@ -226,7 +226,12 @@ const loginProfesor = async (req, res) => {
         const userObj = typeof user.toObject === 'function' ? user.toObject() : user;
         const rut = userObj.rut;
         console.log('Login profesor - userObj:', userObj); // Depuración
-        const token = jsonwebtoken_1.default.sign({ id: userObj._id, username: userObj.username, role: userObj.role, rut }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+        // Verificar que JWT_SECRET esté definida
+        if (!process.env.JWT_SECRET) {
+            console.error('JWT_SECRET no está definida en las variables de entorno');
+            return res.status(500).json({ error: 'Error de configuración del servidor' });
+        }
+        const token = jsonwebtoken_1.default.sign({ id: userObj._id, username: userObj.username, role: userObj.role, rut }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
         return res.status(200).json({
             message: 'Login profesor exitoso',
             token,

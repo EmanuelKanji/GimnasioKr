@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
 // ========================
 // Configuración principal
@@ -13,7 +14,13 @@ import path from 'path';
 // 1. Variables de entorno
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-// 2. Importaciones de rutas y utilidades
+// 2. Crear directorio de logs si no existe
+const logsDir = path.join(__dirname, '../logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// 3. Importaciones de rutas y utilidades
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import alumnoRoutes from './routes/alumnoRoutes';
@@ -23,14 +30,47 @@ import User from './models/User';
 import planRoutes from './routes/planRoutes';
 import avisoRoutes from './routes/avisoRoutes';
 import profesorRoutes from './routes/profesorRoutes';
+import { healthCheck, readinessCheck } from './controllers/healthController';
+import { requestLogger, errorLogger, errorHandler } from './middleware/logging';
+import logger from './config/logger';
 
 
-// 3. Inicialización de Express y middlewares
+// 4. Inicialización de Express y middlewares
 const app = express();
-app.use(express.json());
-app.use(helmet());
-// Limitar a 100 peticiones por IP cada 15 minutos
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+
+// Trust proxy para obtener IP real en producción
+app.set('trust proxy', 1);
+
+// Middlewares de seguridad y logging
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
+
+// Rate limiting más estricto para producción
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: process.env.NODE_ENV === 'production' ? 50 : 100, // Más estricto en producción
+  message: {
+    error: 'Demasiadas peticiones desde esta IP, intenta de nuevo en 15 minutos'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// Logging de requests
+app.use(requestLogger);
+
+// Body parsing con límite de tamaño
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Configuración de CORS mejorada
 const allowedOrigins = [
   'https://kraccess.netlify.app',
@@ -128,9 +168,19 @@ app.use((req, res, next) => {
 // Rutas
 // ========================
 
+// Health checks (sin autenticación)
+app.get('/health', healthCheck);
+app.get('/ready', readinessCheck);
+
 app.get('/', (_req, res) => {
-  res.send('API Gym Backend funcionando');
+  res.json({ 
+    message: 'API Gym Backend funcionando',
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
 });
+
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 
@@ -146,9 +196,19 @@ app.use('/api/profesor', profesorRoutes);
 // Manejo de errores global
 // ========================
 
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err);
-  res.status(500).json({ error: err.message || 'Error interno del servidor' });
+// Middleware para logging de errores
+app.use(errorLogger);
+
+// Middleware para manejo de errores
+app.use(errorHandler);
+
+// Ruta 404
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Ruta no encontrada',
+    path: req.originalUrl,
+    method: req.method
+  });
 });
 
 // ========================
@@ -165,9 +225,18 @@ app.listen(PORT, async () => {
   try {
     await connectDB();
     await ensureAdminUser();
-  // 🚀 Backend corriendo en http://localhost:${PORT}
-  // ✅ Conexión a MongoDB exitosa
+    
+    logger.info('🚀 Servidor iniciado', {
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+      version: process.env.npm_package_version || '1.0.0'
+    });
+    
+    console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
+    console.log(`✅ Conexión a MongoDB exitosa`);
   } catch (err) {
+    logger.error('❌ Error al iniciar servidor', { error: err });
     console.error('❌ Error al conectar a MongoDB:', err);
+    process.exit(1);
   }
 });
