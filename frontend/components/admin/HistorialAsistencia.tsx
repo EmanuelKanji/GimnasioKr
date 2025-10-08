@@ -422,23 +422,23 @@ export default function HistorialAsistencia() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Nombre</th>
-                <th>RUT</th>
-                <th>Fecha</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Plan</th>
+                <th className={styles.tableHeader}>Nombre</th>
+                <th className={styles.tableHeader}>RUT</th>
+                <th className={styles.tableHeader}>Fecha</th>
+                <th className={styles.tableHeader}>Email</th>
+                <th className={styles.tableHeader}>Teléfono</th>
+                <th className={styles.tableHeader}>Plan</th>
               </tr>
             </thead>
             <tbody>
               {paginated.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{item.nombre}</td>
-                  <td>{item.rut}</td>
-                  <td>{item.fecha ? new Date(item.fecha).toLocaleString() : ''}</td>
-                  <td>{item.email}</td>
-                  <td>{item.telefono}</td>
-                  <td data-plan={item.plan?.toLowerCase()}>{item.plan}</td>
+                <tr key={idx} className={styles.tableRow}>
+                  <td className={styles.tableCell}>{item.nombre}</td>
+                  <td className={styles.tableCell}>{item.rut}</td>
+                  <td className={styles.tableCell}>{item.fecha ? new Date(item.fecha).toLocaleString() : ''}</td>
+                  <td className={styles.tableCell}>{item.email}</td>
+                  <td className={styles.tableCell}>{item.telefono}</td>
+                  <td className={styles.tableCell} data-plan={item.plan?.toLowerCase()}>{item.plan}</td>
                 </tr>
               ))}
             </tbody>

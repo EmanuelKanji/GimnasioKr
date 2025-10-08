@@ -149,6 +149,36 @@
   position: relative;
 }
 
+.tableHeader {
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  position: relative;
+  transition: all 0.3s ease;
+  border: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.tableHeader:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tableHeader:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 60%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* Column Widths - Distribución equilibrada */
 .table th:nth-child(1),
 .table td:nth-child(1) {
@@ -233,6 +263,42 @@
   position: relative;
 }
 
+.tableRow {
+  background: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid rgba(241, 245, 249, 0.8);
+  position: relative;
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.tableRow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, #012CAB, transparent);
+  transition: width 0.3s ease;
+  opacity: 0.1;
+}
+
+.tableRow:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f4ff 100%);
+  transform: translateX(8px);
+  box-shadow: 
+    0 4px 16px rgba(1, 44, 171, 0.12),
+    0 2px 8px rgba(1, 44, 171, 0.08);
+}
+
+.tableRow:hover::before {
+  width: 4px;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
 .table tbody tr::before {
   content: '';
   position: absolute;
@@ -269,6 +335,20 @@
   transition: all 0.3s ease;
   vertical-align: middle;
   text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.tableCell {
+  padding: 1.5rem 1.25rem;
+  color: #1e293b;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.3s ease;
+  border: none;
+  text-align: center;
+  vertical-align: middle;
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
