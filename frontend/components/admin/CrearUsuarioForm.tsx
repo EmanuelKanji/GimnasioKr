@@ -17,13 +17,17 @@ export default function CrearUsuarioForm() {
     setMessage('');
     try {
       const token = localStorage.getItem('token');
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/usuarios', {
+      
+      // Limpiar el RUT para enviarlo sin puntos al backend
+      const rutLimpio = rut.replace(/\./g, '');
+      
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/usuarios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ username: email, rut, password, role })
+        body: JSON.stringify({ username: email, rut: rutLimpio, password, role })
       });
       const data = await res.json();
       if (res.ok) {
@@ -85,7 +89,7 @@ export default function CrearUsuarioForm() {
                 className={styles.input}
                 required 
                 disabled={loading}
-                pattern="^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$"
+                pattern="^\d{1,2}(\.\d{3}){2}-[\dkK]$"
                 title="Formato RUT: 12.345.678-9"
               />
               <div className={styles.inputIcon}>🆔</div>
