@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
 const asistenciaRoutes_1 = __importDefault(require("./routes/asistenciaRoutes"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
@@ -34,11 +35,11 @@ const healthController_1 = require("./controllers/healthController");
 const logging_1 = require("./middleware/logging");
 const logger_1 = __importDefault(require("./config/logger"));
 // 4. Inicialización de Express y middlewares
-const app = (0, express_1.default)();
+exports.app = (0, express_1.default)();
 // Trust proxy para obtener IP real en producción
-app.set('trust proxy', 1);
+exports.app.set('trust proxy', 1);
 // Middlewares de seguridad y logging
-app.use((0, helmet_1.default)({
+exports.app.use((0, helmet_1.default)({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
@@ -58,12 +59,12 @@ const limiter = (0, express_rate_limit_1.default)({
     standardHeaders: true,
     legacyHeaders: false,
 });
-app.use(limiter);
+exports.app.use(limiter);
 // Logging de requests
-app.use(logging_1.requestLogger);
+exports.app.use(logging_1.requestLogger);
 // Body parsing con límite de tamaño
-app.use(express_1.default.json({ limit: '10mb' }));
-app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+exports.app.use(express_1.default.json({ limit: '10mb' }));
+exports.app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 // Configuración de CORS mejorada
 const allowedOrigins = [
     'https://kraccess.netlify.app',
@@ -117,9 +118,9 @@ const corsOptions = {
     optionsSuccessStatus: 200,
     preflightContinue: false
 };
-app.use((0, cors_1.default)(corsOptions));
+exports.app.use((0, cors_1.default)(corsOptions));
 // Middleware adicional para manejar preflight requests
-app.use((req, res, next) => {
+exports.app.use((req, res, next) => {
     const origin = req.headers.origin;
     // Log de la petición para debugging
     console.log(`🌐 Petición ${req.method} desde: ${origin} a ${req.path}`);
@@ -152,9 +153,9 @@ app.use((req, res, next) => {
 // Rutas
 // ========================
 // Health checks (sin autenticación)
-app.get('/health', healthController_1.healthCheck);
-app.get('/ready', healthController_1.readinessCheck);
-app.get('/', (_req, res) => {
+exports.app.get('/health', healthController_1.healthCheck);
+exports.app.get('/ready', healthController_1.readinessCheck);
+exports.app.get('/', (_req, res) => {
     res.json({
         message: 'API Gym Backend funcionando',
         version: process.env.npm_package_version || '1.0.0',
@@ -163,23 +164,23 @@ app.get('/', (_req, res) => {
     });
 });
 // Rutas de autenticación
-app.use('/api/auth', authRoutes_1.default);
+exports.app.use('/api/auth', authRoutes_1.default);
 // Rutas protegidas - requieren autenticación
-app.use('/api/usuarios', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), userRoutes_1.default);
-app.use('/api/alumnos', auth_1.authenticateToken, alumnoRoutes_1.default);
-app.use('/api/planes', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), planRoutes_1.default);
-app.use('/api/asistencias', auth_1.authenticateToken, asistenciaRoutes_1.default);
-app.use('/api/avisos', avisoRoutes_1.default);
-app.use('/api/profesor', profesorRoutes_1.default);
+exports.app.use('/api/usuarios', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), userRoutes_1.default);
+exports.app.use('/api/alumnos', auth_1.authenticateToken, alumnoRoutes_1.default);
+exports.app.use('/api/planes', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), planRoutes_1.default);
+exports.app.use('/api/asistencias', auth_1.authenticateToken, asistenciaRoutes_1.default);
+exports.app.use('/api/avisos', avisoRoutes_1.default);
+exports.app.use('/api/profesor', profesorRoutes_1.default);
 // ========================
 // Manejo de errores global
 // ========================
 // Middleware para logging de errores
-app.use(logging_1.errorLogger);
+exports.app.use(logging_1.errorLogger);
 // Middleware para manejo de errores
-app.use(logging_1.errorHandler);
+exports.app.use(logging_1.errorHandler);
 // Ruta 404 - debe ir al final de todas las rutas
-app.use((req, res) => {
+exports.app.use((req, res) => {
     res.status(404).json({
         error: 'Ruta no encontrada',
         path: req.originalUrl,
@@ -193,7 +194,7 @@ const PORT = process.env.PORT || 4000;
 async function ensureAdminUser() {
     // Eliminada la creación automática del usuario admin por defecto
 }
-app.listen(PORT, async () => {
+exports.app.listen(PORT, async () => {
     try {
         await (0, db_1.connectDB)();
         await ensureAdminUser();

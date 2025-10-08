@@ -36,7 +36,7 @@ import logger from './config/logger';
 
 
 // 4. Inicialización de Express y middlewares
-const app = express();
+export const app = express();
 
 // Trust proxy para obtener IP real en producción
 app.set('trust proxy', 1);

@@ -11,23 +11,42 @@ export default function GestionarPlanes() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/planes', {
+    
+    if (!token) {
+      setMensaje('No hay token de autenticación. Por favor, inicia sesión nuevamente.');
+      setLoading(false);
+      return;
+    }
+    
+    fetch(process.env.NEXT_PUBLIC_API_URL + '/api/planes', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 401) {
+          setMensaje('Sesión expirada. Por favor, inicia sesión nuevamente.');
+          return null;
+        }
+        return res.json();
+      })
       .then(data => {
-        if (Array.isArray(data)) {
-          setPlanes(data);
-        } else if (Array.isArray(data.planes)) {
-          setPlanes(data.planes);
-        } else {
-          setPlanes([]);
+        if (data) {
+          if (Array.isArray(data)) {
+            setPlanes(data);
+          } else if (Array.isArray(data.planes)) {
+            setPlanes(data.planes);
+          } else {
+            setPlanes([]);
+          }
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(error => {
+        console.error('Error al cargar planes:', error);
+        setMensaje('Error de conexión con el servidor.');
+        setLoading(false);
+      });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -37,10 +56,20 @@ export default function GestionarPlanes() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje(null);
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setMensaje('No hay token de autenticación. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+    
     try {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/planes', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/planes', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           nombre: nuevo.nombre,
           descripcion: nuevo.descripcion,
@@ -50,32 +79,56 @@ export default function GestionarPlanes() {
           duracion: nuevo.duracion
         })
       });
+      
       const data = await res.json();
+      
       if (res.ok) {
         setPlanes([...planes, data]);
         setMensaje('Plan creado exitosamente.');
         setNuevo({ nombre: '', descripcion: '', precio: '', clases: '12', matricula: '', duracion: 'mensual' });
+      } else if (res.status === 401) {
+        setMensaje('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        // Opcional: redirigir al login
+        // window.location.href = '/login-admin';
       } else {
-        setMensaje(data.message || 'Error al crear el plan.');
+        setMensaje(data.message || data.error || 'Error al crear el plan.');
       }
-    } catch {
+    } catch (error) {
+      console.error('Error al crear plan:', error);
       setMensaje('Error de conexión con el servidor.');
     }
   };
 
   const handleDelete = async (id: string) => {
     setMensaje(null);
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setMensaje('No hay token de autenticación. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+    
     try {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + `/api/planes/${id}`, {
-        method: 'DELETE'
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + `/api/planes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+      
       if (res.ok) {
         setPlanes(planes.filter(plan => plan._id !== id));
         setMensaje('Plan eliminado correctamente.');
+      } else if (res.status === 401) {
+        setMensaje('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        // Opcional: redirigir al login
+        // window.location.href = '/login-admin';
       } else {
-        setMensaje('Error al eliminar el plan.');
+        const data = await res.json();
+        setMensaje(data.message || data.error || 'Error al eliminar el plan.');
       }
-    } catch {
+    } catch (error) {
+      console.error('Error al eliminar plan:', error);
       setMensaje('Error de conexión con el servidor.');
     }
   };
