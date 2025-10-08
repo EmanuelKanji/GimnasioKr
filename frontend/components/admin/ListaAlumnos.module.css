@@ -98,7 +98,7 @@
   table-layout: fixed;
 }
 
-/* Column Widths - Distribución optimizada */
+/* Column Widths - Distribución equilibrada */
 .table th:nth-child(1),
 .table td:nth-child(1) {
   width: 25%; /* Nombre */
@@ -250,7 +250,7 @@
   font-weight: 700;
   color: #012CAB;
   position: relative;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
