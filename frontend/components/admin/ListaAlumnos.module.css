@@ -95,6 +95,44 @@
   border-collapse: collapse;
   font-size: 0.95rem;
   position: relative;
+  table-layout: fixed;
+}
+
+/* Column Widths - Distribución optimizada */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 25%; /* Nombre */
+  min-width: 150px;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 15%; /* RUT */
+  min-width: 120px;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 15%; /* Plan */
+  min-width: 100px;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 15%; /* Inicio */
+  min-width: 120px;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 15%; /* Término */
+  min-width: 120px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 15%; /* Alerta */
+  min-width: 100px;
 }
 
 /* Table Header */
@@ -115,7 +153,7 @@
 
 .tableHeader {
   padding: 1.5rem 1.25rem;
-  text-align: left;
+  text-align: center;
   color: white;
   font-weight: 700;
   text-transform: uppercase;
@@ -124,6 +162,8 @@
   position: relative;
   transition: all 0.3s ease;
   border: none;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .tableHeader:hover {
@@ -185,6 +225,11 @@
   position: relative;
   transition: all 0.3s ease;
   border: none;
+  text-align: center;
+  vertical-align: middle;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .tableRow:hover .tableCell {
@@ -205,6 +250,10 @@
   font-weight: 700;
   color: #012CAB;
   position: relative;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Date Styling */
@@ -216,6 +265,11 @@
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid rgba(226, 232, 240, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
 }
 
 /* Plan Badges */
@@ -230,6 +284,9 @@
   letter-spacing: 0.05em;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  text-overflow: ellipsis;
 }
 
 .planBadge::before {
@@ -460,7 +517,7 @@
   }
   
   .table {
-    min-width: 800px;
+    min-width: 900px;
     font-size: 0.9rem;
   }
   
@@ -505,7 +562,7 @@
   }
   
   .table {
-    min-width: 700px;
+    min-width: 800px;
   }
   
   .tableHeader {

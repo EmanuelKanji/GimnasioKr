@@ -149,35 +149,41 @@
   position: relative;
 }
 
-/* Column Widths */
+/* Column Widths - Mejor distribución */
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 25%; /* Nombre */
+  width: 20%; /* Nombre */
+  min-width: 120px;
 }
 
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 15%; /* RUT */
+  width: 12%; /* RUT */
+  min-width: 100px;
 }
 
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 20%; /* Fecha */
+  width: 18%; /* Fecha */
+  min-width: 140px;
 }
 
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 10%; /* Email */
+  width: 25%; /* Email */
+  min-width: 180px;
 }
 
 .table th:nth-child(5),
 .table td:nth-child(5) {
-  width: 20%; /* Teléfono */
+  width: 15%; /* Teléfono */
+  min-width: 120px;
 }
 
 .table th:nth-child(6),
 .table td:nth-child(6) {
   width: 10%; /* Plan */
+  min-width: 80px;
 }
 
 .table thead::after {
@@ -192,7 +198,7 @@
 
 .table th {
   padding: 1.5rem 1.25rem;
-  text-align: left;
+  text-align: center;
   color: white;
   font-weight: 700;
   text-transform: uppercase;
@@ -200,7 +206,7 @@
   font-size: 0.8rem;
   position: relative;
   transition: all 0.3s ease;
-  vertical-align: top;
+  vertical-align: middle;
   white-space: nowrap;
 }
 
@@ -261,8 +267,11 @@
   font-weight: 500;
   position: relative;
   transition: all 0.3s ease;
-  vertical-align: top;
-  text-align: left;
+  vertical-align: middle;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /* Striped Rows */
@@ -279,6 +288,10 @@
   font-weight: 700;
   color: #012CAB;
   position: relative;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table td:nth-child(3) {
@@ -288,12 +301,18 @@
   background: rgba(241, 245, 249, 0.5);
   border-radius: 6px;
   margin: 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table td:nth-child(4) {
   color: #059669;
   font-weight: 700;
   position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table td:nth-child(4)::before {
@@ -480,7 +499,7 @@
   }
   
   .table {
-    min-width: 800px;
+    min-width: 900px;
     font-size: 0.9rem;
   }
   
@@ -510,7 +529,7 @@
   }
   
   .table {
-    min-width: 700px;
+    min-width: 800px;
   }
   
   .table th {
@@ -548,7 +567,7 @@
   }
   
   .table {
-    min-width: 650px;
+    min-width: 750px;
   }
   
   .table th {
