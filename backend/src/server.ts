@@ -75,7 +75,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Configuración de CORS mejorada
 const allowedOrigins = [
   'https://kraccess.netlify.app',
-  'https://gimnasiokr.onrender.com', // Agregar tu dominio de Netlify si es diferente
+  'https://gimnasiokr.onrender.com',
+  'https://kraccess.cl',
+  'https://www.kraccess.cl',
+  'http://kraccess.cl', // Por si acaso usas HTTP temporalmente
+  'http://www.kraccess.cl',
 ];
 
 // Agregar orígenes desde variables de entorno
