@@ -7,6 +7,7 @@ import PerfilAlumno from "../../components/alumno/PerfilAlumno";
 import AvisosAlumno from "../../components/alumno/AvisosAlumno";
 import InicioAlumno from "../../components/alumno/InicioAlumno";
 import QrAlumno from "../../components/alumno/QrAlumno";
+import { useAsistencias } from "../../hooks/useAsistencias";
 import type { PerfilInfo } from '../../../shared/types';
 
 // Iconos SVG como componentes
@@ -74,9 +75,10 @@ export default function DashboardAlumno() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
   const [loadingPerfil, setLoadingPerfil] = useState(true);
-  const [asistenciasMes, setAsistenciasMes] = useState<string[]>([]);
   const [limiteClases, setLimiteClases] = useState<'12' | '8' | 'todos_los_dias'>('todos_los_dias');
-
+  
+  // Usar el hook centralizado para asistencias
+  const { asistencias: asistenciasMes } = useAsistencias();
 
   const cargarDatos = async () => {
     try {
@@ -88,13 +90,6 @@ export default function DashboardAlumno() {
       });
       const perfilData = await perfilRes.json();
       setPerfil(perfilData.perfil || null);
-      
-      // Cargar asistencias del mes
-      const asistenciasRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const asistenciasData = await asistenciasRes.json();
-      setAsistenciasMes(asistenciasData.diasAsistidos || []);
       
       // Obtener límite de clases del plan (por ahora hardcodeado, después se obtendrá del plan)
       if (perfilData.perfil?.plan) {
@@ -117,22 +112,9 @@ export default function DashboardAlumno() {
     }
   };
 
-  // Obtener perfil del alumno y asistencias al cargar el dashboard
+  // Obtener perfil del alumno al cargar el dashboard
   useEffect(() => {
     cargarDatos();
-  }, []);
-
-  // Escuchar eventos de actualización de asistencia
-  useEffect(() => {
-    const handleAsistenciaUpdate = () => {
-      cargarDatos();
-    };
-
-    window.addEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
-    
-    return () => {
-      window.removeEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
-    };
   }, []);
 
   const handleViewChange = (newView: "inicio" | "asistencia" | "plan" | "perfil" | "avisos" | "qr") => {

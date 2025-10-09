@@ -196,5 +196,15 @@ exports.schemas = {
         motivo: joi_1.default.string().max(200).optional().messages({
             'string.max': 'El motivo no puede exceder 200 caracteres'
         })
+    }),
+    // Cambiar contraseña
+    cambiarPassword: joi_1.default.object({
+        passwordActual: joi_1.default.string().required().messages({
+            'any.required': 'La contraseña actual es requerida'
+        }),
+        passwordNueva: joi_1.default.string().min(6).required().messages({
+            'string.min': 'La nueva contraseña debe tener al menos 6 caracteres',
+            'any.required': 'La nueva contraseña es requerida'
+        })
     })
 };

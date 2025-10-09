@@ -1,55 +1,10 @@
 
 import styles from './AsistenciaAlumno.module.css';
-import { useEffect, useState } from 'react';
 import { generateMonthlyCalendar, isAsistido, getMonthName } from '../../lib/dateUtils';
+import { useAsistencias } from '../../hooks/useAsistencias';
 
 export default function AsistenciaAlumno() {
-  const [diasAsistidos, setDiasAsistidos] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const cargarAsistencias = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      
-      const data = await res.json();
-      setDiasAsistidos(data.diasAsistidos || []);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching asistencias:', error);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    cargarAsistencias();
-    
-    // Actualizar cada 30 segundos para sincronización en tiempo real
-    const interval = setInterval(cargarAsistencias, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  // Escuchar eventos de actualización desde otros componentes
-  useEffect(() => {
-    const handleAsistenciaUpdate = () => {
-      cargarAsistencias();
-    };
-
-    window.addEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
-    
-    return () => {
-      window.removeEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
-    };
-  }, []);
+  const { asistencias: diasAsistidos, loading } = useAsistencias();
 
   // Generación de calendario que inicia en lunes
   const today = new Date();

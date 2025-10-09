@@ -9,6 +9,8 @@ const validation_1 = require("../middleware/validation");
 const router = express_1.default.Router();
 const auth_1 = require("../middleware/auth");
 router.post('/', (0, validation_1.validate)(validation_1.schemas.createUser), userController_1.createUser);
+// Cambiar contraseña del usuario autenticado
+router.put('/cambiar-password', auth_1.authenticateToken, (0, validation_1.validate)(validation_1.schemas.cambiarPassword), userController_1.cambiarPassword);
 // Obtener datos del usuario logueado
 router.get('/me', auth_1.authenticateToken, async (req, res) => {
     try {

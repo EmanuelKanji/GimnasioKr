@@ -2,9 +2,10 @@ import type { PlanAlumno, Aviso } from '../../../shared/types';
 import styles from './InicioAlumno.module.css';
 import { useEffect, useState } from 'react';
 import { generateCurrentWeek, generateMonthlyCalendar, isAsistido, toISODate, getMonthName } from '../../lib/dateUtils';
+import { useAsistencias } from '../../hooks/useAsistencias';
 
 export default function InicioAlumno() {
-  const [diasAsistidos, setDiasAsistidos] = useState<string[]>([]);
+  const { asistencias: diasAsistidos, loading: asistenciasLoading } = useAsistencias();
   const [plan, setPlan] = useState<PlanAlumno>({
     nombre: '',
     estadoPago: 'pendiente',
@@ -18,13 +19,6 @@ export default function InicioAlumno() {
   const cargarDatos = async () => {
     try {
       const token = localStorage.getItem('token');
-      
-      // Fetch asistencia
-      const asistenciasRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/asistencias', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const asistenciasData = await asistenciasRes.json();
-      setDiasAsistidos(asistenciasData.diasAsistidos || []);
       
       // Fetch plan
       const planRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/plan', {
@@ -50,23 +44,10 @@ export default function InicioAlumno() {
   useEffect(() => {
     cargarDatos();
     
-    // Actualizar cada 30 segundos para sincronización en tiempo real
-    const interval = setInterval(cargarDatos, 30000);
+    // Actualizar cada 2 minutos para sincronización en tiempo real (reducido de 30 segundos)
+    const interval = setInterval(cargarDatos, 120000);
     
     return () => clearInterval(interval);
-  }, []);
-
-  // Escuchar eventos de actualización desde otros componentes
-  useEffect(() => {
-    const handleAsistenciaUpdate = () => {
-      cargarDatos();
-    };
-
-    window.addEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
-    
-    return () => {
-      window.removeEventListener('asistenciaRegistrada', handleAsistenciaUpdate);
-    };
   }, []);
 
   // Calcular la semana actual (lunes a domingo)
@@ -80,7 +61,7 @@ export default function InicioAlumno() {
   // Generar calendario mensual para mostrar en el resumen
   const calendar = generateMonthlyCalendar(today.getFullYear(), today.getMonth());
 
-  if (loading) {
+  if (loading || asistenciasLoading) {
   return <div className={styles.container}>Cargando resumen...</div>;
   }
 
