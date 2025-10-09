@@ -41,5 +41,7 @@ const AvisoSchema = new mongoose_1.Schema({
     profesor: { type: String, required: true },
     destinatarios: [{ type: String, required: true }],
     leidoPor: [{ type: String, default: [] }],
+    tipo: { type: String, enum: ['manual', 'automatico'], default: 'manual' },
+    motivoAutomatico: { type: String }
 });
 exports.default = mongoose_1.default.model('Aviso', AvisoSchema);

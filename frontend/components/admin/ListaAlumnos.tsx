@@ -31,17 +31,24 @@ export default function ListaAlumnos() {
     })
       .then(res => res.json())
       .then(data => {
+        let alumnosData = [];
         if (Array.isArray(data)) {
-          setAlumnos(data);
+          alumnosData = data;
         } else if (Array.isArray(data.alumnos)) {
-          setAlumnos(data.alumnos);
-        } else {
-          setAlumnos([]);
+          alumnosData = data.alumnos;
         }
+        
+        setAlumnos(alumnosData);
+        
+        // Enviar avisos automáticos para planes próximos a vencer
+        if (alumnosData.length > 0) {
+          enviarAvisosAutomaticos(alumnosData);
+        }
+        
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
@@ -64,6 +71,73 @@ export default function ListaAlumnos() {
       return <span className={`${styles.alerta} ${styles.alertaAdvertencia}`}>¡Faltan {diff} días!</span>;
     }
     return null;
+  };
+
+  // Función para enviar avisos automáticos
+  const enviarAvisosAutomaticos = async (alumnos: Alumno[]) => {
+    const hoy = new Date();
+    const alumnosParaAvisar = alumnos.filter(alumno => {
+      if (!alumno.fechaTerminoPlan) return false;
+      const termino = new Date(alumno.fechaTerminoPlan);
+      const diff = Math.ceil((termino.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+      return diff <= 7 && diff > 0; // Solo planes que vencen en 7 días o menos
+    });
+
+    console.log(`🔔 Enviando avisos automáticos a ${alumnosParaAvisar.length} alumnos`);
+
+    for (const alumno of alumnosParaAvisar) {
+      try {
+        await crearAvisoVencimiento(alumno);
+      } catch (error) {
+        console.log(`❌ No se pudo enviar aviso a ${alumno.nombre}:`, error);
+      }
+    }
+  };
+
+  // Función para crear avisos de vencimiento
+  const crearAvisoVencimiento = async (alumno: Alumno) => {
+    const hoy = new Date();
+    const termino = new Date(alumno.fechaTerminoPlan);
+    const diff = Math.ceil((termino.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    
+    let titulo, mensaje, motivoAutomatico;
+    
+    if (diff === 1) {
+      titulo = "Tu plan vence mañana";
+      mensaje = `Hola ${alumno.nombre}, tu plan ${alumno.plan} vence mañana. Te recomendamos renovar para evitar interrupciones en tu entrenamiento.`;
+      motivoAutomatico = "vencimiento_plan_1_dia";
+    } else if (diff <= 3) {
+      titulo = `Tu plan vence en ${diff} días`;
+      mensaje = `Hola ${alumno.nombre}, tu plan ${alumno.plan} vence en ${diff} días. Te recomendamos renovar pronto para continuar con tu entrenamiento.`;
+      motivoAutomatico = `vencimiento_plan_${diff}_dias`;
+    } else {
+      titulo = `Tu plan vence en ${diff} días`;
+      mensaje = `Hola ${alumno.nombre}, tu plan ${alumno.plan} vence en ${diff} días. Considera renovar para mantener tu rutina de entrenamiento.`;
+      motivoAutomatico = `vencimiento_plan_${diff}_dias`;
+    }
+
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/avisos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        titulo,
+        mensaje,
+        destinatarios: [alumno.rut],
+        tipo: 'automatico',
+        motivoAutomatico
+      })
+    });
+
+    if (res.ok) {
+      console.log(`✅ Aviso enviado a ${alumno.nombre} (${diff} días restantes)`);
+    } else {
+      const errorData = await res.json();
+      console.log(`⚠️ Error enviando aviso a ${alumno.nombre}:`, errorData);
+    }
   };
 
   // Filtrado por RUT y nombre

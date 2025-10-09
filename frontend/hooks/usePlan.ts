@@ -11,6 +11,8 @@ interface PlanInfo {
   monto: number;
   limiteClases?: '12' | '8' | 'todos_los_dias';
   duracion?: string;
+  descuentoEspecial?: 'ninguno' | 'familiar_x2' | 'familiar_x3';
+  porcentajeDescuento?: number;
 }
 
 interface PlanCache {

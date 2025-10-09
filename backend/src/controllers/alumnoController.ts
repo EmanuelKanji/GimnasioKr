@@ -77,7 +77,9 @@ export const obtenerPlanAlumno = async (req: Request, res: Response) => {
         estadoPago: estaBloqueado ? 'bloqueado' : 'activo',
         monto: alumno.monto,
         limiteClases: limiteClasesPlan,
-        duracion: alumno.duracion
+        duracion: alumno.duracion,
+        descuentoEspecial: alumno.descuentoEspecial || 'ninguno',
+        porcentajeDescuento: alumno.porcentajeDescuento || 0
       }
     });
   } catch (error) {

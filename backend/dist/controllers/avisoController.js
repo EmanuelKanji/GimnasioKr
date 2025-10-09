@@ -5,32 +5,64 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.obtenerAvisosAlumno = exports.obtenerAvisosProfesor = exports.crearAviso = void 0;
 const Aviso_1 = __importDefault(require("../models/Aviso"));
+// Función auxiliar para verificar si ya existe un aviso automático reciente
+const verificarAvisoDuplicado = async (destinatario, motivoAutomatico, horasLimite = 24) => {
+    const fechaLimite = new Date();
+    fechaLimite.setHours(fechaLimite.getHours() - horasLimite);
+    const avisoExistente = await Aviso_1.default.findOne({
+        destinatarios: destinatario,
+        tipo: 'automatico',
+        motivoAutomatico: motivoAutomatico,
+        fecha: { $gte: fechaLimite }
+    });
+    return !!avisoExistente;
+};
 // Crear aviso (POST)
 const crearAviso = async (req, res) => {
     try {
-        const { titulo, mensaje, destinatarios } = req.body;
-        const profesor = req.user?.rut || req.user?.id;
+        const { titulo, mensaje, destinatarios, tipo = 'manual', motivoAutomatico } = req.body;
+        const profesor = req.user?.rut || req.user?.id || 'SISTEMA'; // Permitir SISTEMA para avisos automáticos
         if (!profesor) {
             return res.status(400).json({ error: 'Profesor no identificado' });
         }
         if (!titulo || !mensaje || !destinatarios || !Array.isArray(destinatarios)) {
             return res.status(400).json({ error: 'Datos del aviso incompletos' });
         }
-        console.log(`📝 Profesor ${profesor} creando aviso para ${destinatarios.length} alumnos:`, destinatarios);
+        console.log(`📝 ${tipo === 'automatico' ? 'Sistema' : 'Profesor'} ${profesor} creando aviso ${tipo} para ${destinatarios.length} alumnos:`, destinatarios);
         // Limpiar y normalizar RUTs de destinatarios
         const destinatariosLimpios = destinatarios.map(rut => {
             const rutLimpio = rut.replace(/\.|-/g, '').toUpperCase();
             console.log(`📤 RUT original: ${rut} -> RUT limpio: ${rutLimpio}`);
             return rutLimpio;
         });
+        // Para avisos automáticos, verificar duplicados
+        if (tipo === 'automatico' && motivoAutomatico) {
+            const destinatariosSinDuplicados = [];
+            for (const destinatario of destinatariosLimpios) {
+                const esDuplicado = await verificarAvisoDuplicado(destinatario, motivoAutomatico);
+                if (!esDuplicado) {
+                    destinatariosSinDuplicados.push(destinatario);
+                }
+                else {
+                    console.log(`⚠️ Aviso duplicado evitado para ${destinatario} (${motivoAutomatico})`);
+                }
+            }
+            if (destinatariosSinDuplicados.length === 0) {
+                return res.status(200).json({ message: 'Todos los avisos ya fueron enviados recientemente' });
+            }
+            destinatariosLimpios.length = 0;
+            destinatariosLimpios.push(...destinatariosSinDuplicados);
+        }
         const aviso = new Aviso_1.default({
             titulo,
             mensaje,
             profesor,
-            destinatarios: destinatariosLimpios
+            destinatarios: destinatariosLimpios,
+            tipo,
+            motivoAutomatico
         });
         await aviso.save();
-        console.log(`✅ Aviso creado exitosamente con ID: ${aviso._id}`);
+        console.log(`✅ Aviso ${tipo} creado exitosamente con ID: ${aviso._id}`);
         console.log(`✅ Destinatarios finales:`, aviso.destinatarios);
         res.status(201).json(aviso);
     }

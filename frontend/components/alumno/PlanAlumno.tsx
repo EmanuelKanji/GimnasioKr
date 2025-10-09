@@ -26,6 +26,16 @@ export default function PlanAlumno() {
         </div>
         <div className={styles.planAmount}>
           <span>Monto: ${plan.monto.toLocaleString('es-CL')}</span>
+          {plan.descuentoEspecial && plan.descuentoEspecial !== 'ninguno' && (
+            <div className={styles.descuentoInfo}>
+              <span className={styles.descuentoLabel}>
+                Descuento {plan.descuentoEspecial === 'familiar_x2' ? 'Familiar x2' : 'Familiar x3'}: {plan.porcentajeDescuento}%
+              </span>
+              <span className={styles.montoOriginal}>
+                Monto original: ${(plan.monto / (1 - (plan.porcentajeDescuento || 0) / 100)).toLocaleString('es-CL')}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

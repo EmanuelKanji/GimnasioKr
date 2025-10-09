@@ -90,6 +90,8 @@ export interface Aviso {
   profesor: string; // id o rut del profesor
   destinatarios: string[]; // ruts de alumnos
   leidoPor: string[]; // ruts de alumnos que han leído el aviso
+  tipo?: 'manual' | 'automatico'; // Tipo de aviso
+  motivoAutomatico?: string; // Razón del aviso automático
   createdAt?: string;
   updatedAt?: string;
 }
