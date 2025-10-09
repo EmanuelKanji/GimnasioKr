@@ -63,6 +63,20 @@ const AlumnoSchema = new mongoose_1.Schema({
         ],
         default: []
     },
+    estadoRenovacion: {
+        type: String,
+        enum: ['ninguno', 'solicitada', 'procesando', 'completada'],
+        default: 'ninguno'
+    },
+    fechaSolicitud: { type: Date },
+    motivoSolicitud: { type: String },
+    historialRenovaciones: [{
+            fecha: { type: Date, default: Date.now },
+            fechaInicio: String,
+            fechaFin: String,
+            procesadoPor: String,
+            observaciones: String
+        }]
 }, {
     timestamps: true
 });

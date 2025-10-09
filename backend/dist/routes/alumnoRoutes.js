@@ -13,4 +13,9 @@ router.get('/me/perfil', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoCon
 router.get('/me/plan', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerPlanAlumno);
 router.get('/me/asistencias', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerAsistenciaAlumno);
 router.get('/me/avisos', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerAvisosAlumno);
+// Rutas de renovación
+router.post('/me/solicitar-renovacion', (0, auth_1.requireRole)(['alumno']), (0, validation_1.validate)(validation_1.schemas.solicitarRenovacion), alumnoController_1.solicitarRenovacion);
+router.get('/me/estado-renovacion', (0, auth_1.requireRole)(['alumno']), alumnoController_1.obtenerEstadoRenovacion);
+router.get('/para-renovar', (0, auth_1.requireRole)(['admin']), alumnoController_1.obtenerAlumnosParaRenovar);
+router.post('/:id/renovar', (0, auth_1.requireRole)(['admin']), (0, validation_1.validate)(validation_1.schemas.renovarPlan), alumnoController_1.renovarPlanAlumno);
 exports.default = router;

@@ -3,10 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.crearAlumno = exports.loginAlumno = exports.obtenerAlumnos = exports.obtenerPerfilAlumno = exports.obtenerAvisosAlumno = exports.obtenerAsistenciaAlumno = exports.obtenerPlanAlumno = void 0;
+exports.crearAlumno = exports.loginAlumno = exports.obtenerAlumnos = exports.obtenerPerfilAlumno = exports.renovarPlanAlumno = exports.obtenerAlumnosParaRenovar = exports.obtenerEstadoRenovacion = exports.solicitarRenovacion = exports.obtenerAvisosAlumno = exports.obtenerAsistenciaAlumno = exports.obtenerPlanAlumno = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
+const Plan_1 = __importDefault(require("../models/Plan"));
 // Obtener plan del alumno por RUT
 const obtenerPlanAlumno = async (req, res) => {
     try {
@@ -16,8 +17,23 @@ const obtenerPlanAlumno = async (req, res) => {
         const alumno = await Alumno_1.default.findOne({ rut });
         if (!alumno)
             return res.status(404).json({ message: 'Alumno no encontrado' });
+        let nombrePlan = alumno.plan;
+        // Si el plan es un ID (ObjectId válido), buscar el plan real
+        if (alumno.plan && alumno.plan.length === 24 && /^[0-9a-fA-F]{24}$/.test(alumno.plan)) {
+            try {
+                const planEncontrado = await Plan_1.default.findById(alumno.plan);
+                if (planEncontrado) {
+                    nombrePlan = planEncontrado.nombre;
+                    // Actualizar el alumno con el nombre del plan para futuras consultas
+                    await Alumno_1.default.findByIdAndUpdate(alumno._id, { plan: planEncontrado.nombre });
+                }
+            }
+            catch (error) {
+                console.error('Error buscando plan por ID:', error);
+            }
+        }
         res.json({ plan: {
-                nombre: alumno.plan,
+                nombre: nombrePlan,
                 descripcion: 'Acceso ilimitado a clases grupales y uso de gimnasio.',
                 fechaInicio: alumno.fechaInicioPlan,
                 fechaFin: alumno.fechaTerminoPlan,
@@ -64,6 +80,146 @@ const obtenerAvisosAlumno = async (req, res) => {
     }
 };
 exports.obtenerAvisosAlumno = obtenerAvisosAlumno;
+// Solicitar renovación (Alumno)
+const solicitarRenovacion = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        if (!rut)
+            return res.status(400).json({ message: 'RUT no presente en el token' });
+        const { motivo } = req.body;
+        const alumno = await Alumno_1.default.findOne({ rut });
+        if (!alumno)
+            return res.status(404).json({ message: 'Alumno no encontrado' });
+        alumno.estadoRenovacion = 'solicitada';
+        alumno.fechaSolicitud = new Date();
+        alumno.motivoSolicitud = motivo;
+        await alumno.save();
+        res.json({ message: 'Solicitud enviada exitosamente' });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error al solicitar renovación', error });
+    }
+};
+exports.solicitarRenovacion = solicitarRenovacion;
+// Obtener estado de renovación (Alumno)
+const obtenerEstadoRenovacion = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        if (!rut)
+            return res.status(400).json({ message: 'RUT no presente en el token' });
+        const alumno = await Alumno_1.default.findOne({ rut });
+        if (!alumno)
+            return res.status(404).json({ message: 'Alumno no encontrado' });
+        res.json({
+            estado: alumno.estadoRenovacion || 'ninguno',
+            fechaSolicitud: alumno.fechaSolicitud
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error al obtener estado de renovación', error });
+    }
+};
+exports.obtenerEstadoRenovacion = obtenerEstadoRenovacion;
+// Listar alumnos para renovar (Admin)
+const obtenerAlumnosParaRenovar = async (req, res) => {
+    try {
+        const { filtro } = req.query; // 'todos', 'bloqueados', 'solicitados'
+        let query = {};
+        if (filtro === 'bloqueados') {
+            // Incluir planes expirados y próximos a vencer (3 días o menos)
+            const hoy = new Date();
+            const proximosDias = new Date();
+            proximosDias.setDate(hoy.getDate() + 3);
+            query = {
+                $or: [
+                    { fechaTerminoPlan: { $lt: hoy } }, // Expirados
+                    {
+                        fechaTerminoPlan: { $gte: hoy, $lte: proximosDias },
+                        estadoRenovacion: { $ne: 'solicitada' }
+                    } // Próximos a vencer sin solicitud
+                ]
+            };
+        }
+        else if (filtro === 'solicitados') {
+            query = { estadoRenovacion: 'solicitada' };
+        }
+        const alumnos = await Alumno_1.default.find(query).select('nombre rut plan fechaInicioPlan fechaTerminoPlan limiteClases estadoRenovacion fechaSolicitud motivoSolicitud');
+        res.json(alumnos);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error al obtener alumnos para renovar', error });
+    }
+};
+exports.obtenerAlumnosParaRenovar = obtenerAlumnosParaRenovar;
+// Renovar plan de alumno (Admin)
+const renovarPlanAlumno = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { fechaInicio, fechaFin, duracion, limiteClases, observaciones } = req.body;
+        console.log('Datos recibidos para renovación:', { id, fechaInicio, fechaFin, duracion, limiteClases, observaciones });
+        // Validar que todos los campos requeridos estén presentes
+        if (!fechaInicio || !fechaFin || !duracion || !limiteClases) {
+            return res.status(400).json({
+                message: 'Faltan campos requeridos',
+                campos: { fechaInicio, fechaFin, duracion, limiteClases }
+            });
+        }
+        const alumno = await Alumno_1.default.findById(id);
+        if (!alumno)
+            return res.status(404).json({ message: 'Alumno no encontrado' });
+        // Actualizar datos del plan
+        alumno.fechaInicioPlan = fechaInicio;
+        alumno.fechaTerminoPlan = fechaFin;
+        alumno.duracion = duracion;
+        alumno.limiteClases = limiteClases;
+        alumno.estadoRenovacion = 'completada';
+        alumno.asistencias = []; // Resetear asistencias del nuevo período
+        // Guardar log de renovación
+        alumno.historialRenovaciones = alumno.historialRenovaciones || [];
+        alumno.historialRenovaciones.push({
+            fecha: new Date(),
+            fechaInicio,
+            fechaFin,
+            procesadoPor: req.user?.id,
+            observaciones
+        });
+        console.log('Intentando guardar alumno:', {
+            id: alumno._id,
+            fechaInicioPlan: alumno.fechaInicioPlan,
+            fechaTerminoPlan: alumno.fechaTerminoPlan,
+            duracion: alumno.duracion,
+            limiteClases: alumno.limiteClases
+        });
+        try {
+            await alumno.save();
+            console.log('Alumno guardado exitosamente');
+        }
+        catch (saveError) {
+            console.error('Error al guardar alumno:', saveError);
+            throw saveError;
+        }
+        res.json({
+            message: 'Plan renovado exitosamente',
+            alumno: {
+                nombre: alumno.nombre,
+                rut: alumno.rut,
+                fechaInicio: alumno.fechaInicioPlan,
+                fechaFin: alumno.fechaTerminoPlan,
+                limiteClases: alumno.limiteClases
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error completo en renovarPlanAlumno:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+        res.status(500).json({
+            message: 'Error al renovar plan',
+            error: errorMessage,
+            details: error
+        });
+    }
+};
+exports.renovarPlanAlumno = renovarPlanAlumno;
 // Obtener perfil de alumno por RUT (extraído del token)
 const obtenerPerfilAlumno = async (req, res) => {
     try {
@@ -143,9 +299,14 @@ exports.loginAlumno = loginAlumno;
 // Crear alumno
 const crearAlumno = async (req, res) => {
     try {
-        const { nombre, rut, direccion, fechaNacimiento, email, telefono, plan, fechaInicioPlan, duracion, monto, password } = req.body;
+        const { nombre, rut, direccion, fechaNacimiento, email, telefono, plan, fechaInicioPlan, duracion, monto, password, limiteClases } = req.body;
         if (!nombre || !rut || !direccion || !fechaNacimiento || !email || !telefono || !plan || !fechaInicioPlan || !duracion || !password) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+        }
+        // Buscar el plan por ID para obtener el nombre
+        const planEncontrado = await Plan_1.default.findById(plan);
+        if (!planEncontrado) {
+            return res.status(404).json({ message: 'Plan no encontrado.' });
         }
         // Verificar si el usuario ya existe
         const userExistente = await User_1.default.findOne({ username: email });
@@ -180,11 +341,12 @@ const crearAlumno = async (req, res) => {
             fechaNacimiento,
             email,
             telefono,
-            plan,
+            plan: planEncontrado.nombre, // Guardar el nombre del plan en lugar del ID
             fechaInicioPlan,
             fechaTerminoPlan: termino.toISOString(),
             duracion,
             monto,
+            limiteClases: limiteClases || 'todos_los_dias',
             asistencias: [],
             avisos: []
         });

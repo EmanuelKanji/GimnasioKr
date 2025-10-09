@@ -206,9 +206,10 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error completo en renovarPlanAlumno:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     res.status(500).json({ 
       message: 'Error al renovar plan', 
-      error: error.message || error,
+      error: errorMessage,
       details: error
     });
   }

@@ -168,5 +168,33 @@ exports.schemas = {
             'array.min': 'Debe seleccionar al menos un destinatario',
             'any.required': 'Los destinatarios son requeridos'
         })
+    }),
+    // Renovar plan
+    renovarPlan: joi_1.default.object({
+        fechaInicio: joi_1.default.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required().messages({
+            'string.pattern.base': 'La fecha de inicio debe tener formato YYYY-MM-DD',
+            'any.required': 'La fecha de inicio es requerida'
+        }),
+        fechaFin: joi_1.default.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required().messages({
+            'string.pattern.base': 'La fecha de término debe tener formato YYYY-MM-DD',
+            'any.required': 'La fecha de término es requerida'
+        }),
+        duracion: joi_1.default.string().valid('mensual', 'trimestral', 'anual').required().messages({
+            'any.only': 'La duración debe ser mensual, trimestral o anual',
+            'any.required': 'La duración es requerida'
+        }),
+        limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').required().messages({
+            'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias',
+            'any.required': 'El límite de clases es requerido'
+        }),
+        observaciones: joi_1.default.string().max(500).optional().messages({
+            'string.max': 'Las observaciones no pueden exceder 500 caracteres'
+        })
+    }),
+    // Solicitar renovación
+    solicitarRenovacion: joi_1.default.object({
+        motivo: joi_1.default.string().max(200).optional().messages({
+            'string.max': 'El motivo no puede exceder 200 caracteres'
+        })
     })
 };
