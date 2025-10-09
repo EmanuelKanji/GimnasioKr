@@ -3,11 +3,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginProfesor = exports.obtenerEstadisticasProfesor = exports.obtenerMisAlumnos = exports.eliminarMiAlumno = exports.agregarMiAlumno = exports.actualizarPerfilProfesor = exports.obtenerPerfilProfesor = void 0;
+exports.loginProfesor = exports.obtenerEstadisticasProfesor = exports.obtenerMisAlumnos = exports.eliminarMiAlumno = exports.agregarMiAlumno = exports.actualizarPerfilProfesor = exports.obtenerPerfilProfesor = exports.crearProfesor = void 0;
 const Profesor_1 = __importDefault(require("../models/Profesor"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
 const Asistencia_1 = __importDefault(require("../models/Asistencia"));
 const Aviso_1 = __importDefault(require("../models/Aviso"));
+const User_1 = __importDefault(require("../models/User"));
+// Crear profesor
+const crearProfesor = async (req, res) => {
+    try {
+        const { nombre, rut, email, telefono, direccion, fechaNacimiento, password } = req.body;
+        if (!nombre || !rut || !email || !telefono || !direccion || !fechaNacimiento || !password) {
+            return res.status(400).json({ error: 'Todos los campos son requeridos' });
+        }
+        // Verificar si el usuario ya existe
+        const userExistente = await User_1.default.findOne({ username: email });
+        if (userExistente) {
+            return res.status(409).json({ error: 'El usuario ya está registrado' });
+        }
+        // Verificar si el profesor ya existe
+        const profesorExistente = await Profesor_1.default.findOne({ rut });
+        if (profesorExistente) {
+            return res.status(409).json({ error: 'El profesor ya está registrado' });
+        }
+        // Crear usuario para login
+        const nuevoUsuario = new User_1.default({
+            username: email,
+            password,
+            role: 'profesor',
+            rut
+        });
+        await nuevoUsuario.save();
+        // Crear perfil del profesor
+        const nuevoProfesor = new Profesor_1.default({
+            nombre,
+            rut,
+            email,
+            telefono,
+            direccion,
+            fechaNacimiento,
+            misAlumnos: []
+        });
+        await nuevoProfesor.save();
+        console.log(`✅ Profesor creado: ${nombre} (${rut})`);
+        res.status(201).json({
+            message: 'Profesor creado correctamente',
+            profesor: {
+                nombre,
+                rut,
+                email,
+                telefono,
+                direccion,
+                fechaNacimiento
+            }
+        });
+    }
+    catch (error) {
+        console.error('❌ Error al crear profesor:', error);
+        res.status(500).json({ error: 'Error al crear profesor' });
+    }
+};
+exports.crearProfesor = crearProfesor;
 const obtenerPerfilProfesor = async (req, res) => {
     try {
         const rut = req.user?.rut;
@@ -207,7 +263,6 @@ const obtenerEstadisticasProfesor = async (req, res) => {
 };
 exports.obtenerEstadisticasProfesor = obtenerEstadisticasProfesor;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const User_1 = __importDefault(require("../models/User"));
 const loginProfesor = async (req, res) => {
     const { username, password } = req.body;
     try {

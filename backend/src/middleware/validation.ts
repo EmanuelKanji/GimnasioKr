@@ -230,5 +230,39 @@ export const schemas = {
       'string.min': 'La nueva contraseña debe tener al menos 6 caracteres',
       'any.required': 'La nueva contraseña es requerida'
     })
+  }),
+
+  // Crear profesor
+  crearProfesor: Joi.object({
+    nombre: Joi.string().min(2).max(50).required().messages({
+      'string.min': 'El nombre debe tener al menos 2 caracteres',
+      'string.max': 'El nombre no puede exceder 50 caracteres',
+      'any.required': 'El nombre es requerido'
+    }),
+    rut: Joi.string().pattern(/^\d{1,2}(\.\d{3}){2}-[\dkK]$/).required().messages({
+      'string.pattern.base': 'El RUT debe tener el formato 12.345.678-9',
+      'any.required': 'El RUT es requerido'
+    }),
+    email: Joi.string().email().required().messages({
+      'string.email': 'El email debe tener un formato válido',
+      'any.required': 'El email es requerido'
+    }),
+    telefono: Joi.string().min(8).max(15).required().messages({
+      'string.min': 'El teléfono debe tener al menos 8 caracteres',
+      'string.max': 'El teléfono no puede exceder 15 caracteres',
+      'any.required': 'El teléfono es requerido'
+    }),
+    direccion: Joi.string().min(5).max(100).required().messages({
+      'string.min': 'La dirección debe tener al menos 5 caracteres',
+      'string.max': 'La dirección no puede exceder 100 caracteres',
+      'any.required': 'La dirección es requerida'
+    }),
+    fechaNacimiento: Joi.string().required().messages({
+      'any.required': 'La fecha de nacimiento es requerida'
+    }),
+    password: Joi.string().min(6).required().messages({
+      'string.min': 'La contraseña debe tener al menos 6 caracteres',
+      'any.required': 'La contraseña es requerida'
+    })
   })
 };

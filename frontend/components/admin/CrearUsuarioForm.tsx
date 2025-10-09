@@ -21,13 +21,30 @@ export default function CrearUsuarioForm() {
       // Limpiar el RUT para enviarlo sin puntos al backend
       const rutLimpio = rut.replace(/\./g, '');
       
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/usuarios', {
+      let endpoint = '/api/usuarios';
+      let body: { username: string; rut: string; password: string; role: string } | { nombre: string; rut: string; email: string; telefono: string; direccion: string; fechaNacimiento: string; password: string } = { username: email, rut: rutLimpio, password, role };
+      
+      // Si es profesor, usar endpoint específico y agregar campos adicionales
+      if (role === 'profesor') {
+        endpoint = '/api/profesor';
+        body = {
+          nombre: email.split('@')[0], // Usar parte del email como nombre por defecto
+          rut: rutLimpio,
+          email,
+          telefono: '123456789', // Valor por defecto
+          direccion: 'Dirección por definir', // Valor por defecto
+          fechaNacimiento: '1990-01-01', // Valor por defecto
+          password
+        };
+      }
+      
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ username: email, rut: rutLimpio, password, role })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
       if (res.ok) {

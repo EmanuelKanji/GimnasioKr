@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { 
+  crearProfesor,
   obtenerPerfilProfesor, 
   actualizarPerfilProfesor,
   agregarMiAlumno,
@@ -8,8 +9,12 @@ import {
   obtenerEstadisticasProfesor
 } from '../controllers/profesorController';
 import { authenticateToken, requireRole } from '../middleware/auth';
+import { validate, schemas } from '../middleware/validation';
 
 const router = Router();
+
+// Crear profesor (solo admin)
+router.post('/', authenticateToken, requireRole(['admin']), validate(schemas.crearProfesor), crearProfesor);
 
 // Obtener perfil del profesor
 router.get('/me', authenticateToken, requireRole(['profesor']), obtenerPerfilProfesor);

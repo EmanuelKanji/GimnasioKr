@@ -2,8 +2,70 @@ import Profesor from '../models/Profesor';
 import Alumno from '../models/Alumno';
 import Asistencia from '../models/Asistencia';
 import Aviso from '../models/Aviso';
+import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { Response, Request } from 'express';
+
+// Crear profesor
+export const crearProfesor = async (req: Request, res: Response) => {
+  try {
+    const { nombre, rut, email, telefono, direccion, fechaNacimiento, password } = req.body;
+    
+    if (!nombre || !rut || !email || !telefono || !direccion || !fechaNacimiento || !password) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+
+    // Verificar si el usuario ya existe
+    const userExistente = await User.findOne({ username: email });
+    if (userExistente) {
+      return res.status(409).json({ error: 'El usuario ya está registrado' });
+    }
+
+    // Verificar si el profesor ya existe
+    const profesorExistente = await Profesor.findOne({ rut });
+    if (profesorExistente) {
+      return res.status(409).json({ error: 'El profesor ya está registrado' });
+    }
+
+    // Crear usuario para login
+    const nuevoUsuario = new User({ 
+      username: email, 
+      password, 
+      role: 'profesor', 
+      rut 
+    });
+    await nuevoUsuario.save();
+
+    // Crear perfil del profesor
+    const nuevoProfesor = new Profesor({
+      nombre,
+      rut,
+      email,
+      telefono,
+      direccion,
+      fechaNacimiento,
+      misAlumnos: []
+    });
+    await nuevoProfesor.save();
+
+    console.log(`✅ Profesor creado: ${nombre} (${rut})`);
+    
+    res.status(201).json({ 
+      message: 'Profesor creado correctamente', 
+      profesor: {
+        nombre,
+        rut,
+        email,
+        telefono,
+        direccion,
+        fechaNacimiento
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error al crear profesor:', error);
+    res.status(500).json({ error: 'Error al crear profesor' });
+  }
+};
 
 export const obtenerPerfilProfesor = async (req: AuthRequest, res: Response) => {
   try {
@@ -234,7 +296,6 @@ export const obtenerEstadisticasProfesor = async (req: AuthRequest, res: Respons
 };
 
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
-import User from '../models/User';
 
 export const loginProfesor = async (req: Request, res: Response) => {
   const { username, password } = req.body as { username?: string; password?: string };
