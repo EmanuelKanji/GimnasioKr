@@ -186,7 +186,7 @@ export default function RenovarPlanes() {
     const todos = alumnos.length;
     const bloqueados = alumnos.filter(a => {
       const diasRestantes = calcularDiasRestantes(a.fechaTerminoPlan);
-      return diasRestantes < 0 || (a.estadoRenovacion === 'ninguno' && diasRestantes <= 3);
+      return diasRestantes < 0 || (a.estadoRenovacion !== 'solicitada' && diasRestantes <= 3);
     }).length;
     const solicitados = alumnos.filter(a => a.estadoRenovacion === 'solicitada').length;
     
