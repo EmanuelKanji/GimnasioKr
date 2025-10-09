@@ -110,6 +110,10 @@ const obtenerAsistenciaAlumno = async (req, res) => {
                 return fechaAsistencia >= inicioPlan && fechaAsistencia <= finPlan;
             });
             console.log(`📊 Alumno ${alumno.nombre}: ${asistenciasFiltradas.length} asistencias del período ${inicioPlan.toLocaleDateString()} - ${finPlan.toLocaleDateString()}`);
+            console.log(`📊 Asistencias filtradas:`, asistenciasFiltradas);
+        }
+        else {
+            console.log(`📊 Alumno ${alumno.nombre}: ${asistenciasFiltradas.length} asistencias totales (sin filtro de período)`);
         }
         res.json({ diasAsistidos: asistenciasFiltradas });
     }

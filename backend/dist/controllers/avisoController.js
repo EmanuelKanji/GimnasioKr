@@ -3,8 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAvisosAlumno = exports.obtenerAvisosProfesor = exports.crearAviso = void 0;
+exports.verificarPlanesVencimiento = exports.obtenerAvisosAlumno = exports.obtenerAvisosProfesor = exports.crearAviso = void 0;
 const Aviso_1 = __importDefault(require("../models/Aviso"));
+const avisoService_1 = require("../services/avisoService");
 // Función auxiliar para verificar si ya existe un aviso automático reciente
 const verificarAvisoDuplicado = async (destinatario, motivoAutomatico, horasLimite = 24) => {
     const fechaLimite = new Date();
@@ -118,3 +119,25 @@ const obtenerAvisosAlumno = async (req, res) => {
     }
 };
 exports.obtenerAvisosAlumno = obtenerAvisosAlumno;
+// Verificar planes próximos a vencer (solo admin)
+const verificarPlanesVencimiento = async (req, res) => {
+    try {
+        console.log('🔔 Verificación manual de planes próximos a vencer iniciada');
+        const resultado = await (0, avisoService_1.enviarAvisosAutomaticos)();
+        const planesVencidos = await (0, avisoService_1.verificarPlanesVencidos)();
+        res.json({
+            message: 'Verificación completada',
+            avisos: {
+                enviados: resultado.enviados,
+                errores: resultado.errores
+            },
+            planesVencidos: planesVencidos,
+            timestamp: new Date().toISOString()
+        });
+    }
+    catch (error) {
+        console.error('❌ Error en verificación manual:', error);
+        res.status(500).json({ error: 'Error en verificación de planes' });
+    }
+};
+exports.verificarPlanesVencimiento = verificarPlanesVencimiento;

@@ -1,6 +1,7 @@
 import Aviso from '../models/Aviso';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
+import { enviarAvisosAutomaticos, verificarPlanesVencidos } from '../services/avisoService';
 
 // Función auxiliar para verificar si ya existe un aviso automático reciente
 const verificarAvisoDuplicado = async (destinatario: string, motivoAutomatico: string, horasLimite: number = 24) => {
@@ -128,5 +129,28 @@ export const obtenerAvisosAlumno = async (req: AuthRequest, res: Response) => {
   } catch (err) {
     console.error('❌ Error al obtener avisos del alumno:', err);
     res.status(500).json({ error: 'Error al obtener avisos' });
+  }
+};
+
+// Verificar planes próximos a vencer (solo admin)
+export const verificarPlanesVencimiento = async (req: AuthRequest, res: Response) => {
+  try {
+    console.log('🔔 Verificación manual de planes próximos a vencer iniciada');
+    
+    const resultado = await enviarAvisosAutomaticos();
+    const planesVencidos = await verificarPlanesVencidos();
+    
+    res.json({
+      message: 'Verificación completada',
+      avisos: {
+        enviados: resultado.enviados,
+        errores: resultado.errores
+      },
+      planesVencidos: planesVencidos,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Error en verificación manual:', error);
+    res.status(500).json({ error: 'Error en verificación de planes' });
   }
 };

@@ -62,6 +62,17 @@ export function calcularLimiteClases(
   
   const diasUsados = asistenciasFiltradas.length;
   
+  // Debug: Log de información para verificar cálculos
+  console.log('🔍 calcularLimiteClases Debug:', {
+    limiteClases,
+    asistenciasMes: asistenciasMes.length,
+    asistenciasFiltradas: asistenciasFiltradas.length,
+    fechaInicioPlan,
+    fechaFinPlan,
+    diasUsados,
+    hoy: hoy.toISOString()
+  });
+  
   // Calcular días hábiles del período del plan si se proporcionan fechas
   let diasHabilesPlan: number | null = null;
   let diasHabilesRestantesPlan: number | null = null;

@@ -85,9 +85,21 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   }, [rut, plan, fechaInicio, fechaFin]);
 
   // Calcular información de límites de clases considerando fechas del plan
-  const limiteInfo = calcularLimiteClases(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
+  const limiteInfoCalculado = calcularLimiteClases(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
   const mensajeLimite = obtenerMensajeLimite(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
   const colorIndicador = obtenerColorIndicador(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
+
+  // Debug: Log de información para verificar datos
+  console.log('🔍 QR Debug Info:', {
+    rut,
+    plan,
+    fechaInicio,
+    fechaFin,
+    limiteClases,
+    asistenciasMes: asistenciasMes.length,
+    limiteInfo: limiteInfoCalculado,
+    mensajeLimite
+  });
 
   // El hook useEstadoRenovacion ya maneja la verificación automática
   // No necesitamos useEffect adicional ni setInterval
@@ -100,7 +112,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     const planActivo = hoy >= inicio && hoy <= fin;
     
     // Verificar si puede acceder hoy según los límites de clases
-    const puedeAccederHoy = limiteInfo.puedeAcceder;
+    const puedeAccederHoy = limiteInfoCalculado.puedeAcceder;
     
     setActivo(planActivo && puedeAccederHoy);
     
@@ -108,7 +120,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     if (planActivo && puedeAccederHoy) {
       generarNuevoQR();
     }
-  }, [fechaInicio, fechaFin, rut, plan, limiteInfo.puedeAcceder, generarNuevoQR]);
+  }, [fechaInicio, fechaFin, rut, plan, limiteInfoCalculado.puedeAcceder, generarNuevoQR]);
 
   // Contador regresivo para mostrar tiempo restante del QR
   useEffect(() => {
@@ -164,8 +176,8 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
                 <p>{mensajeLimite}</p>
                 <div className={styles.limiteInfo}>
                   <div className={styles.limiteStats}>
-                    <span>Clases usadas: {limiteInfo.diasUsados} de {limiteInfo.diasDisponibles}</span>
-                    <span>Clases restantes: {limiteInfo.diasRestantes}</span>
+                    <span>Clases usadas: {limiteInfoCalculado.diasUsados} de {limiteInfoCalculado.diasDisponibles}</span>
+                    <span>Clases restantes: {limiteInfoCalculado.diasRestantes}</span>
                   </div>
                   <div className={styles.limiteMessage}>
                     {mensajeLimite}
@@ -264,13 +276,13 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
               <div className={styles.limiteDetail}>
                 <span className={styles.limiteLabel}>Clases usadas:</span>
                 <span className={styles.limiteValue} style={{ color: colorIndicador }}>
-                  {limiteInfo.diasUsados} de {limiteInfo.diasDisponibles}
+                  {limiteInfoCalculado.diasUsados} de {limiteInfoCalculado.diasDisponibles}
                 </span>
               </div>
               <div className={styles.limiteDetail}>
                 <span className={styles.limiteLabel}>Clases restantes:</span>
                 <span className={styles.limiteValue} style={{ color: colorIndicador }}>
-                  {limiteInfo.diasRestantes}
+                  {limiteInfoCalculado.diasRestantes}
                 </span>
               </div>
               <div className={styles.limiteMessage}>
