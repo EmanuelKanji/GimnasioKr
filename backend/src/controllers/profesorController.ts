@@ -102,9 +102,49 @@ export const actualizarPerfilProfesor = async (req: AuthRequest, res: Response) 
   try {
     const rut = req.user?.rut;
     const update = req.body;
-    const profesor = await Profesor.findOneAndUpdate({ rut }, update, { new: true, upsert: true });
+    
+    // Debug: Log de datos recibidos
+    console.log('🔍 Backend actualizando perfil profesor:', {
+      rut,
+      update
+    });
+    
+    if (!rut) {
+      return res.status(400).json({ error: 'RUT no encontrado en el token' });
+    }
+    
+    // Verificar que el profesor existe
+    const profesorExistente = await Profesor.findOne({ rut });
+    if (!profesorExistente) {
+      return res.status(404).json({ error: 'Profesor no encontrado' });
+    }
+    
+    // Actualizar solo los campos permitidos (excluir RUT)
+    const camposPermitidos = ['nombre', 'email', 'telefono', 'direccion', 'fechaNacimiento'];
+    const updateFiltrado: any = {};
+    
+    for (const campo of camposPermitidos) {
+      if (update[campo] !== undefined) {
+        updateFiltrado[campo] = update[campo];
+      }
+    }
+    
+    console.log('🔍 Campos a actualizar:', updateFiltrado);
+    
+    const profesor = await Profesor.findOneAndUpdate(
+      { rut }, 
+      updateFiltrado, 
+      { new: true, runValidators: true }
+    );
+    
+    if (!profesor) {
+      return res.status(404).json({ error: 'No se pudo actualizar el perfil' });
+    }
+    
+    console.log('✅ Perfil actualizado exitosamente:', profesor);
     res.json(profesor);
   } catch (err) {
+    console.error('❌ Error actualizando perfil profesor:', err);
     res.status(500).json({ error: 'Error al actualizar perfil' });
   }
 };

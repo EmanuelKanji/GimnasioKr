@@ -10,7 +10,7 @@ router.post('/', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), (
 // Obtener perfil del profesor
 router.get('/me', auth_1.authenticateToken, (0, auth_1.requireRole)(['profesor']), profesorController_1.obtenerPerfilProfesor);
 // Actualizar perfil del profesor
-router.post('/me', auth_1.authenticateToken, (0, auth_1.requireRole)(['profesor']), profesorController_1.actualizarPerfilProfesor);
+router.post('/me', auth_1.authenticateToken, (0, auth_1.requireRole)(['profesor']), (0, validation_1.validate)(validation_1.schemas.actualizarPerfilProfesor), profesorController_1.actualizarPerfilProfesor);
 // Gestión de "mis alumnos"
 router.get('/mis-alumnos', auth_1.authenticateToken, (0, auth_1.requireRole)(['profesor']), profesorController_1.obtenerMisAlumnos);
 router.post('/mis-alumnos/agregar', auth_1.authenticateToken, (0, auth_1.requireRole)(['profesor']), profesorController_1.agregarMiAlumno);

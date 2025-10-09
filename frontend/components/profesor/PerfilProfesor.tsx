@@ -171,6 +171,9 @@ export default function PerfilProfesor() {
         ...(changePasswordMode && form.password && { password: form.password })
       };
 
+      // Debug: Log de datos enviados
+      console.log('🔍 Frontend enviando actualización de perfil:', dataToSend);
+
       const response = await HttpClient.post<PerfilProfesorData>('/profesor/me', dataToSend);
       
       if (response.error) {

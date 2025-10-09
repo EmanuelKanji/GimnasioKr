@@ -20,7 +20,7 @@ router.post('/', authenticateToken, requireRole(['admin']), validate(schemas.cre
 router.get('/me', authenticateToken, requireRole(['profesor']), obtenerPerfilProfesor);
 
 // Actualizar perfil del profesor
-router.post('/me', authenticateToken, requireRole(['profesor']), actualizarPerfilProfesor);
+router.post('/me', authenticateToken, requireRole(['profesor']), validate(schemas.actualizarPerfilProfesor), actualizarPerfilProfesor);
 
 // Gestión de "mis alumnos"
 router.get('/mis-alumnos', authenticateToken, requireRole(['profesor']), obtenerMisAlumnos);

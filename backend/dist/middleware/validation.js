@@ -254,5 +254,27 @@ exports.schemas = {
             'string.min': 'La contraseña debe tener al menos 6 caracteres',
             'any.required': 'La contraseña es requerida'
         })
+    }),
+    // Actualizar perfil profesor
+    actualizarPerfilProfesor: joi_1.default.object({
+        nombre: joi_1.default.string().min(2).max(50).optional().messages({
+            'string.min': 'El nombre debe tener al menos 2 caracteres',
+            'string.max': 'El nombre no puede exceder 50 caracteres'
+        }),
+        email: joi_1.default.string().email().optional().messages({
+            'string.email': 'El email debe tener un formato válido'
+        }),
+        telefono: joi_1.default.string().min(8).max(15).optional().messages({
+            'string.min': 'El teléfono debe tener al menos 8 caracteres',
+            'string.max': 'El teléfono no puede exceder 15 caracteres'
+        }),
+        direccion: joi_1.default.string().min(5).max(100).optional().messages({
+            'string.min': 'La dirección debe tener al menos 5 caracteres',
+            'string.max': 'La dirección no puede exceder 100 caracteres'
+        }),
+        fechaNacimiento: joi_1.default.string().optional(),
+        password: joi_1.default.string().min(6).optional().messages({
+            'string.min': 'La contraseña debe tener al menos 6 caracteres'
+        })
     })
 };
