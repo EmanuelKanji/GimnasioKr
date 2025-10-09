@@ -40,18 +40,36 @@ export function calcularLimiteClases(
   // Calcular días hábiles del mes (lunes a sábado)
   const diasHabiles = calcularDiasHabiles(primerDia, ultimoDia);
   
-  // Filtrar asistencias del mes actual
-  const asistenciasMesActual = asistenciasMes.filter(fecha => {
-    const fechaAsistencia = new Date(fecha);
-    return fechaAsistencia.getFullYear() === año && fechaAsistencia.getMonth() === mes;
-  });
+  // Filtrar asistencias según el período del plan o mes actual
+  let asistenciasFiltradas: string[];
   
-  const diasUsados = asistenciasMesActual.length;
-  
-  // Calcular días hábiles restantes del plan si se proporciona fecha de término
-  let diasHabilesRestantesPlan: number | null = null;
-  if (fechaFinPlan) {
+  if (fechaInicioPlan && fechaFinPlan) {
+    // Si hay fechas específicas del plan, filtrar por período del plan
+    const inicioPlan = new Date(fechaInicioPlan);
     const finPlan = new Date(fechaFinPlan);
+    
+    asistenciasFiltradas = asistenciasMes.filter(fecha => {
+      const fechaAsistencia = new Date(fecha);
+      return fechaAsistencia >= inicioPlan && fechaAsistencia <= finPlan;
+    });
+  } else {
+    // Si no hay fechas específicas, filtrar por mes actual
+    asistenciasFiltradas = asistenciasMes.filter(fecha => {
+      const fechaAsistencia = new Date(fecha);
+      return fechaAsistencia.getFullYear() === año && fechaAsistencia.getMonth() === mes;
+    });
+  }
+  
+  const diasUsados = asistenciasFiltradas.length;
+  
+  // Calcular días hábiles del período del plan si se proporcionan fechas
+  let diasHabilesPlan: number | null = null;
+  let diasHabilesRestantesPlan: number | null = null;
+  
+  if (fechaInicioPlan && fechaFinPlan) {
+    const inicioPlan = new Date(fechaInicioPlan);
+    const finPlan = new Date(fechaFinPlan);
+    diasHabilesPlan = calcularDiasHabiles(inicioPlan, finPlan);
     diasHabilesRestantesPlan = calcularDiasHabiles(hoy, finPlan);
   }
   
@@ -61,11 +79,11 @@ export function calcularLimiteClases(
   
   switch (limiteClases) {
     case 'todos_los_dias':
-      // Si hay fecha de término del plan, usar días restantes del plan
-      if (diasHabilesRestantesPlan !== null) {
-        diasDisponibles = Math.max(0, diasHabilesRestantesPlan);
-        puedeAcceder = diasHabilesRestantesPlan > 0;
-        mensaje = diasHabilesRestantesPlan > 0
+      // Si hay período específico del plan, usar días hábiles del período
+      if (diasHabilesPlan !== null) {
+        diasDisponibles = diasHabilesPlan;
+        puedeAcceder = diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0;
+        mensaje = diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0
           ? `Puedes acceder todos los días hábiles restantes (${diasHabilesRestantesPlan} días disponibles)`
           : `Tu plan ha terminado`;
       } else {
@@ -76,16 +94,16 @@ export function calcularLimiteClases(
       break;
       
     case '12':
-      diasDisponibles = 12;
-      // Si hay fecha de término del plan, ajustar límite
-      if (diasHabilesRestantesPlan !== null) {
-        const limiteReal = Math.min(12, diasHabilesRestantesPlan);
+      // Si hay período específico del plan, ajustar límite según días hábiles disponibles
+      if (diasHabilesPlan !== null) {
+        const limiteReal = Math.min(12, diasHabilesPlan);
         diasDisponibles = limiteReal;
-        puedeAcceder = diasUsados < limiteReal;
+        puedeAcceder = diasUsados < limiteReal && (diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0);
         mensaje = diasUsados < limiteReal
           ? `Puedes acceder hasta ${limiteReal} días (${limiteReal - diasUsados} restantes)`
           : `Has alcanzado el límite de ${limiteReal} clases disponibles`;
       } else {
+        diasDisponibles = 12;
         puedeAcceder = diasUsados < 12;
         mensaje = diasUsados < 12 
           ? `Puedes acceder hasta 12 días al mes (${12 - diasUsados} días restantes)`
@@ -94,16 +112,16 @@ export function calcularLimiteClases(
       break;
       
     case '8':
-      diasDisponibles = 8;
-      // Si hay fecha de término del plan, ajustar límite
-      if (diasHabilesRestantesPlan !== null) {
-        const limiteReal = Math.min(8, diasHabilesRestantesPlan);
+      // Si hay período específico del plan, ajustar límite según días hábiles disponibles
+      if (diasHabilesPlan !== null) {
+        const limiteReal = Math.min(8, diasHabilesPlan);
         diasDisponibles = limiteReal;
-        puedeAcceder = diasUsados < limiteReal;
+        puedeAcceder = diasUsados < limiteReal && (diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0);
         mensaje = diasUsados < limiteReal
           ? `Puedes acceder hasta ${limiteReal} días (${limiteReal - diasUsados} restantes)`
           : `Has alcanzado el límite de ${limiteReal} clases disponibles`;
       } else {
+        diasDisponibles = 8;
         puedeAcceder = diasUsados < 8;
         mensaje = diasUsados < 8
           ? `Puedes acceder hasta 8 días al mes (${8 - diasUsados} días restantes)`
@@ -121,7 +139,7 @@ export function calcularLimiteClases(
     limite: limiteClases,
     diasDisponibles,
     diasUsados,
-    diasRestantes: diasDisponibles - diasUsados,
+    diasRestantes: Math.max(0, diasDisponibles - diasUsados),
     puedeAcceder,
     mensaje
   };

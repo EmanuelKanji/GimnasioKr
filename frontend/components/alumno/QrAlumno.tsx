@@ -164,8 +164,11 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
                 <p>{mensajeLimite}</p>
                 <div className={styles.limiteInfo}>
                   <div className={styles.limiteStats}>
-                    <span>Clases usadas: {limiteInfo.diasUsados}/{limiteInfo.diasDisponibles}</span>
-                    <span>Restantes: {limiteInfo.diasRestantes}</span>
+                    <span>Clases usadas: {limiteInfo.diasUsados} de {limiteInfo.diasDisponibles}</span>
+                    <span>Clases restantes: {limiteInfo.diasRestantes}</span>
+                  </div>
+                  <div className={styles.limiteMessage}>
+                    {mensajeLimite}
                   </div>
                 </div>
                 <div className={styles.renovacionSection}>
@@ -250,22 +253,22 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
             
             {/* Información de límites de clases */}
             <div className={styles.limiteClasesInfo}>
-              <h5>🎯 Límite de Clases</h5>
+              <h5>🎯 Estado de tu Plan</h5>
               <div className={styles.limiteDetail}>
-                <span className={styles.limiteLabel}>Tipo:</span>
+                <span className={styles.limiteLabel}>Tipo de plan:</span>
                 <span className={styles.limiteValue}>
                   {limiteClases === '12' ? '12 clases al mes' : 
                    limiteClases === '8' ? '8 clases al mes' : 'Todos los días hábiles'}
                 </span>
               </div>
               <div className={styles.limiteDetail}>
-                <span className={styles.limiteLabel}>Usadas:</span>
+                <span className={styles.limiteLabel}>Clases usadas:</span>
                 <span className={styles.limiteValue} style={{ color: colorIndicador }}>
-                  {limiteInfo.diasUsados}/{limiteInfo.diasDisponibles}
+                  {limiteInfo.diasUsados} de {limiteInfo.diasDisponibles}
                 </span>
               </div>
               <div className={styles.limiteDetail}>
-                <span className={styles.limiteLabel}>Restantes:</span>
+                <span className={styles.limiteLabel}>Clases restantes:</span>
                 <span className={styles.limiteValue} style={{ color: colorIndicador }}>
                   {limiteInfo.diasRestantes}
                 </span>

@@ -92,11 +92,25 @@ export const obtenerAsistenciaAlumno = async (req: Request, res: Response) => {
   try {
     const rut = (req as any).user?.rut;
     if (!rut) return res.status(400).json({ message: 'RUT no presente en el token' });
-    const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
-    const alumnos = await Alumno.find();
-    const alumno = alumnos.find((a: any) => limpiarRut(a.rut) === limpiarRut(rut));
+    
+    const alumno = await Alumno.findOne({ rut });
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
-    res.json({ diasAsistidos: alumno.asistencias || [] });
+    
+    // Filtrar asistencias por período del plan actual
+    let asistenciasFiltradas = alumno.asistencias || [];
+    if (alumno.fechaInicioPlan && alumno.fechaTerminoPlan) {
+      const inicioPlan = new Date(alumno.fechaInicioPlan);
+      const finPlan = new Date(alumno.fechaTerminoPlan);
+      
+      asistenciasFiltradas = asistenciasFiltradas.filter(fecha => {
+        const fechaAsistencia = new Date(fecha);
+        return fechaAsistencia >= inicioPlan && fechaAsistencia <= finPlan;
+      });
+      
+      console.log(`📊 Alumno ${alumno.nombre}: ${asistenciasFiltradas.length} asistencias del período ${inicioPlan.toLocaleDateString()} - ${finPlan.toLocaleDateString()}`);
+    }
+    
+    res.json({ diasAsistidos: asistenciasFiltradas });
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener asistencia de alumno', error });
   }
