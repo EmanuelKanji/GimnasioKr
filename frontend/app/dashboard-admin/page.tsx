@@ -7,6 +7,7 @@ import PasarAsistencia from '../../components/admin/PasarAsistencia';
 import ListaAlumnos from '../../components/admin/ListaAlumnos';
 import CrearUsuarioForm from '../../components/admin/CrearUsuarioForm';
 import HistorialAsistencia from '../../components/admin/HistorialAsistencia';
+import RenovarPlanes from '../../components/admin/RenovarPlanes';
 import styles from './dashboard-admin.module.css';
 
 // Iconos SVG para el dashboard admin
@@ -68,8 +69,17 @@ const LogoutIcon = () => (
   </svg>
 );
 
+const RefreshIcon = () => (
+  <svg className={styles.menuBtnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M21 3v5h-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 21v-5h5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function DashboardAdmin() {
-  const [view, setView] = useState<'inscribir' | 'planes' | 'asistencia' | 'lista' | 'crearUsuario' | 'historial'>('inscribir');
+  const [view, setView] = useState<'inscribir' | 'planes' | 'asistencia' | 'lista' | 'crearUsuario' | 'historial' | 'renovar'>('inscribir');
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -89,7 +99,7 @@ export default function DashboardAdmin() {
     }
   }, [router]);
 
-  const handleViewChange = (newView: 'inscribir' | 'planes' | 'asistencia' | 'lista' | 'crearUsuario' | 'historial') => {
+  const handleViewChange = (newView: 'inscribir' | 'planes' | 'asistencia' | 'lista' | 'crearUsuario' | 'historial' | 'renovar') => {
     setView(newView);
     if (window.innerWidth <= 768) {
       setMenuOpen(false);
@@ -193,6 +203,13 @@ export default function DashboardAdmin() {
             <UserCogIcon />
             Crear Usuario
           </button>
+          <button 
+            onClick={() => handleViewChange('renovar')} 
+            className={`${styles.menuBtn} ${view === 'renovar' ? styles.active : ''}`}
+          >
+            <RefreshIcon />
+            Renovar Planes
+          </button>
         </nav>
 
         <div className={styles.menuFooter}>
@@ -218,6 +235,7 @@ export default function DashboardAdmin() {
           {view === 'historial' && <HistorialAsistencia />}
           {view === 'lista' && <ListaAlumnos />}
           {view === 'crearUsuario' && <CrearUsuarioForm />}
+          {view === 'renovar' && <RenovarPlanes />}
         </div>
       </main>
     </div>

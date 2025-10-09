@@ -16,10 +16,47 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   const [activo, setActivo] = useState(false);
   const [qrData, setQrData] = useState('');
   const [tiempoRestante, setTiempoRestante] = useState(0);
+  const [estadoRenovacion, setEstadoRenovacion] = useState<'ninguno' | 'solicitada' | 'procesando' | 'completada'>('ninguno');
 
   // Función para generar un token temporal único
   const generarTokenTemporal = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
+  // Función para solicitar renovación
+  const solicitarRenovacion = async () => {
+    setEstadoRenovacion('procesando');
+    
+    try {
+      const token = localStorage.getItem('token');
+      const hoy = new Date();
+      const inicio = new Date(fechaInicio);
+      const fin = new Date(fechaFin);
+      const planActivo = hoy >= inicio && hoy <= fin;
+      const motivo = !planActivo ? 'plan_expirado' : 'limite_alcanzado';
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/me/solicitar-renovacion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          motivo,
+          fechaSolicitud: new Date().toISOString()
+        })
+      });
+      
+      if (res.ok) {
+        setEstadoRenovacion('solicitada');
+      } else {
+        console.error('Error solicitando renovación');
+        setEstadoRenovacion('ninguno');
+      }
+    } catch (error) {
+      console.error('Error solicitando renovación:', error);
+      setEstadoRenovacion('ninguno');
+    }
   };
 
   // Función para generar nuevo QR con timestamp y token temporal
@@ -44,10 +81,33 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     setTiempoRestante(tiempoExpiracion);
   }, [rut, plan, fechaInicio, fechaFin]);
 
-  // Calcular información de límites de clases
-  const limiteInfo = calcularLimiteClases(limiteClases, asistenciasMes);
-  const mensajeLimite = obtenerMensajeLimite(limiteClases, asistenciasMes);
-  const colorIndicador = obtenerColorIndicador(limiteClases, asistenciasMes);
+  // Calcular información de límites de clases considerando fechas del plan
+  const limiteInfo = calcularLimiteClases(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
+  const mensajeLimite = obtenerMensajeLimite(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
+  const colorIndicador = obtenerColorIndicador(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
+
+  // Verificar estado de renovación
+  useEffect(() => {
+    const verificarEstadoRenovacion = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/me/estado-renovacion`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setEstadoRenovacion(data.estado || 'ninguno');
+        }
+      } catch (error) {
+        console.error('Error verificando estado de renovación:', error);
+      }
+    };
+    
+    verificarEstadoRenovacion();
+    const interval = setInterval(verificarEstadoRenovacion, 30000); // Cada 30 segundos
+    return () => clearInterval(interval);
+  }, []);
 
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {
@@ -102,6 +162,18 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
               <>
                 <p>Tu plan está inactivo o ha expirado.</p>
                 <p>Por favor, renueva tu plan para acceder al gimnasio.</p>
+                <div className={styles.renovacionSection}>
+                  <button 
+                    onClick={solicitarRenovacion}
+                    className={styles.renovarBtn}
+                    disabled={estadoRenovacion === 'procesando'}
+                  >
+                    {estadoRenovacion === 'procesando' ? '⏳ Enviando...' : '🔄 Solicitar Renovación'}
+                  </button>
+                  <p className={styles.instrucciones}>
+                    Contacta al administrador con tu comprobante de pago
+                  </p>
+                </div>
               </>
             ) : (
               <>
@@ -113,7 +185,23 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
                     <span>Restantes: {limiteInfo.diasRestantes}</span>
                   </div>
                 </div>
+                <div className={styles.renovacionSection}>
+                  <button 
+                    onClick={solicitarRenovacion}
+                    className={styles.renovarBtn}
+                    disabled={estadoRenovacion === 'procesando'}
+                  >
+                    {estadoRenovacion === 'procesando' ? '⏳ Enviando...' : '🔄 Solicitar Renovación'}
+                  </button>
+                </div>
               </>
+            )}
+            
+            {estadoRenovacion === 'solicitada' && (
+              <div className={styles.solicitudEnviada}>
+                <p>✅ Solicitud enviada exitosamente</p>
+                <p>El administrador revisará tu pago y renovará tu plan</p>
+              </div>
             )}
           </div>
         </div>

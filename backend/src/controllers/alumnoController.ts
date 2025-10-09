@@ -69,6 +69,109 @@ export const obtenerAvisosAlumno = async (req: Request, res: Response) => {
   }
 };
 
+// Solicitar renovación (Alumno)
+export const solicitarRenovacion = async (req: Request, res: Response) => {
+  try {
+    const rut = (req as any).user?.rut;
+    if (!rut) return res.status(400).json({ message: 'RUT no presente en el token' });
+    
+    const { motivo } = req.body;
+    
+    const alumno = await Alumno.findOne({ rut });
+    if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
+    
+    alumno.estadoRenovacion = 'solicitada';
+    alumno.fechaSolicitud = new Date();
+    alumno.motivoSolicitud = motivo;
+    await alumno.save();
+    
+    res.json({ message: 'Solicitud enviada exitosamente' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al solicitar renovación', error });
+  }
+};
+
+// Obtener estado de renovación (Alumno)
+export const obtenerEstadoRenovacion = async (req: Request, res: Response) => {
+  try {
+    const rut = (req as any).user?.rut;
+    if (!rut) return res.status(400).json({ message: 'RUT no presente en el token' });
+    
+    const alumno = await Alumno.findOne({ rut });
+    if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
+    
+    res.json({ 
+      estado: alumno.estadoRenovacion || 'ninguno',
+      fechaSolicitud: alumno.fechaSolicitud 
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener estado de renovación', error });
+  }
+};
+
+// Listar alumnos para renovar (Admin)
+export const obtenerAlumnosParaRenovar = async (req: Request, res: Response) => {
+  try {
+    const { filtro } = req.query; // 'todos', 'bloqueados', 'solicitados'
+    
+    let query = {};
+    if (filtro === 'bloqueados') {
+      query = { fechaTerminoPlan: { $lt: new Date() } };
+    } else if (filtro === 'solicitados') {
+      query = { estadoRenovacion: 'solicitada' };
+    }
+    
+    const alumnos = await Alumno.find(query).select('nombre rut plan fechaInicioPlan fechaTerminoPlan limiteClases estadoRenovacion fechaSolicitud motivoSolicitud');
+    res.json(alumnos);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener alumnos para renovar', error });
+  }
+};
+
+// Renovar plan de alumno (Admin)
+export const renovarPlanAlumno = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { fechaInicio, fechaFin, duracion, limiteClases, observaciones } = req.body;
+    
+    const alumno = await Alumno.findById(id);
+    if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
+    
+    // Actualizar datos del plan
+    alumno.fechaInicioPlan = fechaInicio;
+    alumno.fechaTerminoPlan = fechaFin;
+    alumno.duracion = duracion;
+    alumno.limiteClases = limiteClases;
+    alumno.estadoRenovacion = 'completada';
+    alumno.asistencias = []; // Resetear asistencias del nuevo período
+    
+    // Guardar log de renovación
+    alumno.historialRenovaciones = alumno.historialRenovaciones || [];
+    alumno.historialRenovaciones.push({
+      fecha: new Date(),
+      fechaInicio,
+      fechaFin,
+      procesadoPor: (req as any).user?.id,
+      observaciones
+    });
+    
+    await alumno.save();
+    
+    res.json({ 
+      message: 'Plan renovado exitosamente',
+      alumno: {
+        nombre: alumno.nombre,
+        rut: alumno.rut,
+        fechaInicio: alumno.fechaInicioPlan,
+        fechaFin: alumno.fechaTerminoPlan,
+        limiteClases: alumno.limiteClases
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al renovar plan', error });
+  }
+};
+
 // Obtener perfil de alumno por RUT (extraído del token)
 export const obtenerPerfilAlumno = async (req: Request, res: Response) => {
   try {

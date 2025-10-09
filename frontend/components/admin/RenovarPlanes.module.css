@@ -1,0 +1,328 @@
+/* RenovarPlanes.module.css - Estilos para el componente de renovación de planes */
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #012CAB;
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: -0.025em;
+}
+
+/* ===== FILTROS ===== */
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #64748b;
+}
+
+.filterBtn:hover {
+  border-color: #012CAB;
+  color: #012CAB;
+  transform: translateY(-2px);
+}
+
+.filterBtn.active {
+  background: linear-gradient(135deg, #012CAB 0%, #00F757 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(1, 44, 171, 0.3);
+}
+
+/* ===== LISTA DE ALUMNOS ===== */
+.alumnosList {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+.alumnoCard {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.alumnoCard:hover {
+  border-color: #012CAB;
+  box-shadow: 0 8px 24px rgba(1, 44, 171, 0.15);
+  transform: translateY(-2px);
+}
+
+.alumnoInfo {
+  margin-bottom: 1rem;
+}
+
+.alumnoNombre {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.alumnoRut {
+  color: #6b7280;
+  margin: 0.25rem 0;
+  font-family: 'Courier New', monospace;
+}
+
+.alumnoPlan {
+  color: #374151;
+  margin: 0.25rem 0;
+  font-weight: 500;
+}
+
+.alumnoFechas {
+  color: #6b7280;
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.estadoContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.estado {
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #f3f4f6;
+}
+
+.diasRestantes {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* ===== ACCIONES ===== */
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.renovarBtn {
+  background: linear-gradient(135deg, #012CAB 0%, #00F757 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(1, 44, 171, 0.3);
+}
+
+.renovarBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 44, 171, 0.4);
+}
+
+/* ===== FORMULARIO DE RENOVACIÓN ===== */
+.formularioRenovacion {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.formularioRenovacion h4 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.125rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #012CAB;
+  box-shadow: 0 0 0 3px rgba(1, 44, 171, 0.1);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.confirmarBtn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.confirmarBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.cancelarBtn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancelarBtn:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.125rem;
+  grid-column: 1 / -1;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.125rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .filters {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .filterBtn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .alumnosList {
+    grid-template-columns: 1fr;
+  }
+  
+  .alumnoCard {
+    padding: 1rem;
+  }
+  
+  .estadoContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .actions {
+    justify-content: center;
+  }
+  
+  .formActions {
+    flex-direction: column;
+  }
+  
+  .confirmarBtn,
+  .cancelarBtn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .alumnoCard {
+    padding: 0.75rem;
+  }
+  
+  .formularioRenovacion {
+    padding: 1rem;
+  }
+  
+  .alumnoNombre {
+    font-size: 1.125rem;
+  }
+}

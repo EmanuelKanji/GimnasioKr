@@ -20,6 +20,16 @@ export interface IAlumno extends Document {
     fecha: string;
     leido: boolean;
   }[];
+  estadoRenovacion: 'ninguno' | 'solicitada' | 'procesando' | 'completada';
+  fechaSolicitud?: Date;
+  motivoSolicitud?: string;
+  historialRenovaciones: {
+    fecha: Date;
+    fechaInicio: string;
+    fechaFin: string;
+    procesadoPor: string;
+    observaciones: string;
+  }[];
 }
 
 const AlumnoSchema: Schema = new Schema({
@@ -51,6 +61,20 @@ const AlumnoSchema: Schema = new Schema({
     ],
     default: []
   },
+  estadoRenovacion: { 
+    type: String, 
+    enum: ['ninguno', 'solicitada', 'procesando', 'completada'], 
+    default: 'ninguno' 
+  },
+  fechaSolicitud: { type: Date },
+  motivoSolicitud: { type: String },
+  historialRenovaciones: [{
+    fecha: { type: Date, default: Date.now },
+    fechaInicio: String,
+    fechaFin: String,
+    procesadoPor: String,
+    observaciones: String
+  }]
 }, {
   timestamps: true
 });

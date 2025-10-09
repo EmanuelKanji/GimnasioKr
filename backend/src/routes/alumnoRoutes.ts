@@ -5,7 +5,11 @@ import {
   obtenerPerfilAlumno, 
   obtenerPlanAlumno, 
   obtenerAsistenciaAlumno, 
-  obtenerAvisosAlumno 
+  obtenerAvisosAlumno,
+  solicitarRenovacion,
+  obtenerEstadoRenovacion,
+  obtenerAlumnosParaRenovar,
+  renovarPlanAlumno
 } from '../controllers/alumnoController';
 import { requireRole } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
@@ -21,5 +25,11 @@ router.get('/me/perfil', requireRole(['alumno', 'admin']), obtenerPerfilAlumno);
 router.get('/me/plan', requireRole(['alumno', 'admin']), obtenerPlanAlumno);
 router.get('/me/asistencias', requireRole(['alumno', 'admin']), obtenerAsistenciaAlumno);
 router.get('/me/avisos', requireRole(['alumno', 'admin']), obtenerAvisosAlumno);
+
+// Rutas de renovación
+router.post('/me/solicitar-renovacion', requireRole(['alumno']), solicitarRenovacion);
+router.get('/me/estado-renovacion', requireRole(['alumno']), obtenerEstadoRenovacion);
+router.get('/para-renovar', requireRole(['admin']), obtenerAlumnosParaRenovar);
+router.post('/:id/renovar', requireRole(['admin']), renovarPlanAlumno);
 
 export default router;

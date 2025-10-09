@@ -139,21 +139,58 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
       });
     }
 
-    // 4. Verificar límites de clases del plan (si está configurado)
+    // 4. Verificar límites de clases del plan considerando días restantes del plan
     const limiteClases = alumno.limiteClases || 'todos_los_dias';
-    if (limiteClases !== 'todos_los_dias') {
+    
+    // Función para calcular días hábiles entre dos fechas
+    const calcularDiasHabilesEntreFechas = (inicio: Date, fin: Date): number => {
+      let diasHabiles = 0;
+      const fecha = new Date(inicio);
+      
+      while (fecha <= fin) {
+        const diaSemana = fecha.getDay();
+        // 1 = lunes, 2 = martes, ..., 6 = sábado (0 = domingo se excluye)
+        if (diaSemana >= 1 && diaSemana <= 6) {
+          diasHabiles++;
+        }
+        fecha.setDate(fecha.getDate() + 1);
+      }
+      
+      return diasHabiles;
+    };
+    
+    // Calcular días hábiles restantes del plan
+    const diasHabilesRestantes = calcularDiasHabilesEntreFechas(fechaActual, fechaFinPlan);
+    
+    if (limiteClases === 'todos_los_dias') {
+      // Para planes "todos los días", verificar que haya días hábiles restantes
+      if (diasHabilesRestantes <= 0) {
+        return res.status(403).json({ 
+          message: 'Tu plan ha terminado. No hay días hábiles restantes.',
+          codigo: 'PLAN_TERMINADO',
+          diasRestantes: diasHabilesRestantes
+        });
+      }
+    } else {
+      // Para planes con límite específico, verificar límite ajustado
+      const limiteNumero = parseInt(limiteClases);
+      
       // Obtener asistencias del mes actual
       const asistenciasMes = alumno.asistencias.filter((fecha: string) => {
         const fechaAsistencia = new Date(fecha);
         return fechaAsistencia.getFullYear() === yyyy && fechaAsistencia.getMonth() === (parseInt(mm) - 1);
       });
       
-      const limiteNumero = parseInt(limiteClases);
-      if (asistenciasMes.length >= limiteNumero) {
+      // Calcular límite real considerando días restantes del plan
+      const limiteReal = Math.min(limiteNumero, diasHabilesRestantes);
+      
+      if (asistenciasMes.length >= limiteReal) {
         return res.status(403).json({ 
-          message: `Has alcanzado el límite de ${limiteNumero} clases este mes.`,
+          message: `Has alcanzado el límite de ${limiteReal} clases disponibles (${limiteNumero} del plan, ${diasHabilesRestantes} días restantes).`,
           codigo: 'LIMITE_CLASES_ALCANZADO',
-          limite: limiteNumero,
+          limite: limiteReal,
+          limiteOriginal: limiteNumero,
+          diasRestantes: diasHabilesRestantes,
           usadas: asistenciasMes.length
         });
       }
