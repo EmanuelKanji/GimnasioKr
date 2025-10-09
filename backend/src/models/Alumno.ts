@@ -14,6 +14,8 @@ export interface IAlumno extends Document {
   monto: number;
   limiteClases: '12' | '8' | 'todos_los_dias'; // Límite de clases por mes
   descripcionPlan?: string; // Descripción del plan desde la colección Plan
+  descuentoEspecial?: 'ninguno' | 'familiar_x2' | 'familiar_x3'; // Descuento especial aplicado
+  porcentajeDescuento?: number; // Porcentaje de descuento aplicado
   asistencias: string[]; // Fechas ISO
   avisos: {
     titulo: string;
@@ -51,6 +53,12 @@ const AlumnoSchema: Schema = new Schema({
     default: 'todos_los_dias' 
   },
   descripcionPlan: { type: String, required: false },
+  descuentoEspecial: { 
+    type: String, 
+    enum: ['ninguno', 'familiar_x2', 'familiar_x3'], 
+    default: 'ninguno' 
+  },
+  porcentajeDescuento: { type: Number, default: 0 },
   asistencias: { type: [String], default: [] }, // Fechas ISO
   avisos: {
     type: [

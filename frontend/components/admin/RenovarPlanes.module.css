@@ -340,3 +340,57 @@
     font-size: 1.125rem;
   }
 }
+
+/* Descuento Info Styles */
+.descuentoInfo {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 2px solid #22c55e;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  animation: slideIn 0.3s ease-out;
+}
+
+.descuentoDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.descuentoDetails span {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.totalPagar {
+  font-size: 1.1rem !important;
+  color: #059669 !important;
+  font-weight: 700;
+  padding: 0.5rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #22c55e;
+}
+
+.warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  color: #92400e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

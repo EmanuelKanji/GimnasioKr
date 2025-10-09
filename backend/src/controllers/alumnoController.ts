@@ -189,7 +189,7 @@ export const obtenerAlumnosParaRenovar = async (req: Request, res: Response) => 
 export const renovarPlanAlumno = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { fechaInicio, fechaFin, duracion, limiteClases, observaciones } = req.body;
+    const { fechaInicio, fechaFin, duracion, limiteClases, observaciones, descuentoEspecial, monto } = req.body;
     
     console.log('Datos recibidos para renovación:', { id, fechaInicio, fechaFin, duracion, limiteClases, observaciones });
     
@@ -203,6 +203,29 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
     
     const alumno = await Alumno.findById(id);
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
+
+    // Validar que descuento solo aplique a mensual/trimestral
+    if (descuentoEspecial && descuentoEspecial !== 'ninguno') {
+      if (duracion === 'semestral' || duracion === 'anual') {
+        return res.status(400).json({ 
+          message: 'Los descuentos familiares no aplican a planes semestrales o anuales' 
+        });
+      }
+    }
+
+    // Calcular descuento
+    let porcentajeDescuento = 0;
+    if (descuentoEspecial === 'familiar_x2') {
+      porcentajeDescuento = 10;
+    } else if (descuentoEspecial === 'familiar_x3') {
+      porcentajeDescuento = 15;
+    }
+
+    // Aplicar descuento al monto si se proporciona
+    let montoConDescuento = alumno.monto; // Mantener monto actual por defecto
+    if (monto && monto > 0) {
+      montoConDescuento = monto * (1 - porcentajeDescuento / 100);
+    }
     
     // Buscar el plan para obtener la descripción
     let descripcionPlan = 'Plan de gimnasio';
@@ -221,6 +244,11 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
     alumno.duracion = duracion;
     alumno.limiteClases = limiteClases;
     alumno.descripcionPlan = descripcionPlan;
+    alumno.descuentoEspecial = descuentoEspecial || 'ninguno';
+    alumno.porcentajeDescuento = porcentajeDescuento;
+    if (monto && monto > 0) {
+      alumno.monto = montoConDescuento;
+    }
     alumno.estadoRenovacion = 'completada';
     alumno.asistencias = []; // Resetear asistencias del nuevo período
     
@@ -367,7 +395,8 @@ export const crearAlumno = async (req: Request, res: Response) => {
       duracion,
       monto,
       password,
-      limiteClases
+      limiteClases,
+      descuentoEspecial
     } = req.body;
     if (!nombre || !rut || !direccion || !fechaNacimiento || !email || !telefono || !plan || !fechaInicioPlan || !duracion || !password) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
@@ -389,6 +418,26 @@ export const crearAlumno = async (req: Request, res: Response) => {
     if (alumnoExistente) {
       return res.status(409).json({ message: 'El alumno ya está inscrito.' });
     }
+
+    // Validar que descuento solo aplique a mensual/trimestral
+    if (descuentoEspecial && descuentoEspecial !== 'ninguno') {
+      if (duracion === 'semestral' || duracion === 'anual') {
+        return res.status(400).json({ 
+          message: 'Los descuentos familiares no aplican a planes semestrales o anuales' 
+        });
+      }
+    }
+
+    // Calcular descuento
+    let porcentajeDescuento = 0;
+    if (descuentoEspecial === 'familiar_x2') {
+      porcentajeDescuento = 10;
+    } else if (descuentoEspecial === 'familiar_x3') {
+      porcentajeDescuento = 15;
+    }
+
+    // Aplicar descuento al monto
+    const montoConDescuento = monto * (1 - porcentajeDescuento / 100);
     // Crear usuario para login
     const nuevoUsuario = new User({ username: email, password, role: 'alumno', rut });
     await nuevoUsuario.save();
@@ -399,6 +448,8 @@ export const crearAlumno = async (req: Request, res: Response) => {
       termino.setMonth(termino.getMonth() + 1);
     } else if (duracion === 'trimestral') {
       termino.setMonth(termino.getMonth() + 3);
+    } else if (duracion === 'semestral') {
+      termino.setMonth(termino.getMonth() + 6);
     } else if (duracion === 'anual') {
       termino.setFullYear(termino.getFullYear() + 1);
     }
@@ -414,9 +465,11 @@ export const crearAlumno = async (req: Request, res: Response) => {
       fechaInicioPlan,
       fechaTerminoPlan: termino.toISOString(),
       duracion,
-      monto,
+      monto: montoConDescuento,
       limiteClases: limiteClases || planEncontrado.limiteClases || 'todos_los_dias',
       descripcionPlan: planEncontrado.descripcion,
+      descuentoEspecial: descuentoEspecial || 'ninguno',
+      porcentajeDescuento,
       asistencias: [],
       avisos: []
     });

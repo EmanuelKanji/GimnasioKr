@@ -52,6 +52,12 @@ const AlumnoSchema = new mongoose_1.Schema({
         default: 'todos_los_dias'
     },
     descripcionPlan: { type: String, required: false },
+    descuentoEspecial: {
+        type: String,
+        enum: ['ninguno', 'familiar_x2', 'familiar_x3'],
+        default: 'ninguno'
+    },
+    porcentajeDescuento: { type: Number, default: 0 },
     asistencias: { type: [String], default: [] }, // Fechas ISO
     avisos: {
         type: [

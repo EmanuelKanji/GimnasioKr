@@ -25,6 +25,9 @@ export interface Alumno {
   duracion: string;
   monto: number;
   limiteClases: '12' | '8' | 'todos_los_dias';
+  descripcionPlan?: string;
+  descuentoEspecial?: 'ninguno' | 'familiar_x2' | 'familiar_x3';
+  porcentajeDescuento?: number;
   asistencias: string[]; // Fechas ISO
   avisos: {
     titulo: string;
@@ -58,7 +61,7 @@ export interface Plan {
   precio: number;
   clases: string | number;
   matricula: string | number;
-  duracion: string; // 'mensual', 'trimestral', 'anual'
+  duracion: 'mensual' | 'trimestral' | 'semestral' | 'anual';
   limiteClases: '12' | '8' | 'todos_los_dias';
   createdAt?: string;
   updatedAt?: string;
@@ -105,6 +108,8 @@ export interface PerfilInfo {
   limiteClases?: '12' | '8' | 'todos_los_dias';
   descripcionPlan?: string;
   duracion?: string;
+  descuentoEspecial?: 'ninguno' | 'familiar_x2' | 'familiar_x3';
+  porcentajeDescuento?: number;
 }
 
 export interface PlanAlumno {
@@ -169,11 +174,12 @@ export interface InscribirAlumnoForm {
   direccion: string;
   fechaNacimiento: string;
   plan: string;
-  duracion: string;
+  duracion: 'mensual' | 'trimestral' | 'semestral' | 'anual';
   monto: number;
   limiteClases: '12' | '8' | 'todos_los_dias';
   password: string;
   fechaInicioPlan: string;
+  descuentoEspecial?: 'ninguno' | 'familiar_x2' | 'familiar_x3';
 }
 
 // ===== INTERFACES PARA RESPUESTAS DE API =====
@@ -243,7 +249,7 @@ export interface ExcelExportData {
 // ===== TIPOS DE UTILIDAD =====
 export type EstadoPlan = 'Activo' | 'Próximo a vencer' | 'Vencido';
 export type PrioridadAlerta = 'ALTA' | 'MEDIA' | 'BAJA';
-export type DuracionPlan = 'mensual' | 'trimestral' | 'anual';
+export type DuracionPlan = 'mensual' | 'trimestral' | 'semestral' | 'anual';
 export type LimiteClases = '12' | '8' | 'todos_los_dias';
 
 // ===== INTERFACES PARA COMPONENTES =====

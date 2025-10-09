@@ -17,6 +17,7 @@ export default function InscribirAlumnoForm() {
     password: '',
     email: '',
     limiteClases: 'todos_los_dias',
+    descuentoEspecial: 'ninguno',
   });
   const [alumnos, setAlumnos] = useState<InscribirAlumnoForm[]>([]);
   const [planes, setPlanes] = useState<Plan[]>([]);
@@ -77,6 +78,14 @@ export default function InscribirAlumnoForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje(null);
+
+    // Validar que descuentos no se apliquen a planes semestrales/anuales
+    if ((form.descuentoEspecial === 'familiar_x2' || form.descuentoEspecial === 'familiar_x3') && 
+        (form.duracion === 'semestral' || form.duracion === 'anual')) {
+      setMensaje('Los descuentos familiares solo aplican a planes mensuales y trimestrales');
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
   const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {
@@ -110,6 +119,7 @@ export default function InscribirAlumnoForm() {
           password: '',
           email: '',
           limiteClases: 'todos_los_dias',
+          descuentoEspecial: 'ninguno',
         });
       } else {
         setMensaje(data.message || 'Error al inscribir alumno.');
@@ -204,6 +214,35 @@ export default function InscribirAlumnoForm() {
             </option>
           ))}
         </select>
+        <select
+          name="duracion"
+          value={form.duracion}
+          onChange={handleChange}
+          className={styles.select}
+          required
+        >
+          <option value="mensual">Mensual</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral (6 meses)</option>
+          <option value="anual">Anual</option>
+        </select>
+        <select
+          name="descuentoEspecial"
+          value={form.descuentoEspecial}
+          onChange={handleChange}
+          className={styles.select}
+          disabled={form.duracion === 'semestral' || form.duracion === 'anual'}
+        >
+          <option value="ninguno">Sin descuento especial</option>
+          <option value="familiar_x2">Familiar x2 (10% descuento)</option>
+          <option value="familiar_x3">Familiar x3 (15% descuento)</option>
+        </select>
+        {(form.duracion === 'semestral' || form.duracion === 'anual') && 
+         form.descuentoEspecial !== 'ninguno' && (
+          <div className={styles.warning}>
+            ⚠️ Los descuentos familiares no aplican a planes semestrales o anuales
+          </div>
+        )}
         <input
           type="number"
           name="monto"
@@ -214,6 +253,17 @@ export default function InscribirAlumnoForm() {
           readOnly
           style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
         />
+        {form.descuentoEspecial !== 'ninguno' && form.monto > 0 && (
+          <div className={styles.descuentoInfo}>
+            <div className={styles.descuentoDetails}>
+              <span><strong>Monto original:</strong> ${form.monto.toLocaleString('es-CL')}</span>
+              <span><strong>Descuento:</strong> {form.descuentoEspecial === 'familiar_x2' ? '10%' : '15%'}</span>
+              <span className={styles.totalPagar}>
+                <strong>Total a pagar:</strong> ${(form.monto * (form.descuentoEspecial === 'familiar_x2' ? 0.9 : 0.85)).toLocaleString('es-CL')}
+              </span>
+            </div>
+          </div>
+        )}
         {form.plan && (
           <div className={styles.planInfo}>
             <h4 className={styles.planInfoTitle}>Información del Plan Seleccionado:</h4>

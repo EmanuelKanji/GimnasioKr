@@ -87,6 +87,14 @@ export default function PerfilAlumno() {
         <div className={styles.infoRow}><span className={styles.label}>Teléfono:</span> {perfil.telefono}</div>
         <div className={styles.infoRow}><span className={styles.label}>Dirección:</span> {perfil.direccion}</div>
         <div className={styles.infoRow}><span className={styles.label}>Fecha de nacimiento:</span> {new Date(perfil.fechaNacimiento).toLocaleDateString('es-CL')}</div>
+        {perfil.descuentoEspecial && perfil.descuentoEspecial !== 'ninguno' && (
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Descuento especial:</span> 
+            <span className={styles.descuentoInfo}>
+              {perfil.descuentoEspecial === 'familiar_x2' ? 'Familiar x2 (10%)' : 'Familiar x3 (15%)'}
+            </span>
+          </div>
+        )}
       </div>
 
       <button 

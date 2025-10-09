@@ -15,6 +15,8 @@ interface PerfilInfo {
   limiteClases?: '12' | '8' | 'todos_los_dias';
   descripcionPlan?: string;
   duracion?: string;
+  descuentoEspecial?: 'ninguno' | 'familiar_x2' | 'familiar_x3';
+  porcentajeDescuento?: number;
 }
 
 interface PerfilCache {

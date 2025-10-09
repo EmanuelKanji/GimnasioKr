@@ -90,8 +90,8 @@ export const schemas = {
       'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD',
       'any.required': 'La fecha de inicio del plan es requerida'
     }),
-    duracion: Joi.string().valid('mensual', 'trimestral', 'anual').required().messages({
-      'any.only': 'La duración debe ser mensual, trimestral o anual',
+    duracion: Joi.string().valid('mensual', 'trimestral', 'semestral', 'anual').required().messages({
+      'any.only': 'La duración debe ser mensual, trimestral, semestral o anual',
       'any.required': 'La duración es requerida'
     }),
     monto: Joi.number().min(0).required().messages({
@@ -105,6 +105,12 @@ export const schemas = {
     limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({
       'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias'
     }),
+    descuentoEspecial: Joi.string()
+      .valid('ninguno', 'familiar_x2', 'familiar_x3')
+      .default('ninguno')
+      .messages({
+        'any.only': 'El descuento especial debe ser ninguno, familiar_x2 o familiar_x3'
+      }),
     fechaTerminoPlan: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().messages({
       'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD'
     })
@@ -136,8 +142,8 @@ export const schemas = {
     ).required().messages({
       'any.required': 'La matrícula es requerida'
     }),
-    duracion: Joi.string().valid('mensual', 'trimestral', 'anual').required().messages({
-      'any.only': 'La duración debe ser mensual, trimestral o anual',
+    duracion: Joi.string().valid('mensual', 'trimestral', 'semestral', 'anual').required().messages({
+      'any.only': 'La duración debe ser mensual, trimestral, semestral o anual',
       'any.required': 'La duración es requerida'
     }),
     limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({
@@ -186,13 +192,22 @@ export const schemas = {
       'string.pattern.base': 'La fecha de término debe tener formato YYYY-MM-DD',
       'any.required': 'La fecha de término es requerida'
     }),
-    duracion: Joi.string().valid('mensual', 'trimestral', 'anual').required().messages({
-      'any.only': 'La duración debe ser mensual, trimestral o anual',
+    duracion: Joi.string().valid('mensual', 'trimestral', 'semestral', 'anual').required().messages({
+      'any.only': 'La duración debe ser mensual, trimestral, semestral o anual',
       'any.required': 'La duración es requerida'
     }),
     limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').required().messages({
       'any.only': 'El límite de clases debe ser 12, 8 o todos_los_dias',
       'any.required': 'El límite de clases es requerido'
+    }),
+    descuentoEspecial: Joi.string()
+      .valid('ninguno', 'familiar_x2', 'familiar_x3')
+      .optional()
+      .messages({
+        'any.only': 'El descuento especial debe ser ninguno, familiar_x2 o familiar_x3'
+      }),
+    monto: Joi.number().min(0).optional().messages({
+      'number.min': 'El monto debe ser mayor o igual a 0'
     }),
     observaciones: Joi.string().max(500).optional().messages({
       'string.max': 'Las observaciones no pueden exceder 500 caracteres'

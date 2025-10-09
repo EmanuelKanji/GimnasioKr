@@ -29,6 +29,8 @@ export default function RenovarPlanes() {
       fin.setMonth(fin.getMonth() + 1);
     } else if (duracion === 'trimestral') {
       fin.setMonth(fin.getMonth() + 3);
+    } else if (duracion === 'semestral') {
+      fin.setMonth(fin.getMonth() + 6);
     } else if (duracion === 'anual') {
       fin.setFullYear(fin.getFullYear() + 1);
     }
@@ -41,7 +43,9 @@ export default function RenovarPlanes() {
     fechaFin: calcularFechaFin(new Date().toISOString().split('T')[0], 'mensual'),
     duracion: 'mensual',
     limiteClases: 'todos_los_dias',
-    observaciones: ''
+    observaciones: '',
+    descuentoEspecial: 'ninguno',
+    monto: 0
   });
 
   // Cargar alumnos para renovar
@@ -116,13 +120,22 @@ export default function RenovarPlanes() {
         return;
       }
 
+      // Validar que descuentos no se apliquen a planes semestrales/anuales
+      if ((formularioRenovacion.descuentoEspecial === 'familiar_x2' || formularioRenovacion.descuentoEspecial === 'familiar_x3') && 
+          (formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual')) {
+        alert('Los descuentos familiares solo aplican a planes mensuales y trimestrales');
+        return;
+      }
+
       // Preparar datos para el backend
       const datosRenovacion = {
         fechaInicio: formularioRenovacion.fechaInicio,
         fechaFin: formularioRenovacion.fechaFin,
         duracion: formularioRenovacion.duracion,
         limiteClases: formularioRenovacion.limiteClases,
-        observaciones: formularioRenovacion.observaciones || ''
+        observaciones: formularioRenovacion.observaciones || '',
+        descuentoEspecial: formularioRenovacion.descuentoEspecial,
+        monto: formularioRenovacion.monto || undefined
       };
 
       console.log('Enviando datos de renovación:', datosRenovacion);
@@ -296,6 +309,7 @@ export default function RenovarPlanes() {
                         >
                           <option value="mensual">Mensual</option>
                           <option value="trimestral">Trimestral</option>
+                          <option value="semestral">Semestral (6 meses)</option>
                           <option value="anual">Anual</option>
                         </select>
                       </div>
@@ -324,6 +338,52 @@ export default function RenovarPlanes() {
                           <option value="8">8 clases/mes</option>
                         </select>
                       </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Descuento Especial:</label>
+                        <select 
+                          value={formularioRenovacion.descuentoEspecial}
+                          onChange={(e) => setFormularioRenovacion({...formularioRenovacion, descuentoEspecial: e.target.value})}
+                          disabled={formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual'}
+                        >
+                          <option value="ninguno">Sin descuento especial</option>
+                          <option value="familiar_x2">Familiar x2 (10% descuento)</option>
+                          <option value="familiar_x3">Familiar x3 (15% descuento)</option>
+                        </select>
+                        {(formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual') && 
+                         formularioRenovacion.descuentoEspecial !== 'ninguno' && (
+                          <div className={styles.warning}>
+                            ⚠️ Los descuentos familiares no aplican a planes semestrales o anuales
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Monto (opcional):</label>
+                        <input 
+                          type="number" 
+                          value={formularioRenovacion.monto || ''}
+                          onChange={(e) => setFormularioRenovacion({...formularioRenovacion, monto: parseFloat(e.target.value) || 0})}
+                          placeholder="Monto del plan (opcional)"
+                          min="0"
+                          step="100"
+                        />
+                        <small className={styles.helpText}>
+                          Si se especifica un monto, se aplicará el descuento correspondiente
+                        </small>
+                      </div>
+
+                      {formularioRenovacion.descuentoEspecial !== 'ninguno' && formularioRenovacion.monto > 0 && (
+                        <div className={styles.descuentoInfo}>
+                          <div className={styles.descuentoDetails}>
+                            <span><strong>Monto original:</strong> ${formularioRenovacion.monto.toLocaleString('es-CL')}</span>
+                            <span><strong>Descuento:</strong> {formularioRenovacion.descuentoEspecial === 'familiar_x2' ? '10%' : '15%'}</span>
+                            <span className={styles.totalPagar}>
+                              <strong>Total a pagar:</strong> ${(formularioRenovacion.monto * (formularioRenovacion.descuentoEspecial === 'familiar_x2' ? 0.9 : 0.85)).toLocaleString('es-CL')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
                       <div className={styles.formGroup}>
                         <label>Observaciones:</label>
