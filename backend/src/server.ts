@@ -23,6 +23,7 @@ if (!fs.existsSync(logsDir)) {
 // 3. Importaciones de rutas y utilidades
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import authUserRoutes from './routes/authUserRoutes';
 import alumnoRoutes from './routes/alumnoRoutes';
 import { authenticateToken, requireRole } from './middleware/auth';
 import { connectDB } from './config/db';
@@ -183,6 +184,9 @@ app.get('/', (_req, res) => {
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
+
+// Rutas para usuarios autenticados (cualquier rol)
+app.use('/api/users', authUserRoutes);
 
 // Rutas protegidas - requieren autenticación
 app.use('/api/usuarios', authenticateToken, requireRole(['admin']), userRoutes);

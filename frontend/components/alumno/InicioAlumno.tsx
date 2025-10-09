@@ -1,54 +1,16 @@
-import type { PlanAlumno, Aviso } from '../../../shared/types';
 import styles from './InicioAlumno.module.css';
-import { useEffect, useState } from 'react';
 import { generateCurrentWeek, generateMonthlyCalendar, isAsistido, toISODate, getMonthName } from '../../lib/dateUtils';
 import { useAsistencias } from '../../hooks/useAsistencias';
+import { usePlan } from '../../hooks/usePlan';
+import { useAvisos } from '../../hooks/useAvisos';
 
 export default function InicioAlumno() {
   const { asistencias: diasAsistidos, loading: asistenciasLoading } = useAsistencias();
-  const [plan, setPlan] = useState<PlanAlumno>({
-    nombre: '',
-    estadoPago: 'pendiente',
-    fechaInicio: '',
-    fechaFin: '',
-    monto: 0
-  });
-  const [avisos, setAvisos] = useState<Aviso[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const cargarDatos = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Fetch plan
-      const planRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/plan', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const planData = await planRes.json();
-      setPlan(planData.plan || null);
-      
-      // Fetch avisos
-      const avisosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/avisos/alumno', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const avisosData = await avisosRes.json();
-      setAvisos(Array.isArray(avisosData) ? avisosData : []);
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error cargando datos:', error);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    cargarDatos();
-    
-    // Actualizar cada 2 minutos para sincronización en tiempo real (reducido de 30 segundos)
-    const interval = setInterval(cargarDatos, 120000);
-    
-    return () => clearInterval(interval);
-  }, []);
+  const { plan, loading: planLoading } = usePlan();
+  const { avisos, loading: avisosLoading } = useAvisos('alumno');
+  
+  // Calcular loading general
+  const loading = asistenciasLoading || planLoading || avisosLoading;
 
   // Calcular la semana actual (lunes a domingo)
   const today = new Date();
@@ -61,7 +23,7 @@ export default function InicioAlumno() {
   // Generar calendario mensual para mostrar en el resumen
   const calendar = generateMonthlyCalendar(today.getFullYear(), today.getMonth());
 
-  if (loading || asistenciasLoading) {
+  if (loading) {
   return <div className={styles.container}>Cargando resumen...</div>;
   }
 

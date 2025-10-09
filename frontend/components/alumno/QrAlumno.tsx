@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import styles from './QrAlumno.module.css';
 import { calcularLimiteClases, obtenerMensajeLimite, obtenerColorIndicador, type LimiteClases } from '../../lib/classLimits';
+import { useEstadoRenovacion } from '../../hooks/useEstadoRenovacion';
 
 interface QrAlumnoProps {
   rut: string;
@@ -16,7 +17,9 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   const [activo, setActivo] = useState(false);
   const [qrData, setQrData] = useState('');
   const [tiempoRestante, setTiempoRestante] = useState(0);
-  const [estadoRenovacion, setEstadoRenovacion] = useState<'ninguno' | 'solicitada' | 'procesando' | 'completada'>('ninguno');
+  
+  // Usar hook centralizado para estado de renovación
+  const { estado: estadoRenovacion, updateEstado } = useEstadoRenovacion();
 
   // Función para generar un token temporal único
   const generarTokenTemporal = () => {
@@ -25,7 +28,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
 
   // Función para solicitar renovación
   const solicitarRenovacion = async () => {
-    setEstadoRenovacion('procesando');
+    updateEstado('procesando');
     
     try {
       const token = localStorage.getItem('token');
@@ -48,14 +51,14 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
       });
       
       if (res.ok) {
-        setEstadoRenovacion('solicitada');
+        updateEstado('solicitada');
       } else {
         console.error('Error solicitando renovación');
-        setEstadoRenovacion('ninguno');
+        updateEstado('ninguno');
       }
     } catch (error) {
       console.error('Error solicitando renovación:', error);
-      setEstadoRenovacion('ninguno');
+      updateEstado('ninguno');
     }
   };
 
@@ -86,28 +89,8 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   const mensajeLimite = obtenerMensajeLimite(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
   const colorIndicador = obtenerColorIndicador(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
 
-  // Verificar estado de renovación
-  useEffect(() => {
-    const verificarEstadoRenovacion = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/me/estado-renovacion`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          setEstadoRenovacion(data.estado || 'ninguno');
-        }
-      } catch (error) {
-        console.error('Error verificando estado de renovación:', error);
-      }
-    };
-    
-    verificarEstadoRenovacion();
-    const interval = setInterval(verificarEstadoRenovacion, 30000); // Cada 30 segundos
-    return () => clearInterval(interval);
-  }, []);
+  // El hook useEstadoRenovacion ya maneja la verificación automática
+  // No necesitamos useEffect adicional ni setInterval
 
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {

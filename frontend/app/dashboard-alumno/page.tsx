@@ -8,7 +8,7 @@ import AvisosAlumno from "../../components/alumno/AvisosAlumno";
 import InicioAlumno from "../../components/alumno/InicioAlumno";
 import QrAlumno from "../../components/alumno/QrAlumno";
 import { useAsistencias } from "../../hooks/useAsistencias";
-import type { PerfilInfo } from '../../../shared/types';
+import { usePerfil } from "../../hooks/usePerfil";
 
 // Iconos SVG como componentes
 const HomeIcon = () => (
@@ -73,49 +73,27 @@ export default function DashboardAlumno() {
   >("inicio");
   
   const [menuOpen, setMenuOpen] = useState(false);
-  const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
-  const [loadingPerfil, setLoadingPerfil] = useState(true);
   const [limiteClases, setLimiteClases] = useState<'12' | '8' | 'todos_los_dias'>('todos_los_dias');
   
-  // Usar el hook centralizado para asistencias
+  // Usar hooks centralizados
   const { asistencias: asistenciasMes } = useAsistencias();
+  const { perfil, loading: loadingPerfil } = usePerfil();
 
-  const cargarDatos = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Cargar perfil del alumno
-      const perfilRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/perfil', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const perfilData = await perfilRes.json();
-      setPerfil(perfilData.perfil || null);
-      
-      // Obtener límite de clases del plan (por ahora hardcodeado, después se obtendrá del plan)
-      if (perfilData.perfil?.plan) {
-        // Aquí se debería obtener el límite de clases del plan desde la API
-        // Por ahora usamos un valor por defecto basado en el nombre del plan
-        const planNombre = perfilData.perfil.plan.toLowerCase();
-        if (planNombre.includes('12')) {
-          setLimiteClases('12');
-        } else if (planNombre.includes('8')) {
-          setLimiteClases('8');
-        } else {
-          setLimiteClases('todos_los_dias');
-        }
-      }
-      
-      setLoadingPerfil(false);
-    } catch (error) {
-      console.error('Error cargando datos:', error);
-      setLoadingPerfil(false);
-    }
-  };
-
-  // Obtener perfil del alumno al cargar el dashboard
+  // Obtener límite de clases del plan cuando el perfil se carga
   useEffect(() => {
-    cargarDatos();
-  }, []);
+    if (perfil?.plan) {
+      // Aquí se debería obtener el límite de clases del plan desde la API
+      // Por ahora usamos un valor por defecto basado en el nombre del plan
+      const planNombre = perfil.plan.toLowerCase();
+      if (planNombre.includes('12')) {
+        setLimiteClases('12');
+      } else if (planNombre.includes('8')) {
+        setLimiteClases('8');
+      } else {
+        setLimiteClases('todos_los_dias');
+      }
+    }
+  }, [perfil]);
 
   const handleViewChange = (newView: "inicio" | "asistencia" | "plan" | "perfil" | "avisos" | "qr") => {
     setView(newView);

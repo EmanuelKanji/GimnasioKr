@@ -25,6 +25,7 @@ if (!fs_1.default.existsSync(logsDir)) {
 // 3. Importaciones de rutas y utilidades
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const authUserRoutes_1 = __importDefault(require("./routes/authUserRoutes"));
 const alumnoRoutes_1 = __importDefault(require("./routes/alumnoRoutes"));
 const auth_1 = require("./middleware/auth");
 const db_1 = require("./config/db");
@@ -165,6 +166,8 @@ exports.app.get('/', (_req, res) => {
 });
 // Rutas de autenticación
 exports.app.use('/api/auth', authRoutes_1.default);
+// Rutas para usuarios autenticados (cualquier rol)
+exports.app.use('/api/users', authUserRoutes_1.default);
 // Rutas protegidas - requieren autenticación
 exports.app.use('/api/usuarios', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), userRoutes_1.default);
 exports.app.use('/api/alumnos', auth_1.authenticateToken, alumnoRoutes_1.default);

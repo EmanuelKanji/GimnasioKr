@@ -1,18 +1,9 @@
 import styles from './PerfilAlumno.module.css';
-import { useEffect, useState } from 'react';
-
-interface PerfilInfo {
-  nombre: string;
-  rut: string;
-  email: string;
-  telefono: string;
-  direccion: string;
-  fechaNacimiento: string;
-}
+import { useState } from 'react';
+import { usePerfil } from '../../hooks/usePerfil';
 
 export default function PerfilAlumno() {
-  const [perfil, setPerfil] = useState<PerfilInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { perfil, loading } = usePerfil();
   const [mostrarFormularioPassword, setMostrarFormularioPassword] = useState(false);
   const [cambiandoPassword, setCambiandoPassword] = useState(false);
   const [mensaje, setMensaje] = useState<{ tipo: 'success' | 'error', texto: string } | null>(null);
@@ -22,22 +13,6 @@ export default function PerfilAlumno() {
     passwordNueva: '',
     confirmarPassword: ''
   });
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    // El backend obtiene el rut desde el token y devuelve solo el perfil del alumno autenticado
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos/me/perfil', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        setPerfil(data.perfil || null);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
 
   const handleCambiarPassword = async (e: React.FormEvent) => {
     e.preventDefault();

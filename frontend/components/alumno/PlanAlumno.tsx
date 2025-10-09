@@ -1,42 +1,8 @@
 import styles from './PlanAlumno.module.css';
-import { useEffect, useState } from 'react';
-import { HttpClient } from '../../lib/httpClient';
-
-interface PlanInfo {
-  nombre: string;
-  descripcion: string;
-  fechaInicio: string;
-  fechaFin: string;
-  estadoPago: 'pagado' | 'pendiente';
-  monto: number;
-}
+import { usePlan } from '../../hooks/usePlan';
 
 export default function PlanAlumno() {
-  const [plan, setPlan] = useState<PlanInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPlan = async () => {
-      try {
-        const response = await HttpClient.get<{ plan: PlanInfo }>('/alumnos/me/plan');
-        
-        if (response.error) {
-          console.error('Error fetching plan:', response.error);
-          setError(response.error);
-        } else {
-          setPlan(response.data?.plan || null);
-        }
-      } catch (error) {
-        console.error('Error fetching plan:', error);
-        setError('Error de conexión');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlan();
-  }, []);
+  const { plan, loading, error } = usePlan();
 
   if (loading) return <div className={styles.container}>Cargando plan...</div>;
   if (error) return <div className={styles.container}>Error: {error}</div>;
