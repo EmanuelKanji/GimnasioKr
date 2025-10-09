@@ -46,7 +46,7 @@ export const schemas = {
       'any.only': 'El rol debe ser alumno o profesor',
       'any.required': 'El rol es requerido'
     }),
-    rut: Joi.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
+    rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
       'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
       'any.required': 'El RUT es requerido'
     }),
@@ -62,7 +62,7 @@ export const schemas = {
       'string.max': 'El nombre no puede exceder 50 caracteres',
       'any.required': 'El nombre es requerido'
     }),
-    rut: Joi.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
+    rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
       'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
       'any.required': 'El RUT es requerido'
     }),
@@ -153,12 +153,12 @@ export const schemas = {
 
   // Registrar asistencia
   registrarAsistencia: Joi.object({
-    rut: Joi.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
+    rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
       'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
       'any.required': 'El RUT es requerido'
     }),
     qrData: Joi.object({
-      rut: Joi.string().pattern(/^[0-9]+-[0-9kK]$/),
+      rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/),
       timestamp: Joi.number().integer().min(0),
       hash: Joi.string().min(1)
     }).optional()

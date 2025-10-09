@@ -115,10 +115,10 @@ export default function InscribirAlumnoForm() {
     try {
       const token = localStorage.getItem('token');
       
-      // Preparar datos para enviar (limpiar RUT para el backend)
+      // Preparar datos para enviar (limpiar RUT completamente para el backend)
       const formData = {
         ...form,
-        rut: form.rut.replace(/\./g, '').replace(/-/g, '') // Remover puntos y guión
+        rut: form.rut.replace(/\./g, '').replace(/-/g, '') // Remover puntos y guión completamente
       };
       
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {

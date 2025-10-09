@@ -47,7 +47,7 @@ exports.schemas = {
             'any.only': 'El rol debe ser alumno o profesor',
             'any.required': 'El rol es requerido'
         }),
-        rut: joi_1.default.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
+        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
             'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
             'any.required': 'El RUT es requerido'
         }),
@@ -62,7 +62,7 @@ exports.schemas = {
             'string.max': 'El nombre no puede exceder 50 caracteres',
             'any.required': 'El nombre es requerido'
         }),
-        rut: joi_1.default.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
+        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
             'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
             'any.required': 'El RUT es requerido'
         }),
@@ -148,12 +148,12 @@ exports.schemas = {
     }),
     // Registrar asistencia
     registrarAsistencia: joi_1.default.object({
-        rut: joi_1.default.string().pattern(/^[0-9]+-[0-9kK]$/).required().messages({
+        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
             'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
             'any.required': 'El RUT es requerido'
         }),
         qrData: joi_1.default.object({
-            rut: joi_1.default.string().pattern(/^[0-9]+-[0-9kK]$/),
+            rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/),
             timestamp: joi_1.default.number().integer().min(0),
             hash: joi_1.default.string().min(1)
         }).optional()
