@@ -42,7 +42,7 @@ export default function InscribirAlumnoForm() {
             setPlanes([]);
           }
         }
-      } catch (error) {
+      } catch {
         console.error('Error cargando planes');
       } finally {
         setLoadingPlanes(false);
@@ -114,7 +114,7 @@ export default function InscribirAlumnoForm() {
       } else {
         setMensaje(data.message || 'Error al inscribir alumno.');
       }
-    } catch (error) {
+    } catch {
       setMensaje('Error de conexión con el servidor.');
     }
   };

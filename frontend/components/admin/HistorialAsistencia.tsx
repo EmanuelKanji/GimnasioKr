@@ -34,11 +34,12 @@ export default function HistorialAsistencia() {
       .catch(() => setLoading(false));
   }, []);
 
-  const obtenerEstadoPlan = (diasRestantes: number) => {
-    if (diasRestantes === 0) return 'Vencido';
-    if (diasRestantes <= 7) return 'Próximo a vencer';
-    return 'Activo';
-  };
+  // Función para obtener estado del plan (comentada por no uso actual)
+  // const obtenerEstadoPlan = (diasRestantes: number) => {
+  //   if (diasRestantes === 0) return 'Vencido';
+  //   if (diasRestantes <= 7) return 'Próximo a vencer';
+  //   return 'Activo';
+  // };
 
   const exportarExcel = async () => {
     setExporting(true);

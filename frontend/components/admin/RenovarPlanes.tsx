@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './RenovarPlanes.module.css';
 
 interface AlumnoParaRenovar {
@@ -29,7 +29,7 @@ export default function RenovarPlanes() {
   });
 
   // Cargar alumnos para renovar
-  const cargarAlumnos = async () => {
+  const cargarAlumnos = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/para-renovar?filtro=${filtro}`, {
@@ -45,16 +45,16 @@ export default function RenovarPlanes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtro]);
 
   useEffect(() => {
     cargarAlumnos();
-  }, [filtro]);
+  }, [filtro, cargarAlumnos]);
 
   // Manejar cambio de duración para calcular fecha fin
   const handleDuracionChange = (duracion: string) => {
     const inicio = new Date(formularioRenovacion.fechaInicio);
-    let fin = new Date(inicio);
+    const fin = new Date(inicio);
     
     if (duracion === 'mensual') {
       fin.setMonth(fin.getMonth() + 1);
