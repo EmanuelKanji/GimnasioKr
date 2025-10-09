@@ -68,6 +68,25 @@ export default function InscribirAlumnoForm() {
           limiteClases: planSeleccionado.limiteClases || 'todos_los_dias'
         });
       }
+    } else if (e.target.name === 'rut') {
+      // Formatear RUT automáticamente mientras el usuario escribe
+      const value = e.target.value;
+      
+      // Remover caracteres no numéricos excepto puntos y guión
+      const rutLimpio = value.replace(/[^0-9kK]/g, '');
+      
+      // Aplicar formato automático: 12.345.678-9
+      if (rutLimpio.length > 1) {
+        // Insertar puntos cada 3 dígitos desde la derecha
+        let rutFormateado = rutLimpio.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        // Agregar el último dígito con guión
+        if (rutLimpio.length > 1) {
+          rutFormateado += '-' + rutLimpio.slice(-1);
+        }
+        setForm({ ...form, [e.target.name]: rutFormateado });
+      } else {
+        setForm({ ...form, [e.target.name]: value });
+      }
     } else {
       setForm({ ...form, [e.target.name]: e.target.value });
     }
@@ -79,6 +98,13 @@ export default function InscribirAlumnoForm() {
     e.preventDefault();
     setMensaje(null);
 
+    // Validar formato de RUT
+    const rutRegex = /^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$/;
+    if (!rutRegex.test(form.rut)) {
+      setMensaje('El RUT debe tener el formato 12.345.678-9');
+      return;
+    }
+
     // Validar que descuentos no se apliquen a planes semestrales/anuales
     if ((form.descuentoEspecial === 'familiar_x2' || form.descuentoEspecial === 'familiar_x3') && 
         (form.duracion === 'semestral' || form.duracion === 'anual')) {
@@ -88,13 +114,20 @@ export default function InscribirAlumnoForm() {
 
     try {
       const token = localStorage.getItem('token');
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {
+      
+      // Preparar datos para enviar (limpiar RUT para el backend)
+      const formData = {
+        ...form,
+        rut: form.rut.replace(/\./g, '').replace(/-/g, '') // Remover puntos y guión
+      };
+      
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
       if (res.ok) {
@@ -146,10 +179,12 @@ export default function InscribirAlumnoForm() {
         <input
           type="text"
           name="rut"
-          placeholder="RUT"
+          placeholder="RUT (12.345.678-9)"
           value={form.rut}
           onChange={handleChange}
           className={styles.input}
+          pattern="^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$"
+          title="El RUT debe tener el formato 12.345.678-9"
           required
         />
         <input
