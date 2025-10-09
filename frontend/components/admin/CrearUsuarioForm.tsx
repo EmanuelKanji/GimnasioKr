@@ -18,24 +18,28 @@ export default function CrearUsuarioForm() {
     try {
       const token = localStorage.getItem('token');
       
-      // Limpiar el RUT para enviarlo sin puntos al backend
-      const rutLimpio = rut.replace(/\./g, '');
-      
       let endpoint = '/api/usuarios';
-      let body: { username: string; rut: string; password: string; role: string } | { nombre: string; rut: string; email: string; telefono: string; direccion: string; fechaNacimiento: string; password: string } = { username: email, rut: rutLimpio, password, role };
+      let body: { username: string; rut: string; password: string; role: string } | { nombre: string; rut: string; email: string; telefono: string; direccion: string; fechaNacimiento: string; password: string };
       
-      // Si es profesor, usar endpoint específico y agregar campos adicionales
       if (role === 'profesor') {
+        // Para profesores, usar endpoint específico y mantener formato original del RUT
         endpoint = '/api/profesor';
         body = {
-          nombre: email.split('@')[0], // Usar parte del email como nombre por defecto
-          rut: rutLimpio,
+          nombre: email.split('@')[0].length >= 2 ? email.split('@')[0] : 'Profesor', // Asegurar mínimo 2 caracteres
+          rut: rut, // Mantener formato original con puntos
           email,
-          telefono: '123456789', // Valor por defecto
-          direccion: 'Dirección por definir', // Valor por defecto
-          fechaNacimiento: '1990-01-01', // Valor por defecto
+          telefono: '12345678', // 8 caracteres mínimo
+          direccion: 'Dirección por definir', // 20 caracteres, cumple mínimo 5
+          fechaNacimiento: '1990-01-01', // Formato válido
           password
         };
+        
+        // Debug: Log de datos enviados
+        console.log('🔍 Frontend enviando datos de profesor:', body);
+      } else {
+        // Para alumnos, limpiar RUT como antes
+        const rutLimpio = rut.replace(/\./g, '');
+        body = { username: email, rut: rutLimpio, password, role };
       }
       
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + endpoint, {

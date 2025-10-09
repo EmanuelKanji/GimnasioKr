@@ -13,7 +13,26 @@ const User_1 = __importDefault(require("../models/User"));
 const crearProfesor = async (req, res) => {
     try {
         const { nombre, rut, email, telefono, direccion, fechaNacimiento, password } = req.body;
+        // Debug: Log de datos recibidos
+        console.log('🔍 Backend recibiendo datos de profesor:', {
+            nombre,
+            rut,
+            email,
+            telefono,
+            direccion,
+            fechaNacimiento,
+            password: password ? '***' : 'undefined'
+        });
         if (!nombre || !rut || !email || !telefono || !direccion || !fechaNacimiento || !password) {
+            console.log('❌ Campos faltantes:', {
+                nombre: !!nombre,
+                rut: !!rut,
+                email: !!email,
+                telefono: !!telefono,
+                direccion: !!direccion,
+                fechaNacimiento: !!fechaNacimiento,
+                password: !!password
+            });
             return res.status(400).json({ error: 'Todos los campos son requeridos' });
         }
         // Verificar si el usuario ya existe
