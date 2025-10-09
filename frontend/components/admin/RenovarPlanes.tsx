@@ -32,6 +32,12 @@ export default function RenovarPlanes() {
   const cargarAlumnos = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No hay token de autenticación');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/para-renovar?filtro=${filtro}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -39,6 +45,12 @@ export default function RenovarPlanes() {
       if (res.ok) {
         const data = await res.json();
         setAlumnos(data);
+      } else if (res.status === 401) {
+        console.error('Token expirado o inválido');
+        // Redirigir al login
+        window.location.href = '/login-admin';
+      } else {
+        console.error('Error cargando alumnos:', res.status);
       }
     } catch (error) {
       console.error('Error cargando alumnos:', error);
@@ -75,6 +87,11 @@ export default function RenovarPlanes() {
   const handleRenovar = async (alumnoId: string) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No hay token de autenticación');
+        return;
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/${alumnoId}/renovar`, {
         method: 'POST',
         headers: {
@@ -88,6 +105,9 @@ export default function RenovarPlanes() {
         alert('Plan renovado exitosamente');
         setAlumnoSeleccionado(null);
         cargarAlumnos(); // Recargar lista
+      } else if (res.status === 401) {
+        alert('Sesión expirada. Redirigiendo al login...');
+        window.location.href = '/login-admin';
       } else {
         const error = await res.json();
         alert(`Error: ${error.message}`);
@@ -122,6 +142,20 @@ export default function RenovarPlanes() {
     }
   };
 
+  // Calcular conteos para los filtros
+  const calcularConteos = () => {
+    const todos = alumnos.length;
+    const bloqueados = alumnos.filter(a => {
+      const diasRestantes = calcularDiasRestantes(a.fechaTerminoPlan);
+      return diasRestantes < 0 || (a.estadoRenovacion === 'ninguno' && diasRestantes <= 3);
+    }).length;
+    const solicitados = alumnos.filter(a => a.estadoRenovacion === 'solicitada').length;
+    
+    return { todos, bloqueados, solicitados };
+  };
+
+  const conteos = calcularConteos();
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -140,19 +174,19 @@ export default function RenovarPlanes() {
           className={`${styles.filterBtn} ${filtro === 'todos' ? styles.active : ''}`}
           onClick={() => setFiltro('todos')}
         >
-          Todos ({alumnos.length})
+          Todos ({conteos.todos})
         </button>
         <button 
           className={`${styles.filterBtn} ${filtro === 'bloqueados' ? styles.active : ''}`}
           onClick={() => setFiltro('bloqueados')}
         >
-          QR Bloqueados ({alumnos.filter(a => a.estadoRenovacion === 'ninguno').length})
+          QR Bloqueados ({conteos.bloqueados})
         </button>
         <button 
           className={`${styles.filterBtn} ${filtro === 'solicitados' ? styles.active : ''}`}
           onClick={() => setFiltro('solicitados')}
         >
-          Con Solicitud ({alumnos.filter(a => a.estadoRenovacion === 'solicitada').length})
+          Con Solicitud ({conteos.solicitados})
         </button>
       </div>
 

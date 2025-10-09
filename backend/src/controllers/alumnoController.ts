@@ -116,7 +116,20 @@ export const obtenerAlumnosParaRenovar = async (req: Request, res: Response) => 
     
     let query = {};
     if (filtro === 'bloqueados') {
-      query = { fechaTerminoPlan: { $lt: new Date() } };
+      // Incluir planes expirados y próximos a vencer (3 días o menos)
+      const hoy = new Date();
+      const proximosDias = new Date();
+      proximosDias.setDate(hoy.getDate() + 3);
+      
+      query = { 
+        $or: [
+          { fechaTerminoPlan: { $lt: hoy } }, // Expirados
+          { 
+            fechaTerminoPlan: { $gte: hoy, $lte: proximosDias },
+            estadoRenovacion: { $ne: 'solicitada' }
+          } // Próximos a vencer sin solicitud
+        ]
+      };
     } else if (filtro === 'solicitados') {
       query = { estadoRenovacion: 'solicitada' };
     }
