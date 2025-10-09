@@ -13,29 +13,73 @@ export const obtenerPlanAlumno = async (req: Request, res: Response) => {
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
     
     let nombrePlan = alumno.plan;
+    let descripcionPlan = alumno.descripcionPlan || 'Plan de gimnasio';
+    let limiteClasesPlan = alumno.limiteClases || 'todos_los_dias';
     
-    // Si el plan es un ID (ObjectId válido), buscar el plan real
+    // Buscar plan en la colección Plan para obtener descripción actualizada
     if (alumno.plan && alumno.plan.length === 24 && /^[0-9a-fA-F]{24}$/.test(alumno.plan)) {
       try {
         const planEncontrado = await Plan.findById(alumno.plan);
         if (planEncontrado) {
           nombrePlan = planEncontrado.nombre;
+          descripcionPlan = planEncontrado.descripcion;
+          limiteClasesPlan = planEncontrado.limiteClases;
           // Actualizar el alumno con el nombre del plan para futuras consultas
-          await Alumno.findByIdAndUpdate(alumno._id, { plan: planEncontrado.nombre });
+          await Alumno.findByIdAndUpdate(alumno._id, { 
+            plan: planEncontrado.nombre,
+            descripcionPlan: planEncontrado.descripcion,
+            limiteClases: planEncontrado.limiteClases
+          });
         }
       } catch (error) {
         console.error('Error buscando plan por ID:', error);
       }
+    } else {
+      // Buscar plan por nombre para obtener descripción
+      try {
+        const planEncontrado = await Plan.findOne({ nombre: alumno.plan });
+        if (planEncontrado) {
+          descripcionPlan = planEncontrado.descripcion;
+          limiteClasesPlan = alumno.limiteClases || planEncontrado.limiteClases;
+          // Actualizar descripción del alumno si no la tiene
+          if (!alumno.descripcionPlan) {
+            await Alumno.findByIdAndUpdate(alumno._id, { 
+              descripcionPlan: planEncontrado.descripcion,
+              limiteClases: limiteClasesPlan
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error buscando plan por nombre:', error);
+      }
     }
     
-    res.json({ plan: {
-      nombre: nombrePlan,
-      descripcion: 'Acceso ilimitado a clases grupales y uso de gimnasio.',
-      fechaInicio: alumno.fechaInicioPlan,
-      fechaFin: alumno.fechaTerminoPlan,
-      estadoPago: 'pagado',
-      monto: alumno.monto
-    }});
+    // Determinar estado de pago basado en si el QR está bloqueado
+    const hoy = new Date();
+    const inicio = new Date(alumno.fechaInicioPlan);
+    const fin = new Date(alumno.fechaTerminoPlan);
+    const planActivo = hoy >= inicio && hoy <= fin;
+    
+    // Calcular días restantes
+    const diasRestantes = Math.ceil((fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Determinar si está bloqueado (plan expirado o próximo a vencer sin renovación)
+    const estaBloqueado = !planActivo || 
+                         (diasRestantes < 0) || 
+                         (diasRestantes <= 3 && alumno.estadoRenovacion !== 'solicitada');
+    
+    res.json({ 
+      plan: {
+        nombre: nombrePlan,
+        descripcion: descripcionPlan,
+        fechaInicio: alumno.fechaInicioPlan,
+        fechaFin: alumno.fechaTerminoPlan,
+        estadoPago: estaBloqueado ? 'bloqueado' : 'activo',
+        monto: alumno.monto,
+        limiteClases: limiteClasesPlan,
+        duracion: alumno.duracion
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener plan de alumno', error });
   }
@@ -160,11 +204,23 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
     const alumno = await Alumno.findById(id);
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
     
+    // Buscar el plan para obtener la descripción
+    let descripcionPlan = 'Plan de gimnasio';
+    try {
+      const planEncontrado = await Plan.findOne({ nombre: alumno.plan });
+      if (planEncontrado) {
+        descripcionPlan = planEncontrado.descripcion;
+      }
+    } catch (error) {
+      console.error('Error buscando plan para renovación:', error);
+    }
+    
     // Actualizar datos del plan
     alumno.fechaInicioPlan = fechaInicio;
     alumno.fechaTerminoPlan = fechaFin;
     alumno.duracion = duracion;
     alumno.limiteClases = limiteClases;
+    alumno.descripcionPlan = descripcionPlan;
     alumno.estadoRenovacion = 'completada';
     alumno.asistencias = []; // Resetear asistencias del nuevo período
     
@@ -359,7 +415,8 @@ export const crearAlumno = async (req: Request, res: Response) => {
       fechaTerminoPlan: termino.toISOString(),
       duracion,
       monto,
-      limiteClases: limiteClases || 'todos_los_dias',
+      limiteClases: limiteClases || planEncontrado.limiteClases || 'todos_los_dias',
+      descripcionPlan: planEncontrado.descripcion,
       asistencias: [],
       avisos: []
     });

@@ -12,6 +12,9 @@ interface PerfilInfo {
   plan?: string;
   fechaInicioPlan?: string;
   fechaTerminoPlan?: string;
+  limiteClases?: '12' | '8' | 'todos_los_dias';
+  descripcionPlan?: string;
+  duracion?: string;
 }
 
 interface PerfilCache {

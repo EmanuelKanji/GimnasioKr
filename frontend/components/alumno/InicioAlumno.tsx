@@ -77,8 +77,9 @@ export default function InicioAlumno() {
             <span className={styles.compactLabel}>Plan:</span>
             <div className={styles.planInfo}>
               <span className={styles.planName}>{plan?.nombre || 'Sin plan'}</span>
-              <span className={plan?.estadoPago === 'pagado' ? styles.paid : styles.pending}>
-                {plan?.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}
+              <span className={plan?.estadoPago === 'activo' ? styles.paid : styles.pending}>
+                {plan?.estadoPago === 'activo' ? 'Activo' : 
+                 plan?.estadoPago === 'bloqueado' ? 'Bloqueado' : 'Pendiente'}
               </span>
               <span className={styles.planDates}>{plan?.fechaInicio ? `${new Date(plan.fechaInicio).toLocaleDateString('es-CL')}` : ''}{plan?.fechaFin ? ` - ${new Date(plan.fechaFin).toLocaleDateString('es-CL')}` : ''}</span>
               <span className={styles.planMonto}>{plan ? `$${plan.monto?.toLocaleString('es-CL')}` : ''}</span>

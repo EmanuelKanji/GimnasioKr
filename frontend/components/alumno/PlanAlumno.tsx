@@ -14,8 +14,9 @@ export default function PlanAlumno() {
       <div className={styles.planBox}>
         <div className={styles.planHeader}>
           <span className={styles.planName}>{plan.nombre}</span>
-          <span className={plan.estadoPago === 'pagado' ? styles.paid : styles.pending}>
-            {plan.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}
+          <span className={plan.estadoPago === 'activo' ? styles.paid : styles.pending}>
+            {plan.estadoPago === 'activo' ? 'Activo' : 
+             plan.estadoPago === 'bloqueado' ? 'Bloqueado' : 'Pendiente'}
           </span>
         </div>
         <div className={styles.planDescription}>{plan.descripcion}</div>

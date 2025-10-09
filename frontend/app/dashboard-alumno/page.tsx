@@ -79,11 +79,13 @@ export default function DashboardAlumno() {
   const { asistencias: asistenciasMes } = useAsistencias();
   const { perfil, loading: loadingPerfil } = usePerfil();
 
-  // Obtener límite de clases del plan cuando el perfil se carga
+  // Obtener límite de clases del perfil real
   useEffect(() => {
-    if (perfil?.plan) {
-      // Aquí se debería obtener el límite de clases del plan desde la API
-      // Por ahora usamos un valor por defecto basado en el nombre del plan
+    if (perfil?.limiteClases) {
+      // Usar el campo limiteClases del perfil
+      setLimiteClases(perfil.limiteClases);
+    } else if (perfil?.plan) {
+      // Fallback: inferir del nombre del plan (para alumnos antiguos)
       const planNombre = perfil.plan.toLowerCase();
       if (planNombre.includes('12')) {
         setLimiteClases('12');

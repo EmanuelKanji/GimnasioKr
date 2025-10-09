@@ -51,6 +51,7 @@ const AlumnoSchema = new mongoose_1.Schema({
         enum: ['12', '8', 'todos_los_dias'],
         default: 'todos_los_dias'
     },
+    descripcionPlan: { type: String, required: false },
     asistencias: { type: [String], default: [] }, // Fechas ISO
     avisos: {
         type: [

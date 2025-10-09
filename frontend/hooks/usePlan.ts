@@ -7,8 +7,10 @@ interface PlanInfo {
   descripcion: string;
   fechaInicio: string;
   fechaFin: string;
-  estadoPago: 'pagado' | 'pendiente';
+  estadoPago: 'activo' | 'bloqueado' | 'pendiente';
   monto: number;
+  limiteClases?: '12' | '8' | 'todos_los_dias';
+  duracion?: string;
 }
 
 interface PlanCache {

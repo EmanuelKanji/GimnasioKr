@@ -102,6 +102,9 @@ export interface PerfilInfo {
   plan?: string;
   fechaInicioPlan?: string;
   fechaTerminoPlan?: string;
+  limiteClases?: '12' | '8' | 'todos_los_dias';
+  descripcionPlan?: string;
+  duracion?: string;
 }
 
 export interface PlanAlumno {
@@ -112,7 +115,7 @@ export interface PlanAlumno {
   duracion?: string;
   clases?: string | number;
   matricula?: string | number;
-  estadoPago?: string;
+  estadoPago?: 'activo' | 'bloqueado' | 'pendiente';
   monto?: number;
   fechaInicio?: string;
   fechaTermino?: string;
