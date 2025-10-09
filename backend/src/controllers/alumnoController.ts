@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import User from '../models/User';
 import Alumno from '../models/Alumno';
+import Plan from '../models/Plan';
 
 // Obtener plan del alumno por RUT
 export const obtenerPlanAlumno = async (req: Request, res: Response) => {
@@ -10,14 +11,31 @@ export const obtenerPlanAlumno = async (req: Request, res: Response) => {
     if (!rut) return res.status(400).json({ message: 'RUT no presente en el token' });
     const alumno = await Alumno.findOne({ rut });
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
-      res.json({ plan: {
-        nombre: alumno.plan,
-        descripcion: 'Acceso ilimitado a clases grupales y uso de gimnasio.',
-        fechaInicio: alumno.fechaInicioPlan,
-        fechaFin: alumno.fechaTerminoPlan,
-        estadoPago: 'pagado',
-        monto: alumno.monto
-      }});
+    
+    let nombrePlan = alumno.plan;
+    
+    // Si el plan es un ID (ObjectId válido), buscar el plan real
+    if (alumno.plan && alumno.plan.length === 24 && /^[0-9a-fA-F]{24}$/.test(alumno.plan)) {
+      try {
+        const planEncontrado = await Plan.findById(alumno.plan);
+        if (planEncontrado) {
+          nombrePlan = planEncontrado.nombre;
+          // Actualizar el alumno con el nombre del plan para futuras consultas
+          await Alumno.findByIdAndUpdate(alumno._id, { plan: planEncontrado.nombre });
+        }
+      } catch (error) {
+        console.error('Error buscando plan por ID:', error);
+      }
+    }
+    
+    res.json({ plan: {
+      nombre: nombrePlan,
+      descripcion: 'Acceso ilimitado a clases grupales y uso de gimnasio.',
+      fechaInicio: alumno.fechaInicioPlan,
+      fechaFin: alumno.fechaTerminoPlan,
+      estadoPago: 'pagado',
+      monto: alumno.monto
+    }});
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener plan de alumno', error });
   }
@@ -146,11 +164,19 @@ export const crearAlumno = async (req: Request, res: Response) => {
       fechaInicioPlan,
       duracion,
       monto,
-      password
+      password,
+      limiteClases
     } = req.body;
     if (!nombre || !rut || !direccion || !fechaNacimiento || !email || !telefono || !plan || !fechaInicioPlan || !duracion || !password) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
+    
+    // Buscar el plan por ID para obtener el nombre
+    const planEncontrado = await Plan.findById(plan);
+    if (!planEncontrado) {
+      return res.status(404).json({ message: 'Plan no encontrado.' });
+    }
+    
     // Verificar si el usuario ya existe
     const userExistente = await User.findOne({ username: email });
     if (userExistente) {
@@ -182,11 +208,12 @@ export const crearAlumno = async (req: Request, res: Response) => {
       fechaNacimiento,
       email,
       telefono,
-      plan,
+      plan: planEncontrado.nombre, // Guardar el nombre del plan en lugar del ID
       fechaInicioPlan,
       fechaTerminoPlan: termino.toISOString(),
       duracion,
       monto,
+      limiteClases: limiteClases || 'todos_los_dias',
       asistencias: [],
       avisos: []
     });
