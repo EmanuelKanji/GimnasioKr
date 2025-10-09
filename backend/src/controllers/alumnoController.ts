@@ -147,6 +147,16 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { fechaInicio, fechaFin, duracion, limiteClases, observaciones } = req.body;
     
+    console.log('Datos recibidos para renovación:', { id, fechaInicio, fechaFin, duracion, limiteClases, observaciones });
+    
+    // Validar que todos los campos requeridos estén presentes
+    if (!fechaInicio || !fechaFin || !duracion || !limiteClases) {
+      return res.status(400).json({ 
+        message: 'Faltan campos requeridos', 
+        campos: { fechaInicio, fechaFin, duracion, limiteClases } 
+      });
+    }
+    
     const alumno = await Alumno.findById(id);
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
     
@@ -168,7 +178,21 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
       observaciones
     });
     
-    await alumno.save();
+    console.log('Intentando guardar alumno:', {
+      id: alumno._id,
+      fechaInicioPlan: alumno.fechaInicioPlan,
+      fechaTerminoPlan: alumno.fechaTerminoPlan,
+      duracion: alumno.duracion,
+      limiteClases: alumno.limiteClases
+    });
+    
+    try {
+      await alumno.save();
+      console.log('Alumno guardado exitosamente');
+    } catch (saveError) {
+      console.error('Error al guardar alumno:', saveError);
+      throw saveError;
+    }
     
     res.json({ 
       message: 'Plan renovado exitosamente',
@@ -181,7 +205,12 @@ export const renovarPlanAlumno = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al renovar plan', error });
+    console.error('Error completo en renovarPlanAlumno:', error);
+    res.status(500).json({ 
+      message: 'Error al renovar plan', 
+      error: error.message || error,
+      details: error
+    });
   }
 };
 

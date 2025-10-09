@@ -20,9 +20,25 @@ export default function RenovarPlanes() {
   const [filtro, setFiltro] = useState<'todos' | 'bloqueados' | 'solicitados'>('todos');
   const [loading, setLoading] = useState(true);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<string | null>(null);
+  // Calcular fecha fin inicial
+  const calcularFechaFin = (fechaInicio: string, duracion: string) => {
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(inicio);
+    
+    if (duracion === 'mensual') {
+      fin.setMonth(fin.getMonth() + 1);
+    } else if (duracion === 'trimestral') {
+      fin.setMonth(fin.getMonth() + 3);
+    } else if (duracion === 'anual') {
+      fin.setFullYear(fin.getFullYear() + 1);
+    }
+    
+    return fin.toISOString().split('T')[0];
+  };
+
   const [formularioRenovacion, setFormularioRenovacion] = useState({
     fechaInicio: new Date().toISOString().split('T')[0],
-    fechaFin: '',
+    fechaFin: calcularFechaFin(new Date().toISOString().split('T')[0], 'mensual'),
     duracion: 'mensual',
     limiteClases: 'todos_los_dias',
     observaciones: ''
@@ -65,21 +81,23 @@ export default function RenovarPlanes() {
 
   // Manejar cambio de duración para calcular fecha fin
   const handleDuracionChange = (duracion: string) => {
-    const inicio = new Date(formularioRenovacion.fechaInicio);
-    const fin = new Date(inicio);
-    
-    if (duracion === 'mensual') {
-      fin.setMonth(fin.getMonth() + 1);
-    } else if (duracion === 'trimestral') {
-      fin.setMonth(fin.getMonth() + 3);
-    } else if (duracion === 'anual') {
-      fin.setFullYear(fin.getFullYear() + 1);
-    }
+    const fechaFin = calcularFechaFin(formularioRenovacion.fechaInicio, duracion);
     
     setFormularioRenovacion({
       ...formularioRenovacion,
       duracion,
-      fechaFin: fin.toISOString().split('T')[0]
+      fechaFin
+    });
+  };
+
+  // Manejar cambio de fecha de inicio para recalcular fecha fin
+  const handleFechaInicioChange = (fechaInicio: string) => {
+    const fechaFin = calcularFechaFin(fechaInicio, formularioRenovacion.duracion);
+    
+    setFormularioRenovacion({
+      ...formularioRenovacion,
+      fechaInicio,
+      fechaFin
     });
   };
 
@@ -92,16 +110,35 @@ export default function RenovarPlanes() {
         return;
       }
 
+      // Validar que todos los campos estén completos
+      if (!formularioRenovacion.fechaInicio || !formularioRenovacion.fechaFin || !formularioRenovacion.duracion || !formularioRenovacion.limiteClases) {
+        alert('Por favor completa todos los campos requeridos');
+        return;
+      }
+
+      // Preparar datos para el backend
+      const datosRenovacion = {
+        fechaInicio: formularioRenovacion.fechaInicio,
+        fechaFin: formularioRenovacion.fechaFin,
+        duracion: formularioRenovacion.duracion,
+        limiteClases: formularioRenovacion.limiteClases,
+        observaciones: formularioRenovacion.observaciones || ''
+      };
+
+      console.log('Enviando datos de renovación:', datosRenovacion);
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/${alumnoId}/renovar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formularioRenovacion)
+        body: JSON.stringify(datosRenovacion)
       });
       
       if (res.ok) {
+        const responseData = await res.json();
+        console.log('Respuesta exitosa:', responseData);
         alert('Plan renovado exitosamente');
         setAlumnoSeleccionado(null);
         cargarAlumnos(); // Recargar lista
@@ -109,12 +146,14 @@ export default function RenovarPlanes() {
         alert('Sesión expirada. Redirigiendo al login...');
         window.location.href = '/login-admin';
       } else {
-        const error = await res.json();
-        alert(`Error: ${error.message}`);
+        const errorData = await res.json();
+        console.error('Error del servidor:', errorData);
+        alert(`Error: ${errorData.message || 'Error desconocido'}`);
       }
     } catch (error) {
       console.error('Error renovando plan:', error);
-      alert('Error al renovar plan');
+      const errorMessage = error instanceof Error ? error.message : 'Error de conexión';
+      alert(`Error al renovar plan: ${errorMessage}`);
     }
   };
 
@@ -244,7 +283,7 @@ export default function RenovarPlanes() {
                         <input 
                           type="date" 
                           value={formularioRenovacion.fechaInicio}
-                          onChange={(e) => setFormularioRenovacion({...formularioRenovacion, fechaInicio: e.target.value})}
+                          onChange={(e) => handleFechaInicioChange(e.target.value)}
                           required
                         />
                       </div>
@@ -259,6 +298,19 @@ export default function RenovarPlanes() {
                           <option value="trimestral">Trimestral</option>
                           <option value="anual">Anual</option>
                         </select>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Fecha de Término (calculada):</label>
+                        <input 
+                          type="date" 
+                          value={formularioRenovacion.fechaFin}
+                          readOnly
+                          className={styles.readOnlyInput}
+                        />
+                        <small className={styles.helpText}>
+                          Esta fecha se calcula automáticamente según la duración seleccionada
+                        </small>
                       </div>
 
                       <div className={styles.formGroup}>

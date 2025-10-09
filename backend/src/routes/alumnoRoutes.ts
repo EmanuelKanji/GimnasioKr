@@ -27,9 +27,9 @@ router.get('/me/asistencias', requireRole(['alumno', 'admin']), obtenerAsistenci
 router.get('/me/avisos', requireRole(['alumno', 'admin']), obtenerAvisosAlumno);
 
 // Rutas de renovación
-router.post('/me/solicitar-renovacion', requireRole(['alumno']), solicitarRenovacion);
+router.post('/me/solicitar-renovacion', requireRole(['alumno']), validate(schemas.solicitarRenovacion), solicitarRenovacion);
 router.get('/me/estado-renovacion', requireRole(['alumno']), obtenerEstadoRenovacion);
 router.get('/para-renovar', requireRole(['admin']), obtenerAlumnosParaRenovar);
-router.post('/:id/renovar', requireRole(['admin']), renovarPlanAlumno);
+router.post('/:id/renovar', requireRole(['admin']), validate(schemas.renovarPlan), renovarPlanAlumno);
 
 export default router;
