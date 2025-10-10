@@ -103,10 +103,9 @@ const actualizarPerfilProfesor = async (req, res) => {
     try {
         const rut = req.user?.rut;
         const update = req.body;
-        // Debug: Log de datos recibidos
         console.log('🔍 Backend actualizando perfil profesor:', {
             rut,
-            update
+            update: { ...update, password: update.password ? '***' : undefined }
         });
         if (!rut) {
             return res.status(400).json({ error: 'RUT no encontrado en el token' });
@@ -116,7 +115,7 @@ const actualizarPerfilProfesor = async (req, res) => {
         if (!profesorExistente) {
             return res.status(404).json({ error: 'Profesor no encontrado' });
         }
-        // Actualizar solo los campos permitidos (excluir RUT)
+        // Actualizar campos del modelo Profesor (excluir RUT y password)
         const camposPermitidos = ['nombre', 'email', 'telefono', 'direccion', 'fechaNacimiento'];
         const updateFiltrado = {};
         for (const campo of camposPermitidos) {
@@ -124,12 +123,29 @@ const actualizarPerfilProfesor = async (req, res) => {
                 updateFiltrado[campo] = update[campo];
             }
         }
-        console.log('🔍 Campos a actualizar:', updateFiltrado);
+        console.log('🔍 Campos a actualizar en Profesor:', updateFiltrado);
+        // Actualizar modelo Profesor
         const profesor = await Profesor_1.default.findOneAndUpdate({ rut }, updateFiltrado, { new: true, runValidators: true });
         if (!profesor) {
             return res.status(404).json({ error: 'No se pudo actualizar el perfil' });
         }
-        console.log('✅ Perfil actualizado exitosamente:', profesor);
+        // Si se incluye password, actualizar en el modelo User
+        if (update.password) {
+            console.log('🔍 Actualizando contraseña en User para email:', profesorExistente.email);
+            const user = await User_1.default.findOne({
+                username: profesorExistente.email,
+                role: 'profesor'
+            });
+            if (user) {
+                user.password = update.password; // El pre-save hook hasheará automáticamente
+                await user.save(); // Dispara el hook
+                console.log('✅ Contraseña actualizada exitosamente en User');
+            }
+            else {
+                console.warn('⚠️ No se encontró usuario para actualizar contraseña');
+            }
+        }
+        console.log('✅ Perfil actualizado exitosamente');
         res.json(profesor);
     }
     catch (err) {
