@@ -76,6 +76,7 @@ export interface Asistencia {
   email?: string;
   telefono?: string;
   plan?: string;
+  fechaTerminoPlan?: string; // Fecha de término del plan del alumno
   validadoPor?: string;
   createdAt?: string;
   updatedAt?: string;
