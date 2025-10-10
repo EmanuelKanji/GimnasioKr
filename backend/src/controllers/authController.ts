@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import User from '../models/User';
 import Alumno from '../models/Alumno';
+import Profesor from '../models/Profesor';
 
 export const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -24,13 +25,16 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // Si es alumno, buscar su RUT
-    let rut = undefined;
-    if (user.role === 'alumno') {
-      // Buscar el alumno por el email del usuario
-      const alumno = await Alumno.findOne({ email: user.username });
-      rut = alumno ? alumno.rut : undefined;
-  // RUT encontrado para alumno: debug
+    // Buscar RUT según el rol
+    let rut = user.rut; // Primero intentar del modelo User
+    if (!rut) {
+      if (user.role === 'alumno') {
+        const alumno = await Alumno.findOne({ email: user.username });
+        rut = alumno ? alumno.rut : undefined;
+      } else if (user.role === 'profesor') {
+        const profesor = await Profesor.findOne({ email: user.username });
+        rut = profesor ? profesor.rut : undefined;
+      }
     }
 
     // Verificar que JWT_SECRET esté definida

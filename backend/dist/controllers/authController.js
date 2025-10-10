@@ -7,6 +7,7 @@ exports.loginUser = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
+const Profesor_1 = __importDefault(require("../models/Profesor"));
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -24,13 +25,17 @@ const loginUser = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ error: 'Credenciales inválidas' });
         }
-        // Si es alumno, buscar su RUT
-        let rut = undefined;
-        if (user.role === 'alumno') {
-            // Buscar el alumno por el email del usuario
-            const alumno = await Alumno_1.default.findOne({ email: user.username });
-            rut = alumno ? alumno.rut : undefined;
-            // RUT encontrado para alumno: debug
+        // Buscar RUT según el rol
+        let rut = user.rut; // Primero intentar del modelo User
+        if (!rut) {
+            if (user.role === 'alumno') {
+                const alumno = await Alumno_1.default.findOne({ email: user.username });
+                rut = alumno ? alumno.rut : undefined;
+            }
+            else if (user.role === 'profesor') {
+                const profesor = await Profesor_1.default.findOne({ email: user.username });
+                rut = profesor ? profesor.rut : undefined;
+            }
         }
         // Verificar que JWT_SECRET esté definida
         if (!process.env.JWT_SECRET) {

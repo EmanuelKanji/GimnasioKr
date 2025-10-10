@@ -237,9 +237,10 @@ exports.schemas = {
             'string.email': 'El email debe tener un formato válido',
             'any.required': 'El email es requerido'
         }),
-        telefono: joi_1.default.string().min(8).max(15).required().messages({
+        telefono: joi_1.default.string().min(8).max(20).pattern(/^[0-9+\-\s()]+$/).required().messages({
             'string.min': 'El teléfono debe tener al menos 8 caracteres',
-            'string.max': 'El teléfono no puede exceder 15 caracteres',
+            'string.max': 'El teléfono no puede exceder 20 caracteres',
+            'string.pattern.base': 'El teléfono solo puede contener números y símbolos (+, -, espacios, paréntesis)',
             'any.required': 'El teléfono es requerido'
         }),
         direccion: joi_1.default.string().min(5).max(100).required().messages({
@@ -264,9 +265,10 @@ exports.schemas = {
         email: joi_1.default.string().email().optional().messages({
             'string.email': 'El email debe tener un formato válido'
         }),
-        telefono: joi_1.default.string().min(8).max(15).optional().messages({
+        telefono: joi_1.default.string().min(8).max(20).pattern(/^[0-9+\-\s()]+$/).optional().messages({
             'string.min': 'El teléfono debe tener al menos 8 caracteres',
-            'string.max': 'El teléfono no puede exceder 15 caracteres'
+            'string.max': 'El teléfono no puede exceder 20 caracteres',
+            'string.pattern.base': 'El teléfono solo puede contener números y símbolos (+, -, espacios, paréntesis)'
         }),
         direccion: joi_1.default.string().min(5).max(100).optional().messages({
             'string.min': 'La dirección debe tener al menos 5 caracteres',

@@ -90,7 +90,10 @@ export const crearProfesor = async (req: Request, res: Response) => {
 export const obtenerPerfilProfesor = async (req: AuthRequest, res: Response) => {
   try {
     const rut = req.user?.rut;
+    console.log('🔍 Debug - RUT del token:', rut);
+    console.log('🔍 Debug - Usuario del token:', req.user);
     const profesor = await Profesor.findOne({ rut });
+    console.log('🔍 Debug - Profesor encontrado:', profesor);
     if (!profesor) return res.status(404).json({ error: 'Profesor no encontrado' });
     res.json(profesor);
   } catch (err) {

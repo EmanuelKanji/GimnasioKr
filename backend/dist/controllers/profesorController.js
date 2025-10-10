@@ -86,7 +86,10 @@ exports.crearProfesor = crearProfesor;
 const obtenerPerfilProfesor = async (req, res) => {
     try {
         const rut = req.user?.rut;
+        console.log('🔍 Debug - RUT del token:', rut);
+        console.log('🔍 Debug - Usuario del token:', req.user);
         const profesor = await Profesor_1.default.findOne({ rut });
+        console.log('🔍 Debug - Profesor encontrado:', profesor);
         if (!profesor)
             return res.status(404).json({ error: 'Profesor no encontrado' });
         res.json(profesor);
