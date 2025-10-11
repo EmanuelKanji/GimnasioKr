@@ -20,6 +20,8 @@ export default function RenovarPlanes() {
   const [filtro, setFiltro] = useState<'todos' | 'bloqueados' | 'solicitados'>('todos');
   const [loading, setLoading] = useState(true);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<string | null>(null);
+  const [procesandoRenovacion, setProcesandoRenovacion] = useState<string | null>(null);
+
   // Calcular fecha fin inicial
   const calcularFechaFin = (fechaInicio: string, duracion: string) => {
     const inicio = new Date(fechaInicio);
@@ -67,7 +69,6 @@ export default function RenovarPlanes() {
         setAlumnos(data);
       } else if (res.status === 401) {
         console.error('Token expirado o inválido');
-        // Redirigir al login
         window.location.href = '/login-admin';
       } else {
         console.error('Error cargando alumnos:', res.status);
@@ -82,6 +83,21 @@ export default function RenovarPlanes() {
   useEffect(() => {
     cargarAlumnos();
   }, [filtro, cargarAlumnos]);
+
+  // Resetear formulario cuando se selecciona nuevo alumno
+  useEffect(() => {
+    if (alumnoSeleccionado) {
+      setFormularioRenovacion({
+        fechaInicio: new Date().toISOString().split('T')[0],
+        fechaFin: calcularFechaFin(new Date().toISOString().split('T')[0], 'mensual'),
+        duracion: 'mensual',
+        limiteClases: 'todos_los_dias',
+        observaciones: '',
+        descuentoEspecial: 'ninguno',
+        monto: 0
+      });
+    }
+  }, [alumnoSeleccionado]);
 
   // Manejar cambio de duración para calcular fecha fin
   const handleDuracionChange = (duracion: string) => {
@@ -108,6 +124,7 @@ export default function RenovarPlanes() {
   // Renovar plan de alumno
   const handleRenovar = async (alumnoId: string) => {
     try {
+      setProcesandoRenovacion(alumnoId);
       const token = localStorage.getItem('token');
       if (!token) {
         alert('No hay token de autenticación');
@@ -138,8 +155,6 @@ export default function RenovarPlanes() {
         monto: formularioRenovacion.monto || undefined
       };
 
-      console.log('Enviando datos de renovación:', datosRenovacion);
-
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/${alumnoId}/renovar`, {
         method: 'POST',
         headers: {
@@ -151,22 +166,22 @@ export default function RenovarPlanes() {
       
       if (res.ok) {
         const responseData = await res.json();
-        console.log('Respuesta exitosa:', responseData);
-        alert('Plan renovado exitosamente');
+        alert('✅ Plan renovado exitosamente');
         setAlumnoSeleccionado(null);
-        cargarAlumnos(); // Recargar lista
+        cargarAlumnos();
       } else if (res.status === 401) {
         alert('Sesión expirada. Redirigiendo al login...');
         window.location.href = '/login-admin';
       } else {
         const errorData = await res.json();
-        console.error('Error del servidor:', errorData);
-        alert(`Error: ${errorData.message || 'Error desconocido'}`);
+        alert(`❌ Error: ${errorData.message || 'Error desconocido'}`);
       }
     } catch (error) {
       console.error('Error renovando plan:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error de conexión';
-      alert(`Error al renovar plan: ${errorMessage}`);
+      alert(`❌ Error al renovar plan: ${errorMessage}`);
+    } finally {
+      setProcesandoRenovacion(null);
     }
   };
 
@@ -184,13 +199,13 @@ export default function RenovarPlanes() {
     const diasRestantes = calcularDiasRestantes(alumno.fechaTerminoPlan);
     
     if (alumno.estadoRenovacion === 'solicitada') {
-      return { texto: 'Solicitud enviada', color: '#f59e0b', icono: '⏳' };
+      return { texto: 'Solicitud enviada', color: '#f59e0b', icono: '⏳', clase: styles.estadoSolicitada };
     } else if (diasRestantes < 0) {
-      return { texto: 'Plan expirado', color: '#ef4444', icono: '❌' };
+      return { texto: 'Plan expirado', color: '#ef4444', icono: '❌', clase: styles.estadoExpirado };
     } else if (diasRestantes <= 3) {
-      return { texto: `Termina en ${diasRestantes} días`, color: '#f59e0b', icono: '⚠️' };
+      return { texto: `Termina en ${diasRestantes} días`, color: '#f59e0b', icono: '⚠️', clase: styles.estadoPorVencer };
     } else {
-      return { texto: 'QR bloqueado', color: '#6b7280', icono: '🔒' };
+      return { texto: 'QR bloqueado', color: '#6b7280', icono: '🔒', clase: styles.estadoBloqueado };
     }
   };
 
@@ -211,14 +226,21 @@ export default function RenovarPlanes() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Cargando alumnos...</div>
+        <div className={styles.loading}>
+          <div className={styles.loadingText}>Cargando alumnos...</div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>🔄 Renovar Planes</h2>
+      <div className={styles.header}>
+        <h2 className={styles.title}>🔄 Renovar Planes</h2>
+        <div className={styles.resultsInfo}>
+          {alumnos.length} alumno{alumnos.length !== 1 ? 's' : ''} encontrado{alumnos.length !== 1 ? 's' : ''}
+        </div>
+      </div>
       
       {/* Filtros */}
       <div className={styles.filters}>
@@ -246,27 +268,38 @@ export default function RenovarPlanes() {
       <div className={styles.alumnosList}>
         {alumnos.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No hay alumnos que requieran renovación</p>
+            <div className={styles.emptyIcon}>📋</div>
+            <div className={styles.emptyText}>No hay alumnos que requieran renovación</div>
+            <div className={styles.emptySubtext}>
+              {filtro === 'todos' 
+                ? 'Todos los planes están activos y sin solicitudes pendientes'
+                : `No hay alumnos que coincidan con el filtro "${filtro}"`}
+            </div>
           </div>
         ) : (
           alumnos.map(alumno => {
             const estado = obtenerEstadoVisual(alumno);
             const diasRestantes = calcularDiasRestantes(alumno.fechaTerminoPlan);
+            const estaProcesando = procesandoRenovacion === alumno._id;
             
             return (
               <div key={alumno._id} className={styles.alumnoCard}>
-                <div className={styles.alumnoInfo}>
-                  <h3 className={styles.alumnoNombre}>{alumno.nombre}</h3>
-                  <p className={styles.alumnoRut}>RUT: {alumno.rut}</p>
-                  <p className={styles.alumnoPlan}>Plan: {alumno.plan}</p>
-                  <p className={styles.alumnoFechas}>
-                    {new Date(alumno.fechaInicioPlan).toLocaleDateString('es-CL')} - {new Date(alumno.fechaTerminoPlan).toLocaleDateString('es-CL')}
-                  </p>
+                <div className={styles.alumnoHeader}>
+                  <div className={styles.alumnoInfo}>
+                    <h3 className={styles.alumnoNombre}>{alumno.nombre}</h3>
+                    <p className={styles.alumnoRut}>RUT: {alumno.rut}</p>
+                    <div className={styles.alumnoDetails}>
+                      <span className={styles.planBadge} data-plan={alumno.plan?.toLowerCase()}>
+                        {alumno.plan}
+                      </span>
+                      <span className={styles.fechas}>
+                        {new Date(alumno.fechaInicioPlan).toLocaleDateString('es-CL')} - {new Date(alumno.fechaTerminoPlan).toLocaleDateString('es-CL')}
+                      </span>
+                    </div>
+                  </div>
+                  
                   <div className={styles.estadoContainer}>
-                    <span 
-                      className={styles.estado}
-                      style={{ color: estado.color }}
-                    >
+                    <span className={`${styles.estado} ${estado.clase}`}>
                       {estado.icono} {estado.texto}
                     </span>
                     {diasRestantes > 0 && (
@@ -279,98 +312,115 @@ export default function RenovarPlanes() {
 
                 <div className={styles.actions}>
                   <button 
-                    onClick={() => setAlumnoSeleccionado(alumno._id)}
+                    onClick={() => setAlumnoSeleccionado(alumnoSeleccionado === alumno._id ? null : alumno._id)}
                     className={styles.renovarBtn}
+                    disabled={estaProcesando}
                   >
-                    🔄 Renovar Plan
+                    {estaProcesando ? '⏳ Procesando...' : '🔄 Renovar Plan'}
                   </button>
                 </div>
 
                 {/* Formulario de Renovación Expandido */}
                 {alumnoSeleccionado === alumno._id && (
                   <div className={styles.formularioRenovacion}>
-                    <h4>Renovar Plan para {alumno.nombre}</h4>
+                    <div className={styles.formHeader}>
+                      <h4>Renovar Plan para {alumno.nombre}</h4>
+                      <button 
+                        onClick={() => setAlumnoSeleccionado(null)}
+                        className={styles.closeBtn}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
                     <form onSubmit={(e) => { e.preventDefault(); handleRenovar(alumno._id); }}>
-                      <div className={styles.formGroup}>
-                        <label>Fecha de Inicio:</label>
-                        <input 
-                          type="date" 
-                          value={formularioRenovacion.fechaInicio}
-                          onChange={(e) => handleFechaInicioChange(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div className={styles.formGroup}>
-                        <label>Duración:</label>
-                        <select 
-                          value={formularioRenovacion.duracion}
-                          onChange={(e) => handleDuracionChange(e.target.value)}
-                        >
-                          <option value="mensual">Mensual</option>
-                          <option value="trimestral">Trimestral</option>
-                          <option value="semestral">Semestral (6 meses)</option>
-                          <option value="anual">Anual</option>
-                        </select>
-                      </div>
+                      <div className={styles.formGrid}>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Fecha de Inicio:</label>
+                          <input 
+                            type="date" 
+                            value={formularioRenovacion.fechaInicio}
+                            onChange={(e) => handleFechaInicioChange(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+                        
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Duración:</label>
+                          <select 
+                            value={formularioRenovacion.duracion}
+                            onChange={(e) => handleDuracionChange(e.target.value)}
+                            className={styles.formSelect}
+                          >
+                            <option value="mensual">Mensual</option>
+                            <option value="trimestral">Trimestral</option>
+                            <option value="semestral">Semestral (6 meses)</option>
+                            <option value="anual">Anual</option>
+                          </select>
+                        </div>
 
-                      <div className={styles.formGroup}>
-                        <label>Fecha de Término (calculada):</label>
-                        <input 
-                          type="date" 
-                          value={formularioRenovacion.fechaFin}
-                          readOnly
-                          className={styles.readOnlyInput}
-                        />
-                        <small className={styles.helpText}>
-                          Esta fecha se calcula automáticamente según la duración seleccionada
-                        </small>
-                      </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Fecha de Término:</label>
+                          <input 
+                            type="date" 
+                            value={formularioRenovacion.fechaFin}
+                            readOnly
+                            className={`${styles.formInput} ${styles.readOnlyInput}`}
+                          />
+                          <small className={styles.helpText}>
+                            Calculada automáticamente según la duración
+                          </small>
+                        </div>
 
-                      <div className={styles.formGroup}>
-                        <label>Límite de Clases:</label>
-                        <select 
-                          value={formularioRenovacion.limiteClases}
-                          onChange={(e) => setFormularioRenovacion({...formularioRenovacion, limiteClases: e.target.value})}
-                        >
-                          <option value="todos_los_dias">Todos los días</option>
-                          <option value="12">12 clases/mes</option>
-                          <option value="8">8 clases/mes</option>
-                        </select>
-                      </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Límite de Clases:</label>
+                          <select 
+                            value={formularioRenovacion.limiteClases}
+                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, limiteClases: e.target.value})}
+                            className={styles.formSelect}
+                          >
+                            <option value="todos_los_dias">Todos los días</option>
+                            <option value="12">12 clases/mes</option>
+                            <option value="8">8 clases/mes</option>
+                          </select>
+                        </div>
 
-                      <div className={styles.formGroup}>
-                        <label>Descuento Especial:</label>
-                        <select 
-                          value={formularioRenovacion.descuentoEspecial}
-                          onChange={(e) => setFormularioRenovacion({...formularioRenovacion, descuentoEspecial: e.target.value})}
-                          disabled={formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual'}
-                        >
-                          <option value="ninguno">Sin descuento especial</option>
-                          <option value="familiar_x2">Familiar x2 (10% descuento)</option>
-                          <option value="familiar_x3">Familiar x3 (15% descuento)</option>
-                        </select>
-                        {(formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual') && 
-                         formularioRenovacion.descuentoEspecial !== 'ninguno' && (
-                          <div className={styles.warning}>
-                            ⚠️ Los descuentos familiares no aplican a planes semestrales o anuales
-                          </div>
-                        )}
-                      </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Descuento Especial:</label>
+                          <select 
+                            value={formularioRenovacion.descuentoEspecial}
+                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, descuentoEspecial: e.target.value})}
+                            className={styles.formSelect}
+                            disabled={formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual'}
+                          >
+                            <option value="ninguno">Sin descuento especial</option>
+                            <option value="familiar_x2">Familiar x2 (10% descuento)</option>
+                            <option value="familiar_x3">Familiar x3 (15% descuento)</option>
+                          </select>
+                          {(formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual') && 
+                          formularioRenovacion.descuentoEspecial !== 'ninguno' && (
+                            <div className={styles.warning}>
+                              ⚠️ Los descuentos familiares no aplican a planes semestrales o anuales
+                            </div>
+                          )}
+                        </div>
 
-                      <div className={styles.formGroup}>
-                        <label>Monto (opcional):</label>
-                        <input 
-                          type="number" 
-                          value={formularioRenovacion.monto || ''}
-                          onChange={(e) => setFormularioRenovacion({...formularioRenovacion, monto: parseFloat(e.target.value) || 0})}
-                          placeholder="Monto del plan (opcional)"
-                          min="0"
-                          step="100"
-                        />
-                        <small className={styles.helpText}>
-                          Si se especifica un monto, se aplicará el descuento correspondiente
-                        </small>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Monto (opcional):</label>
+                          <input 
+                            type="number" 
+                            value={formularioRenovacion.monto || ''}
+                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, monto: parseFloat(e.target.value) || 0})}
+                            placeholder="Monto del plan"
+                            className={styles.formInput}
+                            min="0"
+                            step="100"
+                          />
+                          <small className={styles.helpText}>
+                            Si se especifica un monto, se aplicará el descuento correspondiente
+                          </small>
+                        </div>
                       </div>
 
                       {formularioRenovacion.descuentoEspecial !== 'ninguno' && formularioRenovacion.monto > 0 && (
@@ -386,23 +436,29 @@ export default function RenovarPlanes() {
                       )}
 
                       <div className={styles.formGroup}>
-                        <label>Observaciones:</label>
+                        <label className={styles.formLabel}>Observaciones:</label>
                         <textarea 
                           value={formularioRenovacion.observaciones}
                           onChange={(e) => setFormularioRenovacion({...formularioRenovacion, observaciones: e.target.value})}
                           placeholder="Notas sobre el pago o renovación..."
+                          className={styles.formTextarea}
                           rows={3}
                         />
                       </div>
 
                       <div className={styles.formActions}>
-                        <button type="submit" className={styles.confirmarBtn}>
-                          ✅ Confirmar Renovación
+                        <button 
+                          type="submit" 
+                          className={styles.confirmarBtn}
+                          disabled={estaProcesando}
+                        >
+                          {estaProcesando ? '⏳ Procesando...' : '✅ Confirmar Renovación'}
                         </button>
                         <button 
                           type="button" 
                           onClick={() => setAlumnoSeleccionado(null)}
                           className={styles.cancelarBtn}
+                          disabled={estaProcesando}
                         >
                           ❌ Cancelar
                         </button>
