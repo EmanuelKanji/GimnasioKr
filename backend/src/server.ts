@@ -78,8 +78,6 @@ const allowedOrigins = [
   'https://gimnasiokr.onrender.com',
   'https://kraccess.cl',
   'https://www.kraccess.cl',
-  'http://kraccess.cl', // Por si acaso usas HTTP temporalmente
-  'http://www.kraccess.cl',
 ];
 
 // Agregar orígenes desde variables de entorno
