@@ -433,8 +433,15 @@ export const crearAlumno = async (req: Request, res: Response) => {
     if (userExistente) {
       return res.status(409).json({ message: 'El usuario ya está registrado.' });
     }
+    // Función auxiliar para limpiar RUT (quitar puntos y guiones, convertir K a mayúscula)
+    const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
+    
+    const rutLimpio = limpiarRut(rut);
+    console.log('🔍 Crear Alumno - RUT recibido:', rut);
+    console.log('🔍 Crear Alumno - RUT limpio:', rutLimpio);
+    
     // Verificar si el alumno ya existe
-    const alumnoExistente = await Alumno.findOne({ rut });
+    const alumnoExistente = await Alumno.findOne({ rut: rutLimpio });
     if (alumnoExistente) {
       return res.status(409).json({ message: 'El alumno ya está inscrito.' });
     }
@@ -459,7 +466,7 @@ export const crearAlumno = async (req: Request, res: Response) => {
     // Aplicar descuento al monto
     const montoConDescuento = monto * (1 - porcentajeDescuento / 100);
     // Crear usuario para login
-    const nuevoUsuario = new User({ username: email, password, role: 'alumno', rut });
+    const nuevoUsuario = new User({ username: email, password, role: 'alumno', rut: rutLimpio });
     await nuevoUsuario.save();
     // Calcular fecha de término según duración
     const inicio = new Date(fechaInicioPlan);
@@ -476,7 +483,7 @@ export const crearAlumno = async (req: Request, res: Response) => {
     // Crear perfil de alumno
     const nuevoAlumno = new Alumno({
       nombre,
-      rut,
+      rut: rutLimpio, // Usar RUT limpio
       direccion,
       fechaNacimiento,
       email,

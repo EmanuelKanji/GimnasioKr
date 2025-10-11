@@ -62,6 +62,9 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     }
   };
 
+  // Función para limpiar RUT (quitar puntos y guiones)
+  const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
+
   // Función para generar nuevo QR con timestamp y token temporal
   const generarNuevoQR = useCallback(() => {
     const ahora = Date.now();
@@ -70,7 +73,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     
     // Crear datos del QR con medidas de seguridad mejoradas
     const datosQR = {
-      rut,
+      rut: limpiarRut(rut), // RUT limpio para compatibilidad con backend
       plan,
       validoDesde: fechaInicio,
       validoHasta: fechaFin,
@@ -91,7 +94,8 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
 
   // Debug: Log de información para verificar datos
   console.log('🔍 QR Debug Info:', {
-    rut,
+    rutOriginal: rut,
+    rutLimpio: limpiarRut(rut),
     plan,
     fechaInicio,
     fechaFin,

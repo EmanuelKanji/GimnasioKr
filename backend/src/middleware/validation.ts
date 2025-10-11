@@ -47,7 +47,7 @@ export const schemas = {
       'any.required': 'El rol es requerido'
     }),
     rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-      'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
+      'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
       'any.required': 'El RUT es requerido'
     }),
     limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({
@@ -63,7 +63,7 @@ export const schemas = {
       'any.required': 'El nombre es requerido'
     }),
     rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-      'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
+      'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
       'any.required': 'El RUT es requerido'
     }),
     direccion: Joi.string().min(5).max(100).required().messages({
@@ -154,7 +154,7 @@ export const schemas = {
   // Registrar asistencia
   registrarAsistencia: Joi.object({
     rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-      'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
+      'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
       'any.required': 'El RUT es requerido'
     }),
     qrData: Joi.object({
@@ -176,7 +176,7 @@ export const schemas = {
       'string.max': 'El mensaje no puede exceder 500 caracteres',
       'any.required': 'El mensaje es requerido'
     }),
-    destinatarios: Joi.array().items(Joi.string().pattern(/^[0-9]+-[0-9kK]$/)).min(1).required().messages({
+    destinatarios: Joi.array().items(Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/)).min(1).required().messages({
       'array.min': 'Debe seleccionar al menos un destinatario',
       'any.required': 'Los destinatarios son requeridos'
     })
@@ -239,8 +239,8 @@ export const schemas = {
       'string.max': 'El nombre no puede exceder 50 caracteres',
       'any.required': 'El nombre es requerido'
     }),
-    rut: Joi.string().pattern(/^\d{1,2}(\.\d{3}){2}-[\dkK]$/).required().messages({
-      'string.pattern.base': 'El RUT debe tener el formato 12.345.678-9',
+    rut: Joi.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
+      'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
       'any.required': 'El RUT es requerido'
     }),
     email: Joi.string().email().required().messages({

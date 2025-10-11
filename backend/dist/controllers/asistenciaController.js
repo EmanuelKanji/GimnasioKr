@@ -45,15 +45,27 @@ const registrarAsistencia = async (req, res) => {
         }
         // Función auxiliar para limpiar RUT
         const limpiarRut = (r) => r.replace(/\.|-/g, '').toUpperCase();
+        const rutLimpio = limpiarRut(rut);
+        console.log('🔍 Debug Asistencia - RUT recibido:', rut);
+        console.log('🔍 Debug Asistencia - RUT limpio:', rutLimpio);
         // Buscar el alumno en la base de datos
-        const alumno = await Alumno_1.default.findOne({ rut: limpiarRut(rut) });
-        // Verificar que el alumno existe
+        const alumno = await Alumno_1.default.findOne({ rut: rutLimpio });
+        // Debug: Verificar qué RUTs existen en la BD
         if (!alumno) {
+            console.log('❌ Alumno no encontrado, buscando todos los RUTs en BD...');
+            const todosLosAlumnos = await Alumno_1.default.find({}, 'rut nombre').limit(5);
+            console.log('📊 Primeros 5 alumnos en BD:', todosLosAlumnos.map(a => ({ rut: a.rut, nombre: a.nombre })));
             return res.status(404).json({
                 message: 'Alumno no encontrado en el sistema.',
-                codigo: 'ALUMNO_NO_ENCONTRADO'
+                codigo: 'ALUMNO_NO_ENCONTRADO',
+                debug: {
+                    rutRecibido: rut,
+                    rutLimpio: rutLimpio,
+                    totalAlumnos: todosLosAlumnos.length
+                }
             });
         }
+        console.log('✅ Alumno encontrado:', { nombre: alumno.nombre, rut: alumno.rut });
         // ============= VALIDACIONES DE SEGURIDAD =============
         // 1. Validar datos del alumno
         if (!alumno.fechaInicioPlan || !alumno.fechaTerminoPlan) {

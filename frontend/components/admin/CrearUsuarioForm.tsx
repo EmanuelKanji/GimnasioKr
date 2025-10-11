@@ -22,11 +22,12 @@ export default function CrearUsuarioForm() {
       let body: { username: string; rut: string; password: string; role: string } | { nombre: string; rut: string; email: string; telefono: string; direccion: string; fechaNacimiento: string; password: string };
       
       if (role === 'profesor') {
-        // Para profesores, usar endpoint específico y mantener formato original del RUT
+        // Para profesores, usar endpoint específico y limpiar RUT completamente
         endpoint = '/api/profesor';
+        const rutLimpio = rut.replace(/\.|-/g, '').toUpperCase();
         body = {
           nombre: email.split('@')[0].length >= 2 ? email.split('@')[0] : 'Profesor', // Asegurar mínimo 2 caracteres
-          rut: rut, // Mantener formato original con puntos
+          rut: rutLimpio, // RUT limpio para compatibilidad con backend
           email,
           telefono: '12345678', // 8 caracteres mínimo
           direccion: 'Dirección por definir', // 20 caracteres, cumple mínimo 5
@@ -37,8 +38,8 @@ export default function CrearUsuarioForm() {
         // Debug: Log de datos enviados
         console.log('🔍 Frontend enviando datos de profesor:', body);
       } else {
-        // Para alumnos, limpiar RUT como antes
-        const rutLimpio = rut.replace(/\./g, '');
+        // Para alumnos, limpiar RUT completamente
+        const rutLimpio = rut.replace(/\.|-/g, '').toUpperCase();
         body = { username: email, rut: rutLimpio, password, role };
       }
       

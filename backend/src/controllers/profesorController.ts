@@ -41,8 +41,15 @@ export const crearProfesor = async (req: Request, res: Response) => {
       return res.status(409).json({ error: 'El usuario ya está registrado' });
     }
 
+    // Función auxiliar para limpiar RUT (quitar puntos y guiones, convertir K a mayúscula)
+    const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
+    
+    const rutLimpio = limpiarRut(rut);
+    console.log('🔍 Crear Profesor - RUT recibido:', rut);
+    console.log('🔍 Crear Profesor - RUT limpio:', rutLimpio);
+    
     // Verificar si el profesor ya existe
-    const profesorExistente = await Profesor.findOne({ rut });
+    const profesorExistente = await Profesor.findOne({ rut: rutLimpio });
     if (profesorExistente) {
       return res.status(409).json({ error: 'El profesor ya está registrado' });
     }
@@ -52,14 +59,14 @@ export const crearProfesor = async (req: Request, res: Response) => {
       username: email, 
       password, 
       role: 'profesor', 
-      rut 
+      rut: rutLimpio 
     });
     await nuevoUsuario.save();
 
     // Crear perfil del profesor
     const nuevoProfesor = new Profesor({
       nombre,
-      rut,
+      rut: rutLimpio, // Usar RUT limpio
       email,
       telefono,
       direccion,

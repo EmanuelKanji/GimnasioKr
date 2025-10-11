@@ -48,7 +48,7 @@ exports.schemas = {
             'any.required': 'El rol es requerido'
         }),
         rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
+            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
             'any.required': 'El RUT es requerido'
         }),
         limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
@@ -63,7 +63,7 @@ exports.schemas = {
             'any.required': 'El nombre es requerido'
         }),
         rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
+            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
             'any.required': 'El RUT es requerido'
         }),
         direccion: joi_1.default.string().min(5).max(100).required().messages({
@@ -149,7 +149,7 @@ exports.schemas = {
     // Registrar asistencia
     registrarAsistencia: joi_1.default.object({
         rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678-9)',
+            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
             'any.required': 'El RUT es requerido'
         }),
         qrData: joi_1.default.object({
@@ -170,7 +170,7 @@ exports.schemas = {
             'string.max': 'El mensaje no puede exceder 500 caracteres',
             'any.required': 'El mensaje es requerido'
         }),
-        destinatarios: joi_1.default.array().items(joi_1.default.string().pattern(/^[0-9]+-[0-9kK]$/)).min(1).required().messages({
+        destinatarios: joi_1.default.array().items(joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/)).min(1).required().messages({
             'array.min': 'Debe seleccionar al menos un destinatario',
             'any.required': 'Los destinatarios son requeridos'
         })
@@ -229,8 +229,8 @@ exports.schemas = {
             'string.max': 'El nombre no puede exceder 50 caracteres',
             'any.required': 'El nombre es requerido'
         }),
-        rut: joi_1.default.string().pattern(/^\d{1,2}(\.\d{3}){2}-[\dkK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener el formato 12.345.678-9',
+        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
+            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
             'any.required': 'El RUT es requerido'
         }),
         email: joi_1.default.string().email().required().messages({
