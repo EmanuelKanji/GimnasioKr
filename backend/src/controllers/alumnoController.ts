@@ -3,6 +3,7 @@ import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import User from '../models/User';
 import Alumno from '../models/Alumno';
 import Plan from '../models/Plan';
+import { AttendanceService } from '../services/attendanceService';
 
 // Obtener plan del alumno por RUT
 export const obtenerPlanAlumno = async (req: Request, res: Response) => {
@@ -96,17 +97,17 @@ export const obtenerAsistenciaAlumno = async (req: Request, res: Response) => {
     const alumno = await Alumno.findOne({ rut });
     if (!alumno) return res.status(404).json({ message: 'Alumno no encontrado' });
     
-    // Filtrar asistencias por período del plan actual
+    // Filtrar asistencias por período del plan actual usando el servicio centralizado
     let asistenciasFiltradas = alumno.asistencias || [];
     if (alumno.fechaInicioPlan && alumno.fechaTerminoPlan) {
+      asistenciasFiltradas = AttendanceService.filtrarAsistenciasPorPeriodoPlan(
+        alumno.asistencias || [],
+        alumno.fechaInicioPlan,
+        alumno.fechaTerminoPlan
+      );
+      
       const inicioPlan = new Date(alumno.fechaInicioPlan);
       const finPlan = new Date(alumno.fechaTerminoPlan);
-      
-      asistenciasFiltradas = asistenciasFiltradas.filter(fecha => {
-        const fechaAsistencia = new Date(fecha);
-        return fechaAsistencia >= inicioPlan && fechaAsistencia <= finPlan;
-      });
-      
       console.log(`📊 Alumno ${alumno.nombre}: ${asistenciasFiltradas.length} asistencias del período ${inicioPlan.toLocaleDateString()} - ${finPlan.toLocaleDateString()}`);
       console.log(`📊 Asistencias filtradas:`, asistenciasFiltradas);
     } else {

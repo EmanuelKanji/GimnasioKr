@@ -44,7 +44,8 @@ export function calcularLimiteClases(
   let asistenciasFiltradas: string[];
   
   if (fechaInicioPlan && fechaFinPlan) {
-    // Si hay fechas específicas del plan, filtrar por período del plan
+    // Filtrar por período del plan (compatible con backend)
+    // El backend también filtra por período del plan, no por mes calendario
     const inicioPlan = new Date(fechaInicioPlan);
     const finPlan = new Date(fechaFinPlan);
     
@@ -105,8 +106,9 @@ export function calcularLimiteClases(
       break;
       
     case '12':
-      // Si hay período específico del plan, ajustar límite según días hábiles disponibles
+      // Si hay período específico del plan, aplicar protocolo del gimnasio
       if (diasHabilesPlan !== null) {
+        // PROTOCOLO: Reducir límite según días hábiles disponibles
         const limiteReal = Math.min(12, diasHabilesPlan);
         diasDisponibles = limiteReal;
         puedeAcceder = diasUsados < limiteReal && (diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0);
@@ -123,8 +125,9 @@ export function calcularLimiteClases(
       break;
       
     case '8':
-      // Si hay período específico del plan, ajustar límite según días hábiles disponibles
+      // Si hay período específico del plan, aplicar protocolo del gimnasio
       if (diasHabilesPlan !== null) {
+        // PROTOCOLO: Reducir límite según días hábiles disponibles
         const limiteReal = Math.min(8, diasHabilesPlan);
         diasDisponibles = limiteReal;
         puedeAcceder = diasUsados < limiteReal && (diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0);

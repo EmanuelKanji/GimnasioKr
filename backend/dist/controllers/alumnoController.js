@@ -8,6 +8,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
 const Plan_1 = __importDefault(require("../models/Plan"));
+const attendanceService_1 = require("../services/attendanceService");
 // Obtener plan del alumno por RUT
 const obtenerPlanAlumno = async (req, res) => {
     try {
@@ -100,15 +101,12 @@ const obtenerAsistenciaAlumno = async (req, res) => {
         const alumno = await Alumno_1.default.findOne({ rut });
         if (!alumno)
             return res.status(404).json({ message: 'Alumno no encontrado' });
-        // Filtrar asistencias por período del plan actual
+        // Filtrar asistencias por período del plan actual usando el servicio centralizado
         let asistenciasFiltradas = alumno.asistencias || [];
         if (alumno.fechaInicioPlan && alumno.fechaTerminoPlan) {
+            asistenciasFiltradas = attendanceService_1.AttendanceService.filtrarAsistenciasPorPeriodoPlan(alumno.asistencias || [], alumno.fechaInicioPlan, alumno.fechaTerminoPlan);
             const inicioPlan = new Date(alumno.fechaInicioPlan);
             const finPlan = new Date(alumno.fechaTerminoPlan);
-            asistenciasFiltradas = asistenciasFiltradas.filter(fecha => {
-                const fechaAsistencia = new Date(fecha);
-                return fechaAsistencia >= inicioPlan && fechaAsistencia <= finPlan;
-            });
             console.log(`📊 Alumno ${alumno.nombre}: ${asistenciasFiltradas.length} asistencias del período ${inicioPlan.toLocaleDateString()} - ${finPlan.toLocaleDateString()}`);
             console.log(`📊 Asistencias filtradas:`, asistenciasFiltradas);
         }

@@ -4,7 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registrarAsistencia = exports.obtenerHistorialAsistencia = void 0;
+const Asistencia_1 = __importDefault(require("../models/Asistencia"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
+const attendanceService_1 = require("../services/attendanceService");
 const obtenerHistorialAsistencia = async (_req, res) => {
     try {
         const asistencias = await Asistencia_1.default.find().sort({ fecha: -1 });
@@ -30,7 +32,6 @@ const obtenerHistorialAsistencia = async (_req, res) => {
     }
 };
 exports.obtenerHistorialAsistencia = obtenerHistorialAsistencia;
-const Asistencia_1 = __importDefault(require("../models/Asistencia"));
 const registrarAsistencia = async (req, res) => {
     try {
         // Puede recibir solo RUT (legacy) o datos completos del QR (nuevo sistema)
@@ -45,9 +46,7 @@ const registrarAsistencia = async (req, res) => {
         // Función auxiliar para limpiar RUT
         const limpiarRut = (r) => r.replace(/\.|-/g, '').toUpperCase();
         // Buscar el alumno en la base de datos
-        const AlumnoModel = require('../models/Alumno').default;
-        const alumnos = await AlumnoModel.find();
-        const alumno = alumnos.find((a) => limpiarRut(a.rut) === limpiarRut(rut));
+        const alumno = await Alumno_1.default.findOne({ rut: limpiarRut(rut) });
         // Verificar que el alumno existe
         if (!alumno) {
             return res.status(404).json({
@@ -56,10 +55,23 @@ const registrarAsistencia = async (req, res) => {
             });
         }
         // ============= VALIDACIONES DE SEGURIDAD =============
-        // 1. Validar que el plan del alumno esté activo (fechas)
-        const fechaActual = new Date();
+        // 1. Validar datos del alumno
+        if (!alumno.fechaInicioPlan || !alumno.fechaTerminoPlan) {
+            return res.status(400).json({
+                message: 'El alumno no tiene fechas de plan válidas.',
+                codigo: 'PLAN_DATOS_INCOMPLETOS'
+            });
+        }
         const fechaInicioPlan = new Date(alumno.fechaInicioPlan);
         const fechaFinPlan = new Date(alumno.fechaTerminoPlan);
+        if (isNaN(fechaInicioPlan.getTime()) || isNaN(fechaFinPlan.getTime())) {
+            return res.status(400).json({
+                message: 'Las fechas del plan no son válidas.',
+                codigo: 'FECHAS_INVALIDAS'
+            });
+        }
+        // 2. Validar que el plan del alumno esté activo (fechas)
+        const fechaActual = new Date();
         if (fechaActual < fechaInicioPlan) {
             return res.status(403).json({
                 message: 'Tu plan aún no ha comenzado. Fecha de inicio: ' + fechaInicioPlan.toLocaleDateString('es-CL'),
@@ -72,7 +84,7 @@ const registrarAsistencia = async (req, res) => {
                 codigo: 'PLAN_EXPIRADO'
             });
         }
-        // 2. Validaciones adicionales para QR con timestamp (nuevo sistema de seguridad)
+        // 3. Validaciones adicionales para QR con timestamp (nuevo sistema de seguridad)
         if (qrData) {
             try {
                 const datosQR = JSON.parse(qrData);
@@ -114,65 +126,52 @@ const registrarAsistencia = async (req, res) => {
                 });
             }
         }
-        // 3. Verificar que no haya registrado asistencia el mismo día (evitar duplicados)
+        // 4. Verificar que no haya registrado asistencia el mismo día (evitar duplicados)
         const hoy = new Date();
         const yyyy = hoy.getFullYear();
         const mm = String(hoy.getMonth() + 1).padStart(2, '0');
         const dd = String(hoy.getDate()).padStart(2, '0');
         const fechaHoy = `${yyyy}-${mm}-${dd}`;
-        if (alumno.asistencias.includes(fechaHoy)) {
+        // Validar que asistencias sea un array
+        const asistencias = Array.isArray(alumno.asistencias) ? alumno.asistencias : [];
+        if (asistencias.includes(fechaHoy)) {
             return res.status(409).json({
                 message: 'Ya has registrado asistencia hoy.',
                 codigo: 'ASISTENCIA_YA_REGISTRADA',
                 fecha: fechaHoy
             });
         }
-        // 4. Verificar límites de clases del plan considerando días restantes del plan
+        // 5. Verificar límites de clases del plan considerando días restantes del plan
         const limiteClases = alumno.limiteClases || 'todos_los_dias';
-        // Función para calcular días hábiles entre dos fechas
-        const calcularDiasHabilesEntreFechas = (inicio, fin) => {
-            let diasHabiles = 0;
-            const fecha = new Date(inicio);
-            while (fecha <= fin) {
-                const diaSemana = fecha.getDay();
-                // 1 = lunes, 2 = martes, ..., 6 = sábado (0 = domingo se excluye)
-                if (diaSemana >= 1 && diaSemana <= 6) {
-                    diasHabiles++;
-                }
-                fecha.setDate(fecha.getDate() + 1);
-            }
-            return diasHabiles;
-        };
-        // Calcular días hábiles restantes del plan
-        const diasHabilesRestantes = calcularDiasHabilesEntreFechas(fechaActual, fechaFinPlan);
+        // Obtener el mes actual del plan (no mes calendario)
+        const mesActual = attendanceService_1.AttendanceService.obtenerMesActualDelPlan(alumno.fechaInicioPlan);
+        // Filtrar asistencias del mes actual del plan
+        const asistenciasMesActual = attendanceService_1.AttendanceService.filtrarAsistenciasPorPeriodoPlan(asistencias, mesActual.inicio.toISOString(), mesActual.fin.toISOString());
+        // Calcular días hábiles restantes del mes actual
+        const diasHabilesRestantes = attendanceService_1.AttendanceService.calcularDiasHabilesRestantes(mesActual.fin);
         if (limiteClases === 'todos_los_dias') {
             // Para planes "todos los días", verificar que haya días hábiles restantes
             if (diasHabilesRestantes <= 0) {
                 return res.status(403).json({
-                    message: 'Tu plan ha terminado. No hay días hábiles restantes.',
-                    codigo: 'PLAN_TERMINADO',
+                    message: 'Tu plan del mes actual ha terminado.',
+                    codigo: 'PLAN_MES_TERMINADO',
                     diasRestantes: diasHabilesRestantes
                 });
             }
         }
         else {
-            // Para planes con límite específico, verificar límite ajustado
+            // Para planes con límite específico, aplicar protocolo del gimnasio
             const limiteNumero = parseInt(limiteClases);
-            // Obtener asistencias del mes actual
-            const asistenciasMes = alumno.asistencias.filter((fecha) => {
-                const fechaAsistencia = new Date(fecha);
-                return fechaAsistencia.getFullYear() === yyyy && fechaAsistencia.getMonth() === (parseInt(mm) - 1);
-            });
-            // Calcular límite real considerando días restantes del plan
-            const limiteReal = Math.min(limiteNumero, diasHabilesRestantes);
-            if (asistenciasMes.length >= limiteReal) {
+            // PROTOCOLO DEL GIMNASIO: Reducir límite según días restantes
+            const limiteReal = attendanceService_1.AttendanceService.aplicarProtocoloGimnasio(limiteNumero, diasHabilesRestantes);
+            if (asistenciasMesActual.length >= limiteReal) {
                 return res.status(403).json({
-                    message: `Has alcanzado el límite de ${limiteReal} clases disponibles (${limiteNumero} del plan, ${diasHabilesRestantes} días restantes).`,
+                    message: `Has alcanzado el límite de ${limiteReal} clases disponibles este mes (${limiteNumero} del plan, ${diasHabilesRestantes} días restantes).`,
                     codigo: 'LIMITE_CLASES_ALCANZADO',
                     limite: limiteReal,
                     limiteOriginal: limiteNumero,
                     diasRestantes: diasHabilesRestantes,
-                    usadas: asistenciasMes.length
+                    usadas: asistenciasMesActual.length
                 });
             }
         }
