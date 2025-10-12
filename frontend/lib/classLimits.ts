@@ -123,7 +123,7 @@ export function calcularLimiteClases(
     const mes = hoy.getMonth();
     const primerDia = new Date(año, mes, 1);
     const ultimoDia = new Date(año, mes + 1, 0);
-    const diasHabiles = calcularDiasHabiles(primerDia, ultimoDia);
+    const diasHabiles = AttendanceService.calcularDiasHabiles(primerDia, ultimoDia);
     
     asistenciasFiltradas = asistenciasMes.filter(fecha => {
       const fechaAsistencia = new Date(fecha);
@@ -172,27 +172,6 @@ export function calcularLimiteClases(
   };
 }
 
-/**
- * Calcula los días hábiles (lunes a sábado) entre dos fechas
- * @param fechaInicio Fecha de inicio
- * @param fechaFin Fecha de fin
- * @returns Número de días hábiles
- */
-function calcularDiasHabiles(fechaInicio: Date, fechaFin: Date): number {
-  let diasHabiles = 0;
-  const fecha = new Date(fechaInicio);
-  
-  while (fecha <= fechaFin) {
-    const diaSemana = fecha.getDay();
-    // 1 = lunes, 2 = martes, ..., 6 = sábado (0 = domingo se excluye)
-    if (diaSemana >= 1 && diaSemana <= 6) {
-      diasHabiles++;
-    }
-    fecha.setDate(fecha.getDate() + 1);
-  }
-  
-  return diasHabiles;
-}
 
 /**
  * Verifica si un alumno puede acceder hoy según su límite de clases

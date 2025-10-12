@@ -75,8 +75,8 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     const datosQR = {
       rut: limpiarRut(rut), // RUT limpio para compatibilidad con backend
       plan,
-      validoDesde: fechaInicio,
-      validoHasta: fechaFin,
+      validoDesde: new Date(fechaInicio).toISOString(), // Convertir a ISO format
+      validoHasta: new Date(fechaFin).toISOString(),     // Convertir a ISO format
       timestamp: ahora,           // Momento de generación
       expiraEn: expiraEn,        // Cuándo expira el QR
       token: generarTokenTemporal(), // Token único para esta sesión
