@@ -2,6 +2,8 @@
  * Utilidades para manejo de límites de clases por plan
  */
 
+import { AttendanceService } from './attendanceService';
+
 export type LimiteClases = '12' | '8' | 'todos_los_dias';
 
 export interface LimiteClasesInfo {
@@ -30,123 +32,134 @@ export function calcularLimiteClases(
   fechaFinPlan?: string
 ): LimiteClasesInfo {
   const hoy = fechaReferencia;
-  const año = hoy.getFullYear();
-  const mes = hoy.getMonth();
   
-  // Obtener el primer y último día del mes
-  const primerDia = new Date(año, mes, 1);
-  const ultimoDia = new Date(año, mes + 1, 0);
-  
-  // Calcular días hábiles del mes (lunes a sábado)
-  const diasHabiles = calcularDiasHabiles(primerDia, ultimoDia);
-  
-  // Filtrar asistencias según el período del plan o mes actual
+  // Usar servicio centralizado para obtener mes actual del plan (renovación mensual)
   let asistenciasFiltradas: string[];
-  
-  if (fechaInicioPlan && fechaFinPlan) {
-    // Filtrar por período del plan (compatible con backend)
-    // El backend también filtra por período del plan, no por mes calendario
-    const inicioPlan = new Date(fechaInicioPlan);
-    const finPlan = new Date(fechaFinPlan);
-    
-    asistenciasFiltradas = asistenciasMes.filter(fecha => {
-      const fechaAsistencia = new Date(fecha);
-      return fechaAsistencia >= inicioPlan && fechaAsistencia <= finPlan;
-    });
-  } else {
-    // Si no hay fechas específicas, filtrar por mes actual
-    asistenciasFiltradas = asistenciasMes.filter(fecha => {
-      const fechaAsistencia = new Date(fecha);
-      return fechaAsistencia.getFullYear() === año && fechaAsistencia.getMonth() === mes;
-    });
-  }
-  
-  const diasUsados = asistenciasFiltradas.length;
-  
-  // Debug: Log de información para verificar cálculos
-  console.log('🔍 calcularLimiteClases Debug:', {
-    limiteClases,
-    asistenciasMes: asistenciasMes.length,
-    asistenciasFiltradas: asistenciasFiltradas.length,
-    fechaInicioPlan,
-    fechaFinPlan,
-    diasUsados,
-    hoy: hoy.toISOString()
-  });
-  
-  // Calcular días hábiles del período del plan si se proporcionan fechas
-  let diasHabilesPlan: number | null = null;
-  let diasHabilesRestantesPlan: number | null = null;
-  
-  if (fechaInicioPlan && fechaFinPlan) {
-    const inicioPlan = new Date(fechaInicioPlan);
-    const finPlan = new Date(fechaFinPlan);
-    diasHabilesPlan = calcularDiasHabiles(inicioPlan, finPlan);
-    diasHabilesRestantesPlan = calcularDiasHabiles(hoy, finPlan);
-  }
-  
+  let diasUsados: number;
   let diasDisponibles: number;
   let puedeAcceder: boolean;
   let mensaje: string;
   
-  switch (limiteClases) {
-    case 'todos_los_dias':
-      // Si hay período específico del plan, usar días hábiles del período
-      if (diasHabilesPlan !== null) {
-        diasDisponibles = diasHabilesPlan;
-        puedeAcceder = diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0;
-        mensaje = diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0
-          ? `Puedes acceder todos los días hábiles restantes (${diasHabilesRestantesPlan} días disponibles)`
+  if (fechaInicioPlan && fechaFinPlan) {
+    // Aplicar renovación mensual usando el servicio centralizado
+    const mesActual = AttendanceService.obtenerMesActualDelPlan(fechaInicioPlan, fechaReferencia);
+    
+    // Filtrar asistencias del mes actual del plan
+    asistenciasFiltradas = AttendanceService.filtrarAsistenciasPorPeriodoPlan(
+      asistenciasMes,
+      mesActual.inicio.toISOString(),
+      mesActual.fin.toISOString()
+    );
+    
+    diasUsados = asistenciasFiltradas.length;
+    
+    // Calcular días hábiles del mes actual del plan
+    const diasHabilesMesActual = AttendanceService.calcularDiasHabiles(
+      mesActual.inicio, 
+      mesActual.fin
+    );
+    
+    // Calcular días hábiles restantes del mes actual
+    const diasHabilesRestantes = AttendanceService.calcularDiasHabilesRestantes(
+      mesActual.fin, 
+      fechaReferencia
+    );
+    
+    // Debug: Log de información para verificar cálculos
+    console.log('🔍 calcularLimiteClases Debug (con renovación mensual):', {
+      limiteClases,
+      asistenciasMesTotal: asistenciasMes.length,
+      asistenciasFiltradas: asistenciasFiltradas.length,
+      fechaInicioPlan,
+      fechaFinPlan,
+      mesActual: {
+        inicio: mesActual.inicio.toISOString(),
+        fin: mesActual.fin.toISOString(),
+        numeroMes: mesActual.numeroMes
+      },
+      diasUsados,
+      diasHabilesMesActual,
+      diasHabilesRestantes,
+      hoy: hoy.toISOString()
+    });
+    
+    switch (limiteClases) {
+      case 'todos_los_dias':
+        diasDisponibles = diasHabilesMesActual;
+        puedeAcceder = diasHabilesRestantes > 0;
+        mensaje = diasHabilesRestantes > 0
+          ? `Puedes acceder todos los días hábiles restantes (${diasHabilesRestantes} días disponibles)`
           : `Tu plan ha terminado`;
-      } else {
-        diasDisponibles = diasHabiles;
-        puedeAcceder = true;
-        mensaje = `Puedes acceder todos los días hábiles del mes (${diasHabiles} días disponibles)`;
-      }
-      break;
-      
-    case '12':
-      // Si hay período específico del plan, aplicar protocolo del gimnasio
-      if (diasHabilesPlan !== null) {
-        // PROTOCOLO: Reducir límite según días hábiles disponibles
-        const limiteReal = Math.min(12, diasHabilesPlan);
+        break;
+        
+      case '12':
+        // Aplicar protocolo del gimnasio: reducir límite según días hábiles restantes
+        const limiteReal = AttendanceService.aplicarProtocoloGimnasio(12, diasHabilesRestantes);
         diasDisponibles = limiteReal;
-        puedeAcceder = diasUsados < limiteReal && (diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0);
+        puedeAcceder = diasUsados < limiteReal && diasHabilesRestantes > 0;
         mensaje = diasUsados < limiteReal
           ? `Puedes acceder hasta ${limiteReal} días (${limiteReal - diasUsados} restantes)`
           : `Has alcanzado el límite de ${limiteReal} clases disponibles`;
-      } else {
+        break;
+        
+      case '8':
+        // Aplicar protocolo del gimnasio: reducir límite según días hábiles restantes
+        const limiteReal8 = AttendanceService.aplicarProtocoloGimnasio(8, diasHabilesRestantes);
+        diasDisponibles = limiteReal8;
+        puedeAcceder = diasUsados < limiteReal8 && diasHabilesRestantes > 0;
+        mensaje = diasUsados < limiteReal8
+          ? `Puedes acceder hasta ${limiteReal8} días (${limiteReal8 - diasUsados} restantes)`
+          : `Has alcanzado el límite de ${limiteReal8} clases disponibles`;
+        break;
+        
+      default:
+        diasDisponibles = 0;
+        puedeAcceder = false;
+        mensaje = 'Plan no válido';
+    }
+  } else {
+    // Fallback: usar lógica anterior si no hay fechas del plan
+    const año = hoy.getFullYear();
+    const mes = hoy.getMonth();
+    const primerDia = new Date(año, mes, 1);
+    const ultimoDia = new Date(año, mes + 1, 0);
+    const diasHabiles = calcularDiasHabiles(primerDia, ultimoDia);
+    
+    asistenciasFiltradas = asistenciasMes.filter(fecha => {
+      const fechaAsistencia = new Date(fecha);
+      return fechaAsistencia.getFullYear() === año && fechaAsistencia.getMonth() === mes;
+    });
+    
+    diasUsados = asistenciasFiltradas.length;
+    
+    switch (limiteClases) {
+      case 'todos_los_dias':
+        diasDisponibles = diasHabiles;
+        puedeAcceder = true;
+        mensaje = `Puedes acceder todos los días hábiles del mes (${diasHabiles} días disponibles)`;
+        break;
+        
+      case '12':
         diasDisponibles = 12;
         puedeAcceder = diasUsados < 12;
         mensaje = diasUsados < 12 
           ? `Puedes acceder hasta 12 días al mes (${12 - diasUsados} días restantes)`
           : `Has alcanzado el límite de 12 clases este mes`;
-      }
-      break;
-      
-    case '8':
-      // Si hay período específico del plan, aplicar protocolo del gimnasio
-      if (diasHabilesPlan !== null) {
-        // PROTOCOLO: Reducir límite según días hábiles disponibles
-        const limiteReal = Math.min(8, diasHabilesPlan);
-        diasDisponibles = limiteReal;
-        puedeAcceder = diasUsados < limiteReal && (diasHabilesRestantesPlan !== null && diasHabilesRestantesPlan > 0);
-        mensaje = diasUsados < limiteReal
-          ? `Puedes acceder hasta ${limiteReal} días (${limiteReal - diasUsados} restantes)`
-          : `Has alcanzado el límite de ${limiteReal} clases disponibles`;
-      } else {
+        break;
+        
+      case '8':
         diasDisponibles = 8;
         puedeAcceder = diasUsados < 8;
         mensaje = diasUsados < 8
           ? `Puedes acceder hasta 8 días al mes (${8 - diasUsados} días restantes)`
           : `Has alcanzado el límite de 8 clases este mes`;
-      }
-      break;
-      
-    default:
-      diasDisponibles = 0;
-      puedeAcceder = false;
-      mensaje = 'Plan no válido';
+        break;
+        
+      default:
+        diasDisponibles = 0;
+        puedeAcceder = false;
+        mensaje = 'Plan no válido';
+    }
   }
   
   return {

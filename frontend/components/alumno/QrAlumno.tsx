@@ -100,9 +100,11 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     fechaInicio,
     fechaFin,
     limiteClases,
-    asistenciasMes: asistenciasMes.length,
+    asistenciasMesTotal: asistenciasMes.length,
+    asistenciasMes: asistenciasMes,
     limiteInfo: limiteInfoCalculado,
-    mensajeLimite
+    mensajeLimite,
+    colorIndicador
   });
 
   // El hook useEstadoRenovacion ya maneja la verificación automática
