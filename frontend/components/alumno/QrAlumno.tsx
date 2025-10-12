@@ -300,7 +300,8 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
               <div className={styles.limiteDetail}>
                 <span className={styles.limiteLabel}>Límite del plan:</span>
                 <span className={styles.limiteValue}>
-                  {limiteReal === '12' ? '12 clases al mes' : 
+                  {planCompleto?.clases ? `${planCompleto.clases} clases al mes` : 
+                   limiteReal === '12' ? '12 clases al mes' : 
                    limiteReal === '8' ? '8 clases al mes' : 'Todos los días hábiles'}
                 </span>
               </div>
