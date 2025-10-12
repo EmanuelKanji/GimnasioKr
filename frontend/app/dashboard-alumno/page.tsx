@@ -9,6 +9,7 @@ import InicioAlumno from "../../components/alumno/InicioAlumno";
 import QrAlumno from "../../components/alumno/QrAlumno";
 import { useAsistencias } from "../../hooks/useAsistencias";
 import { usePerfil } from "../../hooks/usePerfil";
+import type { Plan } from "../../../shared/types";
 
 // Iconos SVG como componentes
 const HomeIcon = () => (
@@ -74,6 +75,7 @@ export default function DashboardAlumno() {
   
   const [menuOpen, setMenuOpen] = useState(false);
   const [limiteClases, setLimiteClases] = useState<'12' | '8' | 'todos_los_dias'>('todos_los_dias');
+  const [planCompleto, setPlanCompleto] = useState<Plan | null>(null);
   
   // Usar hooks centralizados
   const { asistencias: asistenciasMes } = useAsistencias();
@@ -95,6 +97,31 @@ export default function DashboardAlumno() {
         setLimiteClases('todos_los_dias');
       }
     }
+  }, [perfil]);
+
+  // Obtener plan completo del alumno
+  useEffect(() => {
+    const obtenerPlanCompleto = async () => {
+      if (!perfil?.plan) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/planes`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const planes = await response.json();
+          // Buscar el plan del alumno por nombre
+          const plan = planes.find((p: Plan) => p.nombre === perfil.plan);
+          setPlanCompleto(plan || null);
+        }
+      } catch (error) {
+        console.error('Error obteniendo plan:', error);
+      }
+    };
+    
+    obtenerPlanCompleto();
   }, [perfil]);
 
   const handleViewChange = (newView: "inicio" | "asistencia" | "plan" | "perfil" | "avisos" | "qr") => {
@@ -249,6 +276,7 @@ export default function DashboardAlumno() {
                 fechaFin={perfil?.fechaTerminoPlan ?? ''}
                 limiteClases={limiteClases}
                 asistenciasMes={asistenciasMes}
+                planCompleto={planCompleto}
               />
             ) : (
               <div className={styles.errorState}>No se encontró el perfil del alumno.</div>

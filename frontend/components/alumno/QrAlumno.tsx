@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import styles from './QrAlumno.module.css';
 import { calcularLimiteClases, obtenerMensajeLimite, obtenerColorIndicador, type LimiteClases } from '../../lib/classLimits';
 import { useEstadoRenovacion } from '../../hooks/useEstadoRenovacion';
+import type { Plan } from '../../../shared/types';
 
 interface QrAlumnoProps {
   rut: string;
@@ -11,15 +12,21 @@ interface QrAlumnoProps {
   fechaFin: string;
   limiteClases?: LimiteClases;
   asistenciasMes?: string[];
+  planCompleto?: Plan | null;
 }
 
-export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClases = 'todos_los_dias', asistenciasMes = [] }: QrAlumnoProps) {
+export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClases = 'todos_los_dias', asistenciasMes = [], planCompleto }: QrAlumnoProps) {
   const [activo, setActivo] = useState(false);
   const [qrData, setQrData] = useState('');
   const [tiempoRestante, setTiempoRestante] = useState(0);
   
   // Usar hook centralizado para estado de renovación
   const { estado: estadoRenovacion, updateEstado } = useEstadoRenovacion();
+
+  // Usar datos del plan real si está disponible
+  const nombrePlanReal = planCompleto?.nombre || plan;
+  const descripcionPlan = planCompleto?.descripcion || '';
+  const limiteReal = planCompleto?.limiteClases || limiteClases;
 
   // Función para generar un token temporal único
   const generarTokenTemporal = () => {
@@ -87,16 +94,20 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     setTiempoRestante(tiempoExpiracion);
   }, [rut, plan, fechaInicio, fechaFin]);
 
-  // Calcular información de límites de clases considerando fechas del plan
-  const limiteInfoCalculado = calcularLimiteClases(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
-  const mensajeLimite = obtenerMensajeLimite(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
-  const colorIndicador = obtenerColorIndicador(limiteClases, asistenciasMes, new Date(), fechaInicio, fechaFin);
+  // Calcular información de límites de clases usando el límite real del plan
+  const limiteInfoCalculado = calcularLimiteClases(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
+  const mensajeLimite = obtenerMensajeLimite(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
+  const colorIndicador = obtenerColorIndicador(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
 
   // Debug: Log de información para verificar datos
   console.log('🔍 QR Debug Info:', {
     rutOriginal: rut,
     rutLimpio: limpiarRut(rut),
     plan,
+    planCompleto,
+    nombrePlanReal,
+    descripcionPlan,
+    limiteReal,
     fechaInicio,
     fechaFin,
     limiteClases,
@@ -258,7 +269,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
             <h4>📋 Información del Plan</h4>
             <div className={styles.planDetail}>
               <span className={styles.planLabel}>Plan:</span>
-              <span className={styles.planValue}>{plan}</span>
+              <span className={styles.planValue}>{nombrePlanReal}</span>
             </div>
             <div className={styles.planDetail}>
               <span className={styles.planLabel}>Válido desde:</span>
@@ -272,11 +283,25 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
             {/* Información de límites de clases */}
             <div className={styles.limiteClasesInfo}>
               <h5>🎯 Estado de tu Plan</h5>
+              
+              {/* Mostrar nombre y descripción del plan real */}
               <div className={styles.limiteDetail}>
-                <span className={styles.limiteLabel}>Tipo de plan:</span>
+                <span className={styles.limiteLabel}>Plan contratado:</span>
+                <span className={styles.limiteValue}>{nombrePlanReal}</span>
+              </div>
+              
+              {descripcionPlan && (
+                <div className={styles.limiteDetail}>
+                  <span className={styles.limiteLabel}>Descripción:</span>
+                  <span className={styles.limiteValue}>{descripcionPlan}</span>
+                </div>
+              )}
+              
+              <div className={styles.limiteDetail}>
+                <span className={styles.limiteLabel}>Límite del plan:</span>
                 <span className={styles.limiteValue}>
-                  {limiteClases === '12' ? '12 clases al mes' : 
-                   limiteClases === '8' ? '8 clases al mes' : 'Todos los días hábiles'}
+                  {limiteReal === '12' ? '12 clases al mes' : 
+                   limiteReal === '8' ? '8 clases al mes' : 'Todos los días hábiles'}
                 </span>
               </div>
               <div className={styles.limiteDetail}>
