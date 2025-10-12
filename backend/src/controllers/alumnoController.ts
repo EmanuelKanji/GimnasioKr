@@ -4,6 +4,7 @@ import User from '../models/User';
 import Alumno from '../models/Alumno';
 import Plan from '../models/Plan';
 import { AttendanceService } from '../services/attendanceService';
+import { executeTransaction, log } from '../utils/transactionHelper';
 
 // Obtener plan del alumno por RUT
 export const obtenerPlanAlumno = async (req: Request, res: Response) => {
@@ -465,9 +466,7 @@ export const crearAlumno = async (req: Request, res: Response) => {
 
     // Aplicar descuento al monto
     const montoConDescuento = monto * (1 - porcentajeDescuento / 100);
-    // Crear usuario para login
-    const nuevoUsuario = new User({ username: email, password, role: 'alumno', rut: rutLimpio });
-    await nuevoUsuario.save();
+    
     // Calcular fecha de término según duración
     const inicio = new Date(fechaInicioPlan);
     let termino = new Date(inicio);
@@ -480,27 +479,66 @@ export const crearAlumno = async (req: Request, res: Response) => {
     } else if (duracion === 'anual') {
       termino.setFullYear(termino.getFullYear() + 1);
     }
-    // Crear perfil de alumno
-    const nuevoAlumno = new Alumno({
-      nombre,
-      rut: rutLimpio, // Usar RUT limpio
-      direccion,
-      fechaNacimiento,
-      email,
-      telefono,
-      plan: planEncontrado.nombre, // Guardar el nombre del plan en lugar del ID
-      fechaInicioPlan,
-      fechaTerminoPlan: termino.toISOString(),
-      duracion,
-      monto: montoConDescuento,
-      limiteClases: limiteClases || planEncontrado.limiteClases || 'todos_los_dias',
-      descripcionPlan: planEncontrado.descripcion,
-      descuentoEspecial: descuentoEspecial || 'ninguno',
-      porcentajeDescuento,
-      asistencias: [],
-      avisos: []
+
+    // Crear usuario y alumno en transacción
+    await executeTransaction([
+      // Operación 1: Crear usuario
+      async (session) => {
+        const nuevoUsuario = new User({ 
+          username: email, 
+          password, 
+          role: 'alumno', 
+          rut: rutLimpio 
+        });
+        await nuevoUsuario.save({ session });
+        
+        log.info('Usuario creado', {
+          email: email,
+          rut: rutLimpio,
+          action: 'crear_usuario'
+        });
+      },
+      
+      // Operación 2: Crear alumno
+      async (session) => {
+        const nuevoAlumno = new Alumno({
+          nombre,
+          rut: rutLimpio,
+          direccion,
+          fechaNacimiento,
+          email,
+          telefono,
+          plan: planEncontrado.nombre,
+          fechaInicioPlan,
+          fechaTerminoPlan: termino.toISOString(),
+          duracion,
+          monto: montoConDescuento,
+          limiteClases: limiteClases || planEncontrado.limiteClases || 'todos_los_dias',
+          descripcionPlan: planEncontrado.descripcion,
+          descuentoEspecial: descuentoEspecial || 'ninguno',
+          porcentajeDescuento,
+          asistencias: [],
+          avisos: []
+        });
+        await nuevoAlumno.save({ session });
+        
+        log.audit('Alumno creado', {
+          nombre: nombre,
+          rut: rutLimpio,
+          email: email,
+          plan: planEncontrado.nombre,
+          duracion: duracion,
+          monto: montoConDescuento,
+          descuentoEspecial: descuentoEspecial,
+          action: 'crear_alumno'
+        });
+      }
+    ], {
+      email: email,
+      rut: rutLimpio,
+      action: 'crear_alumno_completo'
     });
-    await nuevoAlumno.save();
+
     return res.status(201).json({ message: 'Alumno y usuario creados exitosamente.' });
   } catch (error) {
     return res.status(500).json({ message: 'Error al inscribir alumno.', error });

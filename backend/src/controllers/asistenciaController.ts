@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Asistencia from '../models/Asistencia';
 import Alumno from '../models/Alumno';
+import { log } from '../utils/transactionHelper';
 import { AttendanceService } from '../services/attendanceService';
 
 export const obtenerHistorialAsistencia = async (_req: Request, res: Response) => {
@@ -44,17 +45,27 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
     const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
     
     const rutLimpio = limpiarRut(rut);
-    console.log('🔍 Debug Asistencia - RUT recibido:', rut);
-    console.log('🔍 Debug Asistencia - RUT limpio:', rutLimpio);
+    log.info('Registrando asistencia', { 
+      rutRecibido: rut, 
+      rutLimpio: rutLimpio,
+      action: 'registrar_asistencia'
+    });
     
     // Buscar el alumno en la base de datos
     const alumno = await Alumno.findOne({ rut: rutLimpio });
     
     // Debug: Verificar qué RUTs existen en la BD
     if (!alumno) {
-      console.log('❌ Alumno no encontrado, buscando todos los RUTs en BD...');
+      log.warn('Alumno no encontrado', { 
+        rutLimpio: rutLimpio,
+        action: 'buscar_alumno'
+      });
+      
       const todosLosAlumnos = await Alumno.find({}, 'rut nombre').limit(5);
-      console.log('📊 Primeros 5 alumnos en BD:', todosLosAlumnos.map(a => ({ rut: a.rut, nombre: a.nombre })));
+      log.debug('Primeros 5 alumnos en BD', { 
+        alumnos: todosLosAlumnos.map(a => ({ rut: a.rut, nombre: a.nombre })),
+        totalAlumnos: todosLosAlumnos.length
+      });
       
       return res.status(404).json({ 
         message: 'Alumno no encontrado en el sistema.', 
@@ -165,6 +176,13 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
     const asistencias = Array.isArray(alumno.asistencias) ? alumno.asistencias : [];
 
     if (asistencias.includes(fechaHoy)) {
+      log.warn('Asistencia ya registrada hoy', { 
+        rut: rutLimpio,
+        nombre: alumno.nombre,
+        fecha: fechaHoy,
+        action: 'asistencia_duplicada'
+      });
+      
       return res.status(409).json({ 
         message: 'Ya has registrado asistencia hoy.',
         codigo: 'ASISTENCIA_YA_REGISTRADA',
@@ -228,8 +246,14 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
     alumno.asistencias.push(fechaHoy);
     await alumno.save();
 
-    // Log de seguridad
-    console.log(`📝 Asistencia registrada - RUT: ${rut}, Fecha: ${fechaHoy}, Plan: ${alumno.plan}`);
+    // Log de asistencia exitosa
+    log.audit('Asistencia registrada', {
+      rut: rutLimpio,
+      nombre: alumno.nombre,
+      fecha: fechaHoy,
+      plan: alumno.plan,
+      action: 'registrar_asistencia_exitosa'
+    });
 
     // Respuesta exitosa con información adicional
     res.status(201).json({ 

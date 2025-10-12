@@ -1,6 +1,7 @@
 'use client';
 import type { InscribirAlumnoForm, Plan } from '../../../shared/types';
 import { useState, useEffect } from 'react';
+import { validarRutChileno, validarFortalezaPassword, limpiarRut } from '../../lib/validators';
 import styles from './InscribirAlumno.module.css';
 
 export default function InscribirAlumnoForm() {
@@ -98,17 +99,17 @@ export default function InscribirAlumnoForm() {
     e.preventDefault();
     setMensaje(null);
 
-    // Validar formato de RUT
-    const rutRegex = /^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$/;
-    if (!rutRegex.test(form.rut)) {
-      setMensaje('El RUT debe tener el formato 12.345.678-9');
+    // Validar formato de RUT con dígito verificador
+    const rutValidation = validarRutChileno(form.rut);
+    if (!rutValidation.valid) {
+      setMensaje(rutValidation.message);
       return;
     }
 
-    // Validar que descuentos no se apliquen a planes semestrales/anuales
-    if ((form.descuentoEspecial === 'familiar_x2' || form.descuentoEspecial === 'familiar_x3') && 
-        (form.duracion === 'semestral' || form.duracion === 'anual')) {
-      setMensaje('Los descuentos familiares solo aplican a planes mensuales y trimestrales');
+    // Validar fortaleza de contraseña
+    const passwordValidation = validarFortalezaPassword(form.password);
+    if (!passwordValidation.valid) {
+      setMensaje(passwordValidation.message);
       return;
     }
 
@@ -118,7 +119,7 @@ export default function InscribirAlumnoForm() {
       // Preparar datos para enviar (limpiar RUT completamente para el backend)
       const formData = {
         ...form,
-        rut: form.rut.replace(/\./g, '').replace(/-/g, '') // Remover puntos y guión completamente
+        rut: limpiarRut(form.rut) // Usar función de limpieza consistente
       };
       
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/alumnos', {

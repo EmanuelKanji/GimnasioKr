@@ -6,6 +6,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import { sanitizeInputs } from './middleware/sanitizer';
+import { validateDataIntegrity } from './middleware/dataIntegrity';
+import { requestLoggingMiddleware } from './utils/transactionHelper';
 
 // ========================
 // Configuración principal
@@ -72,6 +75,12 @@ app.use(requestLogger);
 // Body parsing con límite de tamaño
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Middleware de sanitización de inputs (después de body parsing)
+app.use(sanitizeInputs);
+
+// Middleware de logging de requests
+app.use(requestLoggingMiddleware);
 // Configuración de CORS mejorada
 const allowedOrigins = [
   'https://kraccess.netlify.app',
@@ -192,11 +201,11 @@ app.use('/api/users', authUserRoutes);
 
 // Rutas protegidas - requieren autenticación
 app.use('/api/usuarios', authenticateToken, requireRole(['admin']), userRoutes);
-app.use('/api/alumnos', authenticateToken, alumnoRoutes);
-app.use('/api/planes', authenticateToken, requireRole(['admin']), planRoutes);
+app.use('/api/alumnos', authenticateToken, validateDataIntegrity, alumnoRoutes);
+app.use('/api/planes', authenticateToken, requireRole(['admin']), validateDataIntegrity, planRoutes);
 app.use('/api/asistencias', authenticateToken, asistenciaRoutes);
 app.use('/api/avisos', avisoRoutes);
-app.use('/api/profesor', profesorRoutes);
+app.use('/api/profesor', validateDataIntegrity, profesorRoutes);
 
 // ========================
 // Manejo de errores global

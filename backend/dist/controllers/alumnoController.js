@@ -9,6 +9,7 @@ const User_1 = __importDefault(require("../models/User"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
 const Plan_1 = __importDefault(require("../models/Plan"));
 const attendanceService_1 = require("../services/attendanceService");
+const transactionHelper_1 = require("../utils/transactionHelper");
 // Obtener plan del alumno por RUT
 const obtenerPlanAlumno = async (req, res) => {
     try {
@@ -435,9 +436,6 @@ const crearAlumno = async (req, res) => {
         }
         // Aplicar descuento al monto
         const montoConDescuento = monto * (1 - porcentajeDescuento / 100);
-        // Crear usuario para login
-        const nuevoUsuario = new User_1.default({ username: email, password, role: 'alumno', rut: rutLimpio });
-        await nuevoUsuario.save();
         // Calcular fecha de término según duración
         const inicio = new Date(fechaInicioPlan);
         let termino = new Date(inicio);
@@ -453,27 +451,61 @@ const crearAlumno = async (req, res) => {
         else if (duracion === 'anual') {
             termino.setFullYear(termino.getFullYear() + 1);
         }
-        // Crear perfil de alumno
-        const nuevoAlumno = new Alumno_1.default({
-            nombre,
-            rut: rutLimpio, // Usar RUT limpio
-            direccion,
-            fechaNacimiento,
-            email,
-            telefono,
-            plan: planEncontrado.nombre, // Guardar el nombre del plan en lugar del ID
-            fechaInicioPlan,
-            fechaTerminoPlan: termino.toISOString(),
-            duracion,
-            monto: montoConDescuento,
-            limiteClases: limiteClases || planEncontrado.limiteClases || 'todos_los_dias',
-            descripcionPlan: planEncontrado.descripcion,
-            descuentoEspecial: descuentoEspecial || 'ninguno',
-            porcentajeDescuento,
-            asistencias: [],
-            avisos: []
+        // Crear usuario y alumno en transacción
+        await (0, transactionHelper_1.executeTransaction)([
+            // Operación 1: Crear usuario
+            async (session) => {
+                const nuevoUsuario = new User_1.default({
+                    username: email,
+                    password,
+                    role: 'alumno',
+                    rut: rutLimpio
+                });
+                await nuevoUsuario.save({ session });
+                transactionHelper_1.log.info('Usuario creado', {
+                    email: email,
+                    rut: rutLimpio,
+                    action: 'crear_usuario'
+                });
+            },
+            // Operación 2: Crear alumno
+            async (session) => {
+                const nuevoAlumno = new Alumno_1.default({
+                    nombre,
+                    rut: rutLimpio,
+                    direccion,
+                    fechaNacimiento,
+                    email,
+                    telefono,
+                    plan: planEncontrado.nombre,
+                    fechaInicioPlan,
+                    fechaTerminoPlan: termino.toISOString(),
+                    duracion,
+                    monto: montoConDescuento,
+                    limiteClases: limiteClases || planEncontrado.limiteClases || 'todos_los_dias',
+                    descripcionPlan: planEncontrado.descripcion,
+                    descuentoEspecial: descuentoEspecial || 'ninguno',
+                    porcentajeDescuento,
+                    asistencias: [],
+                    avisos: []
+                });
+                await nuevoAlumno.save({ session });
+                transactionHelper_1.log.audit('Alumno creado', {
+                    nombre: nombre,
+                    rut: rutLimpio,
+                    email: email,
+                    plan: planEncontrado.nombre,
+                    duracion: duracion,
+                    monto: montoConDescuento,
+                    descuentoEspecial: descuentoEspecial,
+                    action: 'crear_alumno'
+                });
+            }
+        ], {
+            email: email,
+            rut: rutLimpio,
+            action: 'crear_alumno_completo'
         });
-        await nuevoAlumno.save();
         return res.status(201).json({ message: 'Alumno y usuario creados exitosamente.' });
     }
     catch (error) {

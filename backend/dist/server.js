@@ -12,6 +12,9 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const sanitizer_1 = require("./middleware/sanitizer");
+const dataIntegrity_1 = require("./middleware/dataIntegrity");
+const transactionHelper_1 = require("./utils/transactionHelper");
 // ========================
 // Configuración principal
 // ========================
@@ -66,6 +69,10 @@ exports.app.use(logging_1.requestLogger);
 // Body parsing con límite de tamaño
 exports.app.use(express_1.default.json({ limit: '10mb' }));
 exports.app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+// Middleware de sanitización de inputs (después de body parsing)
+exports.app.use(sanitizer_1.sanitizeInputs);
+// Middleware de logging de requests
+exports.app.use(transactionHelper_1.requestLoggingMiddleware);
 // Configuración de CORS mejorada
 const allowedOrigins = [
     'https://kraccess.netlify.app',
@@ -172,11 +179,11 @@ exports.app.use('/api/auth', authRoutes_1.default);
 exports.app.use('/api/users', authUserRoutes_1.default);
 // Rutas protegidas - requieren autenticación
 exports.app.use('/api/usuarios', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), userRoutes_1.default);
-exports.app.use('/api/alumnos', auth_1.authenticateToken, alumnoRoutes_1.default);
-exports.app.use('/api/planes', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), planRoutes_1.default);
+exports.app.use('/api/alumnos', auth_1.authenticateToken, dataIntegrity_1.validateDataIntegrity, alumnoRoutes_1.default);
+exports.app.use('/api/planes', auth_1.authenticateToken, (0, auth_1.requireRole)(['admin']), dataIntegrity_1.validateDataIntegrity, planRoutes_1.default);
 exports.app.use('/api/asistencias', auth_1.authenticateToken, asistenciaRoutes_1.default);
 exports.app.use('/api/avisos', avisoRoutes_1.default);
-exports.app.use('/api/profesor', profesorRoutes_1.default);
+exports.app.use('/api/profesor', dataIntegrity_1.validateDataIntegrity, profesorRoutes_1.default);
 // ========================
 // Manejo de errores global
 // ========================

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.schemas = exports.validate = void 0;
 const joi_1 = __importDefault(require("joi"));
+const validators_1 = require("../utils/validators");
 // Middleware de validación genérico
 const validate = (schema) => {
     return (req, res, next) => {
@@ -20,6 +21,28 @@ const validate = (schema) => {
     };
 };
 exports.validate = validate;
+// Validaciones custom de Joi
+const customValidations = {
+    // Validación de RUT chileno con dígito verificador
+    rutChileno: joi_1.default.string().custom((value, helpers) => {
+        if (!(0, validators_1.validarRutChileno)(value)) {
+            return helpers.error('rut.invalid');
+        }
+        return value;
+    }, 'Validación de RUT chileno').messages({
+        'rut.invalid': 'El RUT no es válido. Verifique el dígito verificador.'
+    }),
+    // Validación de fortaleza de contraseña
+    passwordStrong: joi_1.default.string().custom((value, helpers) => {
+        const validation = (0, validators_1.validarFortalezaPassword)(value);
+        if (!validation.valid) {
+            return helpers.error('password.weak', { message: validation.message });
+        }
+        return value;
+    }, 'Validación de fortaleza de contraseña').messages({
+        'password.weak': 'La contraseña no cumple los requisitos de seguridad: {{#message}}'
+    })
+};
 // Esquemas de validación
 exports.schemas = {
     // Login
@@ -39,16 +62,14 @@ exports.schemas = {
             'string.email': 'El username debe ser un email válido',
             'any.required': 'El username es requerido'
         }),
-        password: joi_1.default.string().min(6).required().messages({
-            'string.min': 'La contraseña debe tener al menos 6 caracteres',
+        password: customValidations.passwordStrong.required().messages({
             'any.required': 'La contraseña es requerida'
         }),
         role: joi_1.default.string().valid('alumno', 'profesor').required().messages({
             'any.only': 'El rol debe ser alumno o profesor',
             'any.required': 'El rol es requerido'
         }),
-        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
+        rut: customValidations.rutChileno.required().messages({
             'any.required': 'El RUT es requerido'
         }),
         limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
@@ -62,8 +83,7 @@ exports.schemas = {
             'string.max': 'El nombre no puede exceder 50 caracteres',
             'any.required': 'El nombre es requerido'
         }),
-        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
+        rut: customValidations.rutChileno.required().messages({
             'any.required': 'El RUT es requerido'
         }),
         direccion: joi_1.default.string().min(5).max(100).required().messages({
@@ -98,8 +118,7 @@ exports.schemas = {
             'number.min': 'El monto debe ser mayor o igual a 0',
             'any.required': 'El monto es requerido'
         }),
-        password: joi_1.default.string().min(6).required().messages({
-            'string.min': 'La contraseña debe tener al menos 6 caracteres',
+        password: customValidations.passwordStrong.required().messages({
             'any.required': 'La contraseña es requerida'
         }),
         limiteClases: joi_1.default.string().valid('12', '8', 'todos_los_dias').default('12').messages({
@@ -148,8 +167,7 @@ exports.schemas = {
     }),
     // Registrar asistencia
     registrarAsistencia: joi_1.default.object({
-        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
+        rut: customValidations.rutChileno.required().messages({
             'any.required': 'El RUT es requerido'
         }),
         qrData: joi_1.default.object({
@@ -217,8 +235,7 @@ exports.schemas = {
         passwordActual: joi_1.default.string().required().messages({
             'any.required': 'La contraseña actual es requerida'
         }),
-        passwordNueva: joi_1.default.string().min(6).required().messages({
-            'string.min': 'La nueva contraseña debe tener al menos 6 caracteres',
+        passwordNueva: customValidations.passwordStrong.required().messages({
             'any.required': 'La nueva contraseña es requerida'
         })
     }),
@@ -229,8 +246,7 @@ exports.schemas = {
             'string.max': 'El nombre no puede exceder 50 caracteres',
             'any.required': 'El nombre es requerido'
         }),
-        rut: joi_1.default.string().pattern(/^[0-9]{7,8}[0-9kK]$/).required().messages({
-            'string.pattern.base': 'El RUT debe tener formato válido (12345678K)',
+        rut: customValidations.rutChileno.required().messages({
             'any.required': 'El RUT es requerido'
         }),
         email: joi_1.default.string().email().required().messages({
