@@ -600,3 +600,53 @@
     text-align: center;
   }
 }
+
+/* Nuevos estilos para el formulario simplificado */
+.planInfo {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.planInfo h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.planDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.planDetails span {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.descuentoAplicado {
+  color: #28a745 !important;
+  font-weight: 600;
+}
+
+.readOnlyInput {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.helpText {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .planDetails {
+    gap: 0.5rem;
+  }
+}

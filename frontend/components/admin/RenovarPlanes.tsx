@@ -40,14 +40,60 @@ export default function RenovarPlanes() {
     return fin.toISOString().split('T')[0];
   };
 
+  // Funciones helper para manejar planes
+  const obtenerDuracionPlan = (plan: string) => {
+    const duraciones: { [key: string]: string } = {
+      'PM 2X': 'mensual',
+      'PM 3X': 'mensual', 
+      'FULL': 'mensual',
+      'ESTUDIANTES': 'mensual',
+      'TRIMESTRAL 12 CLASES': 'trimestral',
+      'TRIMESTRAL FULL': 'trimestral',
+      'AM FULL': 'mensual'
+    };
+    return duraciones[plan] || 'mensual';
+  };
+
+  const obtenerLimiteClases = (plan: string) => {
+    const limites: { [key: string]: string } = {
+      'PM 2X': '8',
+      'PM 3X': '12',
+      'FULL': 'todos_los_dias',
+      'ESTUDIANTES': 'todos_los_dias',
+      'TRIMESTRAL 12 CLASES': '12',
+      'TRIMESTRAL FULL': 'todos_los_dias',
+      'AM FULL': 'todos_los_dias'
+    };
+    return limites[plan] || 'todos_los_dias';
+  };
+
+  const obtenerDescripcionLimite = (plan: string) => {
+    const descripciones: { [key: string]: string } = {
+      'PM 2X': '8 clases/mes',
+      'PM 3X': '12 clases/mes',
+      'FULL': 'Todos los días',
+      'ESTUDIANTES': 'Todos los días',
+      'TRIMESTRAL 12 CLASES': '12 clases/mes',
+      'TRIMESTRAL FULL': 'Todos los días',
+      'AM FULL': 'Todos los días (solo mañanas)'
+    };
+    return descripciones[plan] || 'Todos los días';
+  };
+
+  const obtenerPorcentajeDescuento = (descuento: string) => {
+    const porcentajes: { [key: string]: string } = {
+      'familiar_x2': '10%',
+      'familiar_x3': '15%'
+    };
+    return porcentajes[descuento] || '0%';
+  };
+
   const [formularioRenovacion, setFormularioRenovacion] = useState({
-    fechaInicio: new Date().toISOString().split('T')[0],
-    fechaFin: calcularFechaFin(new Date().toISOString().split('T')[0], 'mensual'),
-    duracion: 'mensual',
-    limiteClases: 'todos_los_dias',
-    observaciones: '',
+    planSeleccionado: '',
     descuentoEspecial: 'ninguno',
-    monto: 0
+    fechaInicio: new Date().toISOString().split('T')[0],
+    fechaFin: '',
+    observaciones: ''
   });
 
   // Cargar alumnos para renovar
@@ -88,37 +134,38 @@ export default function RenovarPlanes() {
   useEffect(() => {
     if (alumnoSeleccionado) {
       setFormularioRenovacion({
-        fechaInicio: new Date().toISOString().split('T')[0],
-        fechaFin: calcularFechaFin(new Date().toISOString().split('T')[0], 'mensual'),
-        duracion: 'mensual',
-        limiteClases: 'todos_los_dias',
-        observaciones: '',
+        planSeleccionado: '',
         descuentoEspecial: 'ninguno',
-        monto: 0
+        fechaInicio: new Date().toISOString().split('T')[0],
+        fechaFin: '',
+        observaciones: ''
       });
     }
   }, [alumnoSeleccionado]);
 
-  // Manejar cambio de duración para calcular fecha fin
-  const handleDuracionChange = (duracion: string) => {
+  // Manejar cambios en el formulario
+  const handlePlanChange = (planSeleccionado: string) => {
+    const duracion = obtenerDuracionPlan(planSeleccionado);
     const fechaFin = calcularFechaFin(formularioRenovacion.fechaInicio, duracion);
-    
     setFormularioRenovacion({
       ...formularioRenovacion,
-      duracion,
+      planSeleccionado,
       fechaFin
     });
   };
 
   // Manejar cambio de fecha de inicio para recalcular fecha fin
   const handleFechaInicioChange = (fechaInicio: string) => {
-    const fechaFin = calcularFechaFin(fechaInicio, formularioRenovacion.duracion);
-    
-    setFormularioRenovacion({
-      ...formularioRenovacion,
-      fechaInicio,
-      fechaFin
-    });
+    if (formularioRenovacion.planSeleccionado) {
+      const duracion = obtenerDuracionPlan(formularioRenovacion.planSeleccionado);
+      const fechaFin = calcularFechaFin(fechaInicio, duracion);
+      
+      setFormularioRenovacion({
+        ...formularioRenovacion,
+        fechaInicio,
+        fechaFin
+      });
+    }
   };
 
   // Renovar plan de alumno
@@ -132,27 +179,25 @@ export default function RenovarPlanes() {
       }
 
       // Validar que todos los campos estén completos
-      if (!formularioRenovacion.fechaInicio || !formularioRenovacion.fechaFin || !formularioRenovacion.duracion || !formularioRenovacion.limiteClases) {
-        alert('Por favor completa todos los campos requeridos');
+      if (!formularioRenovacion.planSeleccionado) {
+        alert('Por favor selecciona un plan para la renovación');
         return;
       }
 
-      // Validar que descuentos no se apliquen a planes semestrales/anuales
-      if ((formularioRenovacion.descuentoEspecial === 'familiar_x2' || formularioRenovacion.descuentoEspecial === 'familiar_x3') && 
-          (formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual')) {
-        alert('Los descuentos familiares solo aplican a planes mensuales y trimestrales');
-        return;
-      }
+      // Obtener duración y límite del plan seleccionado
+      const duracion = obtenerDuracionPlan(formularioRenovacion.planSeleccionado);
+      const limiteClases = obtenerLimiteClases(formularioRenovacion.planSeleccionado);
+      const fechaFin = calcularFechaFin(formularioRenovacion.fechaInicio, duracion);
 
       // Preparar datos para el backend
       const datosRenovacion = {
+        plan: formularioRenovacion.planSeleccionado,
         fechaInicio: formularioRenovacion.fechaInicio,
-        fechaFin: formularioRenovacion.fechaFin,
-        duracion: formularioRenovacion.duracion,
-        limiteClases: formularioRenovacion.limiteClases,
+        fechaFin: fechaFin,
+        duracion: duracion,
+        limiteClases: limiteClases,
         observaciones: formularioRenovacion.observaciones || '',
-        descuentoEspecial: formularioRenovacion.descuentoEspecial,
-        monto: formularioRenovacion.monto || undefined
+        descuentoEspecial: formularioRenovacion.descuentoEspecial
       };
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/${alumnoId}/renovar`, {
@@ -169,6 +214,12 @@ export default function RenovarPlanes() {
         alert('✅ Plan renovado exitosamente');
         setAlumnoSeleccionado(null);
         cargarAlumnos();
+        
+        // Notificar que el perfil del alumno se ha actualizado
+        // Esto hará que el dashboard del alumno se actualice automáticamente
+        window.dispatchEvent(new CustomEvent('perfilActualizado', { 
+          detail: { data: responseData.alumno, timestamp: Date.now() } 
+        }));
       } else if (res.status === 401) {
         alert('Sesión expirada. Redirigiendo al login...');
         window.location.href = '/login-admin';
@@ -335,31 +386,55 @@ export default function RenovarPlanes() {
                     
                     <form onSubmit={(e) => { e.preventDefault(); handleRenovar(alumno._id); }}>
                       <div className={styles.formGrid}>
+                        {/* Plan de Renovación */}
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Plan de Renovación:</label>
+                          <select 
+                            value={formularioRenovacion.planSeleccionado}
+                            onChange={(e) => handlePlanChange(e.target.value)}
+                            className={styles.formSelect}
+                            required
+                          >
+                            <option value="">Seleccionar plan...</option>
+                            <option value="PM 2X">PM 2X - 8 clases/mes</option>
+                            <option value="PM 3X">PM 3X - 12 clases/mes</option>
+                            <option value="FULL">FULL - Todos los días</option>
+                            <option value="ESTUDIANTES">ESTUDIANTES - Descuento estudiantil</option>
+                            <option value="TRIMESTRAL 12 CLASES">TRIMESTRAL 12 CLASES</option>
+                            <option value="TRIMESTRAL FULL">TRIMESTRAL FULL</option>
+                            <option value="AM FULL">AM FULL - Mañanas</option>
+                          </select>
+                        </div>
+
+                        {/* Descuento Especial */}
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Descuento Especial:</label>
+                          <select 
+                            value={formularioRenovacion.descuentoEspecial}
+                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, descuentoEspecial: e.target.value})}
+                            className={styles.formSelect}
+                          >
+                            <option value="ninguno">Sin descuento especial</option>
+                            <option value="familiar_x2">Familiar x2 (10% descuento)</option>
+                            <option value="familiar_x3">Familiar x3 (15% descuento)</option>
+                          </select>
+                        </div>
+
+                        {/* Fecha de Inicio (automática) */}
                         <div className={styles.formGroup}>
                           <label className={styles.formLabel}>Fecha de Inicio:</label>
                           <input 
                             type="date" 
                             value={formularioRenovacion.fechaInicio}
-                            onChange={(e) => handleFechaInicioChange(e.target.value)}
-                            className={styles.formInput}
-                            required
+                            readOnly
+                            className={`${styles.formInput} ${styles.readOnlyInput}`}
                           />
-                        </div>
-                        
-                        <div className={styles.formGroup}>
-                          <label className={styles.formLabel}>Duración:</label>
-                          <select 
-                            value={formularioRenovacion.duracion}
-                            onChange={(e) => handleDuracionChange(e.target.value)}
-                            className={styles.formSelect}
-                          >
-                            <option value="mensual">Mensual</option>
-                            <option value="trimestral">Trimestral</option>
-                            <option value="semestral">Semestral (6 meses)</option>
-                            <option value="anual">Anual</option>
-                          </select>
+                          <small className={styles.helpText}>
+                            Inicia automáticamente hoy
+                          </small>
                         </div>
 
+                        {/* Fecha de Término (calculada automáticamente) */}
                         <div className={styles.formGroup}>
                           <label className={styles.formLabel}>Fecha de Término:</label>
                           <input 
@@ -369,68 +444,24 @@ export default function RenovarPlanes() {
                             className={`${styles.formInput} ${styles.readOnlyInput}`}
                           />
                           <small className={styles.helpText}>
-                            Calculada automáticamente según la duración
-                          </small>
-                        </div>
-
-                        <div className={styles.formGroup}>
-                          <label className={styles.formLabel}>Límite de Clases:</label>
-                          <select 
-                            value={formularioRenovacion.limiteClases}
-                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, limiteClases: e.target.value})}
-                            className={styles.formSelect}
-                          >
-                            <option value="todos_los_dias">Todos los días</option>
-                            <option value="12">12 clases/mes</option>
-                            <option value="8">8 clases/mes</option>
-                          </select>
-                        </div>
-
-                        <div className={styles.formGroup}>
-                          <label className={styles.formLabel}>Descuento Especial:</label>
-                          <select 
-                            value={formularioRenovacion.descuentoEspecial}
-                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, descuentoEspecial: e.target.value})}
-                            className={styles.formSelect}
-                            disabled={formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual'}
-                          >
-                            <option value="ninguno">Sin descuento especial</option>
-                            <option value="familiar_x2">Familiar x2 (10% descuento)</option>
-                            <option value="familiar_x3">Familiar x3 (15% descuento)</option>
-                          </select>
-                          {(formularioRenovacion.duracion === 'semestral' || formularioRenovacion.duracion === 'anual') && 
-                          formularioRenovacion.descuentoEspecial !== 'ninguno' && (
-                            <div className={styles.warning}>
-                              ⚠️ Los descuentos familiares no aplican a planes semestrales o anuales
-                            </div>
-                          )}
-                        </div>
-
-                        <div className={styles.formGroup}>
-                          <label className={styles.formLabel}>Monto (opcional):</label>
-                          <input 
-                            type="number" 
-                            value={formularioRenovacion.monto || ''}
-                            onChange={(e) => setFormularioRenovacion({...formularioRenovacion, monto: parseFloat(e.target.value) || 0})}
-                            placeholder="Monto del plan"
-                            className={styles.formInput}
-                            min="0"
-                            step="100"
-                          />
-                          <small className={styles.helpText}>
-                            Si se especifica un monto, se aplicará el descuento correspondiente
+                            Calculada automáticamente según el plan seleccionado
                           </small>
                         </div>
                       </div>
 
-                      {formularioRenovacion.descuentoEspecial !== 'ninguno' && formularioRenovacion.monto > 0 && (
-                        <div className={styles.descuentoInfo}>
-                          <div className={styles.descuentoDetails}>
-                            <span><strong>Monto original:</strong> ${formularioRenovacion.monto.toLocaleString('es-CL')}</span>
-                            <span><strong>Descuento:</strong> {formularioRenovacion.descuentoEspecial === 'familiar_x2' ? '10%' : '15%'}</span>
-                            <span className={styles.totalPagar}>
-                              <strong>Total a pagar:</strong> ${(formularioRenovacion.monto * (formularioRenovacion.descuentoEspecial === 'familiar_x2' ? 0.9 : 0.85)).toLocaleString('es-CL')}
-                            </span>
+                      {/* Información del Plan y Descuento */}
+                      {formularioRenovacion.planSeleccionado && (
+                        <div className={styles.planInfo}>
+                          <h4>📋 Información del Plan</h4>
+                          <div className={styles.planDetails}>
+                            <span><strong>Plan:</strong> {formularioRenovacion.planSeleccionado}</span>
+                            <span><strong>Duración:</strong> {obtenerDuracionPlan(formularioRenovacion.planSeleccionado)}</span>
+                            <span><strong>Límite de clases:</strong> {obtenerDescripcionLimite(formularioRenovacion.planSeleccionado)}</span>
+                            {formularioRenovacion.descuentoEspecial !== 'ninguno' && (
+                              <span className={styles.descuentoAplicado}>
+                                <strong>Descuento aplicado:</strong> {obtenerPorcentajeDescuento(formularioRenovacion.descuentoEspecial)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       )}
@@ -450,7 +481,7 @@ export default function RenovarPlanes() {
                         <button 
                           type="submit" 
                           className={styles.confirmarBtn}
-                          disabled={estaProcesando}
+                          disabled={estaProcesando || !formularioRenovacion.planSeleccionado}
                         >
                           {estaProcesando ? '⏳ Procesando...' : '✅ Confirmar Renovación'}
                         </button>
