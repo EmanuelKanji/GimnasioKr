@@ -60,19 +60,35 @@ export class AttendanceService {
   ): { inicio: Date, fin: Date, numeroMes: number } {
     const inicioPlan = new Date(fechaInicioPlan);
     
-    // Calcular meses transcurridos desde el inicio del plan
-    const mesesTranscurridos = Math.floor(
-      (fechaActual.getTime() - inicioPlan.getTime()) / (1000 * 60 * 60 * 24 * 30)
+    // Calcular días transcurridos desde el inicio del plan
+    const diasTranscurridos = Math.floor(
+      (fechaActual.getTime() - inicioPlan.getTime()) / (1000 * 60 * 60 * 24)
     );
+    
+    // Calcular meses transcurridos (usar 31 días para evitar problemas de borde)
+    const mesesTranscurridos = Math.floor(diasTranscurridos / 31);
     
     // Calcular inicio del mes actual del plan
     const inicioMes = new Date(inicioPlan);
-    inicioMes.setMonth(inicioMes.getMonth() + mesesTranscurridos);
+    inicioMes.setDate(inicioMes.getDate() + (mesesTranscurridos * 31));
     
-    // Calcular fin del mes actual del plan
+    // Calcular fin del mes actual del plan (30 días después del inicio)
     const finMes = new Date(inicioMes);
-    finMes.setMonth(finMes.getMonth() + 1);
-    finMes.setDate(finMes.getDate() - 1); // Último día del mes del plan
+    finMes.setDate(finMes.getDate() + 29); // 30 días - 1
+    
+    // Si la fecha actual está antes del inicio del mes calculado, 
+    // significa que estamos en el primer mes
+    if (fechaActual < inicioMes) {
+      const primerMesInicio = new Date(inicioPlan);
+      const primerMesFin = new Date(inicioPlan);
+      primerMesFin.setDate(primerMesFin.getDate() + 29);
+      
+      return {
+        inicio: primerMesInicio,
+        fin: primerMesFin,
+        numeroMes: 1
+      };
+    }
     
     return {
       inicio: inicioMes,
