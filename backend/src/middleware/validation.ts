@@ -204,6 +204,9 @@ export const schemas = {
 
   // Renovar plan
   renovarPlan: Joi.object({
+    plan: Joi.string().required().messages({
+      'any.required': 'El plan es requerido'
+    }),
     fechaInicio: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required().messages({
       'string.pattern.base': 'La fecha de inicio debe tener formato YYYY-MM-DD',
       'any.required': 'La fecha de inicio es requerida'
@@ -226,9 +229,6 @@ export const schemas = {
       .messages({
         'any.only': 'El descuento especial debe ser ninguno, familiar_x2 o familiar_x3'
       }),
-    monto: Joi.number().min(0).optional().messages({
-      'number.min': 'El monto debe ser mayor o igual a 0'
-    }),
     observaciones: Joi.string().max(500).optional().messages({
       'string.max': 'Las observaciones no pueden exceder 500 caracteres'
     })

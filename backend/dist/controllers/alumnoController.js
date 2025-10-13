@@ -212,27 +212,19 @@ exports.obtenerAlumnosParaRenovar = obtenerAlumnosParaRenovar;
 const renovarPlanAlumno = async (req, res) => {
     try {
         const { id } = req.params;
-        const { fechaInicio, fechaFin, duracion, limiteClases, observaciones, descuentoEspecial, monto } = req.body;
-        console.log('Datos recibidos para renovación:', { id, fechaInicio, fechaFin, duracion, limiteClases, observaciones });
+        const { plan, fechaInicio, fechaFin, duracion, limiteClases, observaciones, descuentoEspecial } = req.body;
+        console.log('Datos recibidos para renovación:', { id, plan, fechaInicio, fechaFin, duracion, limiteClases, observaciones });
         // Validar que todos los campos requeridos estén presentes
-        if (!fechaInicio || !fechaFin || !duracion || !limiteClases) {
+        if (!plan || !fechaInicio || !fechaFin || !duracion || !limiteClases) {
             return res.status(400).json({
                 message: 'Faltan campos requeridos',
-                campos: { fechaInicio, fechaFin, duracion, limiteClases }
+                campos: { plan, fechaInicio, fechaFin, duracion, limiteClases }
             });
         }
         const alumno = await Alumno_1.default.findById(id);
         if (!alumno)
             return res.status(404).json({ message: 'Alumno no encontrado' });
-        // Validar que descuento solo aplique a mensual/trimestral
-        if (descuentoEspecial && descuentoEspecial !== 'ninguno') {
-            if (duracion === 'semestral' || duracion === 'anual') {
-                return res.status(400).json({
-                    message: 'Los descuentos familiares no aplican a planes semestrales o anuales'
-                });
-            }
-        }
-        // Calcular descuento
+        // Calcular descuento según el tipo
         let porcentajeDescuento = 0;
         if (descuentoEspecial === 'familiar_x2') {
             porcentajeDescuento = 10;
@@ -240,15 +232,10 @@ const renovarPlanAlumno = async (req, res) => {
         else if (descuentoEspecial === 'familiar_x3') {
             porcentajeDescuento = 15;
         }
-        // Aplicar descuento al monto si se proporciona
-        let montoConDescuento = alumno.monto; // Mantener monto actual por defecto
-        if (monto && monto > 0) {
-            montoConDescuento = monto * (1 - porcentajeDescuento / 100);
-        }
         // Buscar el plan para obtener la descripción
         let descripcionPlan = 'Plan de gimnasio';
         try {
-            const planEncontrado = await Plan_1.default.findOne({ nombre: alumno.plan });
+            const planEncontrado = await Plan_1.default.findOne({ nombre: plan });
             if (planEncontrado) {
                 descripcionPlan = planEncontrado.descripcion;
             }
@@ -257,6 +244,7 @@ const renovarPlanAlumno = async (req, res) => {
             console.error('Error buscando plan para renovación:', error);
         }
         // Actualizar datos del plan
+        alumno.plan = plan; // Actualizar el plan asignado
         alumno.fechaInicioPlan = fechaInicio;
         alumno.fechaTerminoPlan = fechaFin;
         alumno.duracion = duracion;
@@ -264,9 +252,6 @@ const renovarPlanAlumno = async (req, res) => {
         alumno.descripcionPlan = descripcionPlan;
         alumno.descuentoEspecial = descuentoEspecial || 'ninguno';
         alumno.porcentajeDescuento = porcentajeDescuento;
-        if (monto && monto > 0) {
-            alumno.monto = montoConDescuento;
-        }
         alumno.estadoRenovacion = 'completada';
         alumno.asistencias = []; // Resetear asistencias del nuevo período
         // Guardar log de renovación
@@ -298,9 +283,12 @@ const renovarPlanAlumno = async (req, res) => {
             alumno: {
                 nombre: alumno.nombre,
                 rut: alumno.rut,
+                plan: alumno.plan,
                 fechaInicio: alumno.fechaInicioPlan,
                 fechaFin: alumno.fechaTerminoPlan,
-                limiteClases: alumno.limiteClases
+                limiteClases: alumno.limiteClases,
+                descuentoEspecial: alumno.descuentoEspecial,
+                porcentajeDescuento: alumno.porcentajeDescuento
             }
         });
     }

@@ -195,6 +195,9 @@ exports.schemas = {
     }),
     // Renovar plan
     renovarPlan: joi_1.default.object({
+        plan: joi_1.default.string().required().messages({
+            'any.required': 'El plan es requerido'
+        }),
         fechaInicio: joi_1.default.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required().messages({
             'string.pattern.base': 'La fecha de inicio debe tener formato YYYY-MM-DD',
             'any.required': 'La fecha de inicio es requerida'
@@ -216,9 +219,6 @@ exports.schemas = {
             .optional()
             .messages({
             'any.only': 'El descuento especial debe ser ninguno, familiar_x2 o familiar_x3'
-        }),
-        monto: joi_1.default.number().min(0).optional().messages({
-            'number.min': 'El monto debe ser mayor o igual a 0'
         }),
         observaciones: joi_1.default.string().max(500).optional().messages({
             'string.max': 'Las observaciones no pueden exceder 500 caracteres'
