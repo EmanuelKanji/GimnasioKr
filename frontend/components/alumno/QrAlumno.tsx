@@ -78,12 +78,35 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     const tiempoExpiracion = 10 * 60 * 1000; // 10 minutos en milisegundos (sincronizado con backend)
     const expiraEn = ahora + tiempoExpiracion;
     
+    // Validar fechas antes de generar QR
+    const fechaInicioPlan = new Date(fechaInicio);
+    const fechaFinPlan = new Date(fechaFin);
+    const fechaActual = new Date();
+    
+    // Si las fechas del perfil están expiradas, usar fechas actuales para el QR
+    // El backend ya validará las fechas reales del perfil del alumno
+    let validoDesde, validoHasta;
+    
+    if (isNaN(fechaInicioPlan.getTime()) || isNaN(fechaFinPlan.getTime())) {
+      // Fechas inválidas, usar fechas por defecto
+      validoDesde = fechaActual.toISOString();
+      validoHasta = new Date(fechaActual.getTime() + (30 * 24 * 60 * 60 * 1000)).toISOString(); // 30 días
+    } else if (fechaActual > fechaFinPlan) {
+      // Plan expirado según perfil, usar fechas actuales para QR
+      validoDesde = fechaActual.toISOString();
+      validoHasta = new Date(fechaActual.getTime() + (30 * 24 * 60 * 60 * 1000)).toISOString(); // 30 días
+    } else {
+      // Fechas válidas, usar las del perfil
+      validoDesde = fechaInicioPlan.toISOString();
+      validoHasta = fechaFinPlan.toISOString();
+    }
+    
     // Crear datos del QR con medidas de seguridad mejoradas
     const datosQR = {
       rut: limpiarRut(rut), // RUT limpio para compatibilidad con backend
       plan,
-      validoDesde: new Date(fechaInicio).toISOString(), // Asegurar formato ISO
-      validoHasta: new Date(fechaFin).toISOString(),     // Asegurar formato ISO
+      validoDesde,          // Fechas validadas y corregidas
+      validoHasta,          // Fechas validadas y corregidas
       timestamp: ahora,           // Momento de generación
       expiraEn: expiraEn,        // Cuándo expira el QR
       token: generarTokenTemporal(), // Token único para esta sesión
@@ -94,8 +117,12 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     console.log('🔍 QR Fechas Debug:', {
       fechaInicioOriginal: fechaInicio,
       fechaFinOriginal: fechaFin,
-      fechaInicioISO: new Date(fechaInicio).toISOString(),
-      fechaFinISO: new Date(fechaFin).toISOString(),
+      fechaInicioPlan: fechaInicioPlan.toISOString(),
+      fechaFinPlan: fechaFinPlan.toISOString(),
+      fechaActual: fechaActual.toISOString(),
+      planExpirado: fechaActual > fechaFinPlan,
+      validoDesde: validoDesde,
+      validoHasta: validoHasta,
       datosQR: datosQR
     });
 

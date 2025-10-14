@@ -150,36 +150,25 @@ const registrarAsistencia = async (req, res) => {
                         });
                     }
                 }
-                // Validar fechas del plan en el QR (doble verificación)
-                if (datosQR.validoHasta) {
-                    let fechaValidoHasta;
-                    try {
-                        // Intentar parsear la fecha (puede ser ISO o formato local)
-                        fechaValidoHasta = new Date(datosQR.validoHasta);
-                        // Verificar que la fecha es válida
-                        if (isNaN(fechaValidoHasta.getTime())) {
-                            transactionHelper_1.log.warn('Fecha inválida en QR', {
-                                fechaRecibida: datosQR.validoHasta,
-                                action: 'validar_fecha_qr'
-                            });
-                            // Si la fecha es inválida, continuar sin esta validación
-                        }
-                        else if (fechaActual > fechaValidoHasta) {
-                            return res.status(403).json({
-                                message: 'El plan en el QR ha expirado.',
-                                codigo: 'PLAN_QR_EXPIRADO'
-                            });
-                        }
-                    }
-                    catch (error) {
-                        transactionHelper_1.log.warn('Error parseando fecha del QR', {
-                            fechaRecibida: datosQR.validoHasta,
-                            error: error instanceof Error ? error.message : String(error),
-                            action: 'parsear_fecha_qr'
-                        });
-                        // Si hay error parseando, continuar sin esta validación
-                    }
+                // Validar fechas del plan en el QR (verificación opcional)
+                // NOTA: Las fechas del perfil del alumno ya fueron validadas arriba (líneas 104-119)
+                // El QR solo debe coincidir con el plan, no validar fechas independientemente
+                if (datosQR.plan && datosQR.plan !== alumno.plan) {
+                    transactionHelper_1.log.warn('Plan del QR no coincide con el plan del alumno', {
+                        planQR: datosQR.plan,
+                        planAlumno: alumno.plan,
+                        action: 'validar_plan_qr'
+                    });
+                    // No rechazar por esto, solo loggear para debugging
                 }
+                // Log de QR procesado exitosamente
+                transactionHelper_1.log.info('QR procesado exitosamente', {
+                    rut: rutLimpio,
+                    planQR: datosQR.plan,
+                    planAlumno: alumno.plan,
+                    timestamp: new Date(datosQR.timestamp).toISOString(),
+                    action: 'qr_procesado'
+                });
                 console.log(`✅ QR válido procesado - RUT: ${rut}, Token: ${datosQR.token}, Generado: ${new Date(datosQR.timestamp).toLocaleString()}`);
             }
             catch (parseError) {

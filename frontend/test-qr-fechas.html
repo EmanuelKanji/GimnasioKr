@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Fechas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test QR Fechas</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test de Fechas del QR</h3>
+        <p>Este test verifica cómo se procesan las fechas en el componente QrAlumno.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Simular Datos del Perfil del Alumno</h3>
+        <button onclick="simularPerfil()">Simular Perfil</button>
+        <div id="perfil-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Generar QR con Fechas del Perfil</h3>
+        <button onclick="generarQRConFechas()">Generar QR</button>
+        <div id="qr-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Validar QR Generado</h3>
+        <button onclick="validarQR()">Validar QR</button>
+        <div id="validacion-result"></div>
+    </div>
+
+    <script>
+        let perfilSimulado = null;
+        let qrGenerado = '';
+
+        function simularPerfil() {
+            // Simular diferentes tipos de fechas que puede recibir el componente
+            const perfiles = [
+                {
+                    nombre: 'Perfil con fechas ISO',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: '2025-10-01T00:00:00.000Z',
+                    fechaTerminoPlan: '2025-12-31T00:00:00.000Z'
+                },
+                {
+                    nombre: 'Perfil con fechas locales',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: '2025-10-01',
+                    fechaTerminoPlan: '2025-12-31'
+                },
+                {
+                    nombre: 'Perfil con fechas pasadas (PROBLEMA)',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: '2024-10-01T00:00:00.000Z',
+                    fechaTerminoPlan: '2024-12-31T00:00:00.000Z'
+                },
+                {
+                    nombre: 'Perfil con fechas inválidas',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: 'fecha-invalida',
+                    fechaTerminoPlan: 'otra-fecha-invalida'
+                }
+            ];
+
+            let resultados = '<h4>📊 Perfiles Simulados</h4>';
+            
+            perfiles.forEach((perfil, index) => {
+                const fechaInicio = new Date(perfil.fechaInicioPlan);
+                const fechaFin = new Date(perfil.fechaTerminoPlan);
+                const esValidaInicio = !isNaN(fechaInicio.getTime());
+                const esValidaFin = !isNaN(fechaFin.getTime());
+                const esFuturaFin = esValidaFin && fechaFin > new Date();
+                
+                resultados += `
+                    <div class="${esValidaInicio && esValidaFin && esFuturaFin ? 'success' : 'error'}">
+                        <strong>${perfil.nombre}:</strong><br>
+                        <strong>Inicio:</strong> ${perfil.fechaInicioPlan} → ${esValidaInicio ? fechaInicio.toISOString() : 'INVÁLIDA'}<br>
+                        <strong>Fin:</strong> ${perfil.fechaTerminoPlan} → ${esValidaFin ? fechaFin.toISOString() : 'INVÁLIDA'}<br>
+                        <strong>Válida:</strong> ${esValidaInicio && esValidaFin ? 'Sí' : 'No'}<br>
+                        <strong>Futura:</strong> ${esFuturaFin ? 'Sí' : 'No'}<br>
+                        <button onclick="usarPerfil(${index})">Usar este perfil</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('perfil-result').innerHTML = resultados;
+        }
+
+        function usarPerfil(index) {
+            const perfiles = [
+                {
+                    nombre: 'Perfil con fechas ISO',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: '2025-10-01T00:00:00.000Z',
+                    fechaTerminoPlan: '2025-12-31T00:00:00.000Z'
+                },
+                {
+                    nombre: 'Perfil con fechas locales',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: '2025-10-01',
+                    fechaTerminoPlan: '2025-12-31'
+                },
+                {
+                    nombre: 'Perfil con fechas pasadas (PROBLEMA)',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: '2024-10-01T00:00:00.000Z',
+                    fechaTerminoPlan: '2024-12-31T00:00:00.000Z'
+                },
+                {
+                    nombre: 'Perfil con fechas inválidas',
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicioPlan: 'fecha-invalida',
+                    fechaTerminoPlan: 'otra-fecha-invalida'
+                }
+            ];
+
+            perfilSimulado = perfiles[index];
+            
+            document.getElementById('perfil-result').innerHTML = `
+                <div class="info">
+                    <h4>✅ Perfil Seleccionado</h4>
+                    <pre>${JSON.stringify(perfilSimulado, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function generarQRConFechas() {
+            if (!perfilSimulado) {
+                document.getElementById('qr-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error</h4>
+                        <p>Primero selecciona un perfil</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Simular la función generarNuevoQR del componente QrAlumno
+            const ahora = Date.now();
+            const tiempoExpiracion = 10 * 60 * 1000; // 10 minutos
+            const expiraEn = ahora + tiempoExpiracion;
+            
+            const datosQR = {
+                rut: perfilSimulado.rut.replace(/\.|-/g, '').toUpperCase(),
+                plan: perfilSimulado.plan,
+                validoDesde: new Date(perfilSimulado.fechaInicioPlan).toISOString(),
+                validoHasta: new Date(perfilSimulado.fechaTerminoPlan).toISOString(),
+                timestamp: ahora,
+                expiraEn: expiraEn,
+                token: Math.random().toString(36).substring(2, 15),
+                version: '2.0'
+            };
+
+            qrGenerado = JSON.stringify(datosQR);
+            
+            // Verificar si las fechas son válidas
+            const fechaInicio = new Date(perfilSimulado.fechaInicioPlan);
+            const fechaFin = new Date(perfilSimulado.fechaTerminoPlan);
+            const esValidaInicio = !isNaN(fechaInicio.getTime());
+            const esValidaFin = !isNaN(fechaFin.getTime());
+            const esFuturaFin = esValidaFin && fechaFin > new Date();
+            
+            let estado = 'success';
+            let mensaje = '✅ QR generado correctamente';
+            
+            if (!esValidaInicio || !esValidaFin) {
+                estado = 'error';
+                mensaje = '❌ Error: Fechas inválidas en el perfil';
+            } else if (!esFuturaFin) {
+                estado = 'error';
+                mensaje = '❌ Error: El plan ya expiró según las fechas del perfil';
+            }
+            
+            document.getElementById('qr-result').innerHTML = `
+                <div class="${estado}">
+                    <h4>${mensaje}</h4>
+                    <pre>${qrGenerado}</pre>
+                    <p><strong>Fechas procesadas:</strong></p>
+                    <p>Inicio: ${fechaInicio.toISOString()} (válida: ${esValidaInicio})</p>
+                    <p>Fin: ${fechaFin.toISOString()} (válida: ${esValidaFin}, futura: ${esFuturaFin})</p>
+                </div>
+            `;
+        }
+
+        function validarQR() {
+            if (!qrGenerado) {
+                document.getElementById('validacion-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error</h4>
+                        <p>Primero genera un QR</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const datosQR = JSON.parse(qrGenerado);
+            const ahora = Date.now();
+            
+            let errores = [];
+            
+            // Validar expiración
+            if (datosQR.expiraEn && ahora > datosQR.expiraEn) {
+                errores.push('QR expirado');
+            }
+            
+            // Validar timestamp (máximo 10 minutos)
+            if (datosQR.timestamp && (ahora - datosQR.timestamp) > (10 * 60 * 1000)) {
+                errores.push('QR demasiado antiguo');
+            }
+            
+            // Validar fechas
+            if (datosQR.validoHasta) {
+                const fechaValidoHasta = new Date(datosQR.validoHasta);
+                if (isNaN(fechaValidoHasta.getTime())) {
+                    errores.push('Fecha inválida en QR');
+                } else if (ahora > fechaValidoHasta.getTime()) {
+                    errores.push('Plan expirado según QR');
+                }
+            }
+
+            if (errores.length > 0) {
+                document.getElementById('validacion-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Validaciones Fallidas</h4>
+                        <ul>
+                            ${errores.map(error => `<li>${error}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                document.getElementById('validacion-result').innerHTML = `
+                    <div class="success">
+                        <h4>✅ Validaciones Exitosas</h4>
+                        <p>El QR pasó todas las validaciones del backend</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

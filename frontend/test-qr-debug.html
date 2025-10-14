@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test QR Debug</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Información del Test</h3>
+        <p>Este test verifica el flujo completo del QR desde la generación hasta el procesamiento.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Generar QR de Prueba</h3>
+        <button onclick="generarQR()">Generar QR</button>
+        <div id="qr-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Procesar QR con QRService</h3>
+        <button onclick="procesarQR()">Procesar QR</button>
+        <div id="process-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Simular Envío al Backend</h3>
+        <button onclick="simularBackend()">Simular Backend</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test de Validación de Fechas</h3>
+        <button onclick="testFechas()">Test Fechas</button>
+        <div id="fechas-result"></div>
+    </div>
+
+    <script>
+        // Simular QRService
+        class QRService {
+            static processQR(qrData) {
+                if (!qrData || qrData === 'undefined') {
+                    return {
+                        rut: '',
+                        qrData: null,
+                        isValid: false,
+                        type: 'unknown',
+                        originalData: qrData
+                    };
+                }
+
+                try {
+                    const datosQR = JSON.parse(qrData);
+                    
+                    if (datosQR.rut && datosQR.timestamp) {
+                        return {
+                            rut: datosQR.rut,
+                            qrData: qrData,
+                            isValid: true,
+                            type: 'new',
+                            originalData: qrData
+                        };
+                    }
+                } catch {
+                    const rutMatch = qrData.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
+                    if (rutMatch) {
+                        const rutLimpio = rutMatch[1].replace(/\.|-/g, '');
+                        return {
+                            rut: rutLimpio,
+                            qrData: null,
+                            isValid: true,
+                            type: 'legacy',
+                            originalData: qrData
+                        };
+                    }
+                }
+
+                return {
+                    rut: '',
+                    qrData: null,
+                    isValid: false,
+                    type: 'unknown',
+                    originalData: qrData
+                };
+            }
+
+            static processAndLogQR(qrData, type = 'detected') {
+                const result = this.processQR(qrData);
+                
+                if (result.isValid) {
+                    if (result.type === 'new' && result.qrData) {
+                        try {
+                            const parsedQR = JSON.parse(result.qrData);
+                            console.log(`📱 QR ${type === 'scanned' ? 'escaneado' : 'detectado'}:`, {
+                                rut: parsedQR.rut,
+                                plan: parsedQR.plan,
+                                generado: new Date(parsedQR.timestamp).toISOString(),
+                                expira: new Date(parsedQR.expiraEn).toISOString()
+                            });
+                        } catch {
+                            console.log(`📱 QR ${type === 'scanned' ? 'escaneado' : 'detectado'}:`, {
+                                rut: result.rut,
+                                type: result.type
+                            });
+                        }
+                    } else if (result.type === 'legacy') {
+                        console.log('📱 QR formato legacy detectado (solo RUT):', result.rut);
+                    }
+                } else {
+                    console.log('📱 QR formato desconocido:', qrData);
+                }
+
+                return result;
+            }
+        }
+
+        let qrGenerado = '';
+
+        function generarQR() {
+            const ahora = Date.now();
+            const tiempoExpiracion = 10 * 60 * 1000; // 10 minutos
+            const expiraEn = ahora + tiempoExpiracion;
+            
+            const datosQR = {
+                rut: '1234567899',
+                plan: 'PM 3X',
+                validoDesde: new Date('2024-10-01').toISOString(),
+                validoHasta: new Date('2024-12-31').toISOString(),
+                timestamp: ahora,
+                expiraEn: expiraEn,
+                token: Math.random().toString(36).substring(2, 15),
+                version: '2.0'
+            };
+
+            qrGenerado = JSON.stringify(datosQR);
+            
+            document.getElementById('qr-result').innerHTML = `
+                <div class="success">
+                    <h4>✅ QR Generado</h4>
+                    <pre>${qrGenerado}</pre>
+                </div>
+            `;
+        }
+
+        function procesarQR() {
+            if (!qrGenerado) {
+                document.getElementById('process-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error</h4>
+                        <p>Primero genera un QR</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const result = QRService.processAndLogQR(qrGenerado, 'detected');
+            
+            document.getElementById('process-result').innerHTML = `
+                <div class="success">
+                    <h4>✅ QR Procesado</h4>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function simularBackend() {
+            if (!qrGenerado) {
+                document.getElementById('backend-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error</h4>
+                        <p>Primero genera un QR</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const result = QRService.processQR(qrGenerado);
+            
+            if (!result.isValid) {
+                document.getElementById('backend-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ QR Inválido</h4>
+                        <p>El QR no se pudo procesar correctamente</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Simular validaciones del backend
+            const datosQR = JSON.parse(result.qrData);
+            const ahora = Date.now();
+            
+            let errores = [];
+            
+            // Validar expiración
+            if (datosQR.expiraEn && ahora > datosQR.expiraEn) {
+                errores.push('QR expirado');
+            }
+            
+            // Validar timestamp (máximo 10 minutos)
+            if (datosQR.timestamp && (ahora - datosQR.timestamp) > (10 * 60 * 1000)) {
+                errores.push('QR demasiado antiguo');
+            }
+            
+            // Validar fechas
+            if (datosQR.validoHasta) {
+                const fechaValidoHasta = new Date(datosQR.validoHasta);
+                if (isNaN(fechaValidoHasta.getTime())) {
+                    errores.push('Fecha inválida en QR');
+                } else if (ahora > fechaValidoHasta.getTime()) {
+                    errores.push('Plan expirado según QR');
+                }
+            }
+
+            if (errores.length > 0) {
+                document.getElementById('backend-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Validaciones Fallidas</h4>
+                        <ul>
+                            ${errores.map(error => `<li>${error}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                document.getElementById('backend-result').innerHTML = `
+                    <div class="success">
+                        <h4>✅ Validaciones Exitosas</h4>
+                        <p>El QR pasó todas las validaciones del backend</p>
+                    </div>
+                `;
+            }
+        }
+
+        function testFechas() {
+            const fechas = [
+                { nombre: 'Fecha actual', valor: new Date().toISOString() },
+                { nombre: 'Fecha pasada', valor: new Date('2024-01-01').toISOString() },
+                { nombre: 'Fecha futura', valor: new Date('2025-12-31').toISOString() },
+                { nombre: 'Fecha inválida', valor: 'fecha-invalida' },
+                { nombre: 'Fecha local', valor: '2024-10-14 09:25:40' }
+            ];
+
+            let resultados = '<h4>📅 Test de Fechas</h4>';
+            
+            fechas.forEach(fecha => {
+                const fechaObj = new Date(fecha.valor);
+                const esValida = !isNaN(fechaObj.getTime());
+                const esFutura = esValida && fechaObj > new Date();
+                
+                resultados += `
+                    <div class="${esValida ? 'success' : 'error'}">
+                        <strong>${fecha.nombre}:</strong> ${fecha.valor}<br>
+                        <strong>Válida:</strong> ${esValida ? 'Sí' : 'No'}<br>
+                        <strong>Futura:</strong> ${esFutura ? 'Sí' : 'No'}<br>
+                        <strong>ISO:</strong> ${esValida ? fechaObj.toISOString() : 'N/A'}
+                    </div>
+                `;
+            });
+
+            document.getElementById('fechas-result').innerHTML = resultados;
+        }
+    </script>
+</body>
+</html>
