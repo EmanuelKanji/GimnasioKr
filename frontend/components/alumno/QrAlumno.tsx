@@ -153,6 +153,21 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     }
   }, [tiempoRestante, generarNuevoQR]);
 
+  // Escuchar eventos de asistencia registrada para actualizar el contador
+  useEffect(() => {
+    const handleAsistenciaRegistrada = (event: CustomEvent) => {
+      console.log('🔄 Asistencia registrada, actualizando contador...', event.detail);
+      // Forzar recálculo de límites
+      window.dispatchEvent(new CustomEvent('perfilActualizado'));
+    };
+
+    window.addEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
+    
+    return () => {
+      window.removeEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
+    };
+  }, []);
+
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {
     const hoy = new Date();

@@ -85,15 +85,24 @@ export function useAsistencias() {
       setLoading(asistenciasCache.isLoading);
     };
 
+    const handleAsistenciaRegistrada = (event: CustomEvent) => {
+      console.log('🔄 Asistencia registrada, actualizando cache...', event.detail);
+      // Agregar la fecha de hoy al cache
+      const hoy = new Date().toISOString().split('T')[0];
+      addAsistencia(hoy);
+    };
+
     listeners.add(listener);
+    window.addEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
 
     // Cargar datos iniciales
     fetchAsistencias();
 
     return () => {
       listeners.delete(listener);
+      window.removeEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
     };
-  }, [fetchAsistencias]);
+  }, [fetchAsistencias, addAsistencia]);
 
   // Función para registrar una nueva asistencia localmente
   const addAsistencia = useCallback((fecha: string) => {
