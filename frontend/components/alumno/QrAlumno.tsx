@@ -95,15 +95,20 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   // Función para limpiar RUT (quitar puntos y guiones)
   const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
 
-  // Función para generar QR simplificado (solo RUT)
+  // Función para generar QR con expiración (solo RUT)
   const generarNuevoQR = useCallback(() => {
-    // QR simplificado - solo RUT
+    const ahora = new Date();
+    const expiraEn = new Date(ahora.getTime() + 5 * 60 * 1000); // 5 minutos
+    
+    // QR simplificado - solo RUT con timestamp
     const datosQR = {
-      rut: limpiarRut(rut)
+      rut: limpiarRut(rut),
+      timestamp: ahora.getTime(),
+      expiraEn: expiraEn.getTime()
     };
 
     setQrData(JSON.stringify(datosQR));
-    setTiempoRestante(0); // No hay expiración
+    setTiempoRestante(5 * 60 * 1000); // 5 minutos en milisegundos
   }, [rut]);
 
   // Calcular información de límites de clases usando el límite real del plan
@@ -130,8 +135,23 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     colorIndicador
   });
 
-  // El hook useEstadoRenovacion ya maneja la verificación automática
-  // No necesitamos useEffect adicional ni setInterval
+  // Contador de tiempo para el QR
+  useEffect(() => {
+    if (tiempoRestante > 0) {
+      const timer = setInterval(() => {
+        setTiempoRestante(prev => {
+          if (prev <= 1000) {
+            // QR expirado, regenerar automáticamente
+            generarNuevoQR();
+            return 0;
+          }
+          return prev - 1000;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [tiempoRestante, generarNuevoQR]);
 
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {

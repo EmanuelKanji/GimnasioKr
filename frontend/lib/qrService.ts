@@ -36,8 +36,25 @@ export class QRService {
       const datosQR = JSON.parse(qrData);
       
       if (datosQR.rut) {
+        // Limpiar el RUT del QR
+        const rutLimpio = datosQR.rut.replace(/\.|-/g, '').toUpperCase();
+        
+        // Verificar si el QR ha expirado
+        const ahora = new Date().getTime();
+        const expiraEn = datosQR.expiraEn || (datosQR.timestamp + 5 * 60 * 1000); // 5 minutos por defecto
+        
+        if (ahora > expiraEn) {
+          return {
+            rut: rutLimpio,
+            qrData: null,
+            isValid: false,
+            type: 'new',
+            originalData: qrData
+          };
+        }
+        
         return {
-          rut: datosQR.rut,
+          rut: rutLimpio,
           qrData: null, // No devolver el QR completo
           isValid: true,
           type: 'new',
