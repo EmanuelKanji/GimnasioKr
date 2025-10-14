@@ -121,7 +121,7 @@ export default function PasarAsistencia() {
         },
         body: JSON.stringify({ 
           rut: qrResult.rut,
-          qrData: qrResult.qrData ? JSON.stringify(qrResult.qrData) : undefined
+          qrData: qrResult.qrData ? JSON.parse(qrResult.qrData) : null
         })
       });
       const data = await res.json();

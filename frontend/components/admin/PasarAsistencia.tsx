@@ -34,7 +34,7 @@ export default function PasarAsistencia() {
       // Preparar datos para enviar
       const requestData = { 
         rut: rutParaEnviar,
-        qrData: qrDataParaEnviar
+        qrData: qrDataParaEnviar ? JSON.parse(qrDataParaEnviar) : null
       };
       
       console.log('📤 Enviando datos al backend:', requestData);
@@ -127,7 +127,7 @@ export default function PasarAsistencia() {
         },
         body: JSON.stringify({ 
           rut: qrResult.rut,
-          qrData: qrResult.qrData ? JSON.stringify(qrResult.qrData) : undefined
+          qrData: qrResult.qrData ? JSON.parse(qrResult.qrData) : null
         })
       });
       const data = await res.json();
