@@ -38,7 +38,7 @@ export class QRService {
       if (datosQR.rut) {
         return {
           rut: datosQR.rut,
-          qrData: qrData,
+          qrData: null, // No devolver el QR completo
           isValid: true,
           type: 'new',
           originalData: qrData
