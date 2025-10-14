@@ -12,18 +12,18 @@ const transactionHelper_1 = require("../utils/transactionHelper");
 const validateDataIntegrity = (req, res, next) => {
     try {
         const { body } = req;
-        // Validar fechas futuras
+        // Validar fechas de plan
         if (body.fechaInicioPlan) {
-            if (!(0, transactionHelper_1.validarFechaFutura)(body.fechaInicioPlan)) {
+            if (!(0, transactionHelper_1.validarFechaInicio)(body.fechaInicioPlan)) {
                 return res.status(400).json({
-                    error: 'Fecha de inicio del plan debe ser futura',
+                    error: 'Fecha de inicio del plan debe ser válida (puede ser pasada, actual o futura)',
                     field: 'fechaInicioPlan',
                     value: body.fechaInicioPlan
                 });
             }
         }
         if (body.fechaTerminoPlan) {
-            if (!(0, transactionHelper_1.validarFechaFutura)(body.fechaTerminoPlan)) {
+            if (!(0, transactionHelper_1.validarFechaTermino)(body.fechaTerminoPlan)) {
                 return res.status(400).json({
                     error: 'Fecha de término del plan debe ser futura',
                     field: 'fechaTerminoPlan',

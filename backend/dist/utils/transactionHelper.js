@@ -6,7 +6,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.requestLoggingMiddleware = exports.validarTelefono = exports.validarEmail = exports.validarMontoPositivo = exports.validarFechaFutura = exports.executeWithLogging = exports.executeTransaction = exports.log = void 0;
+exports.requestLoggingMiddleware = exports.validarTelefono = exports.validarEmail = exports.validarMontoPositivo = exports.validarFechaTermino = exports.validarFechaInicio = exports.validarFechaFutura = exports.executeWithLogging = exports.executeTransaction = exports.log = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const winston_1 = __importDefault(require("winston"));
 // ========================
@@ -164,6 +164,30 @@ const validarFechaFutura = (fecha) => {
     return !isNaN(fechaObj.getTime()) && fechaObj >= hoy;
 };
 exports.validarFechaFutura = validarFechaFutura;
+/**
+ * Valida que una fecha de inicio sea válida (puede ser pasada, actual o futura)
+ * Útil para alumnos que ya iniciaron su membresía
+ */
+const validarFechaInicio = (fecha) => {
+    const fechaObj = new Date(fecha);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    // Permitir fechas pasadas, actuales o futuras, pero no muy antiguas (antes de 2020)
+    const fechaMinima = new Date('2020-01-01');
+    return !isNaN(fechaObj.getTime()) && fechaObj >= fechaMinima;
+};
+exports.validarFechaInicio = validarFechaInicio;
+/**
+ * Valida que una fecha de término sea válida y futura
+ * El plan debe terminar en el futuro
+ */
+const validarFechaTermino = (fecha) => {
+    const fechaObj = new Date(fecha);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return !isNaN(fechaObj.getTime()) && fechaObj > hoy;
+};
+exports.validarFechaTermino = validarFechaTermino;
 /**
  * Valida que un monto sea positivo
  */

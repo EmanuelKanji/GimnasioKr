@@ -3,7 +3,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { validarFechaFutura, validarMontoPositivo, validarEmail, validarTelefono } from '../utils/transactionHelper';
+import { validarFechaFutura, validarFechaInicio, validarFechaTermino, validarMontoPositivo, validarEmail, validarTelefono } from '../utils/transactionHelper';
 
 /**
  * Middleware para validar integridad de datos en requests
@@ -13,11 +13,11 @@ export const validateDataIntegrity = (req: Request, res: Response, next: NextFun
   try {
     const { body } = req;
 
-    // Validar fechas futuras
+    // Validar fechas de plan
     if (body.fechaInicioPlan) {
-      if (!validarFechaFutura(body.fechaInicioPlan)) {
+      if (!validarFechaInicio(body.fechaInicioPlan)) {
         return res.status(400).json({
-          error: 'Fecha de inicio del plan debe ser futura',
+          error: 'Fecha de inicio del plan debe ser válida (puede ser pasada, actual o futura)',
           field: 'fechaInicioPlan',
           value: body.fechaInicioPlan
         });
@@ -25,7 +25,7 @@ export const validateDataIntegrity = (req: Request, res: Response, next: NextFun
     }
 
     if (body.fechaTerminoPlan) {
-      if (!validarFechaFutura(body.fechaTerminoPlan)) {
+      if (!validarFechaTermino(body.fechaTerminoPlan)) {
         return res.status(400).json({
           error: 'Fecha de término del plan debe ser futura',
           field: 'fechaTerminoPlan',

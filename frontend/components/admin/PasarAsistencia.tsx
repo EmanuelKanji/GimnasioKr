@@ -31,6 +31,16 @@ export default function PasarAsistencia() {
     const qrDataParaEnviar = result.qrData;
     
     try {
+      // Preparar datos para enviar
+      const requestData = { 
+        rut: rutParaEnviar,
+        qrData: qrDataParaEnviar
+      };
+      
+      console.log('📤 Enviando datos al backend:', requestData);
+      console.log('📤 RUT para enviar:', rutParaEnviar);
+      console.log('📤 QR Data para enviar:', qrDataParaEnviar);
+      
       // Enviar solicitud al backend con validaciones mejoradas
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
         method: 'POST',
@@ -38,10 +48,7 @@ export default function PasarAsistencia() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ 
-          rut: rutParaEnviar,
-          qrData: qrDataParaEnviar // Datos adicionales para validación de seguridad
-        })
+        body: JSON.stringify(requestData)
       });
       
       const result = await res.json();

@@ -210,6 +210,32 @@ export const validarFechaFutura = (fecha: string | Date): boolean => {
 };
 
 /**
+ * Valida que una fecha de inicio sea válida (puede ser pasada, actual o futura)
+ * Útil para alumnos que ya iniciaron su membresía
+ */
+export const validarFechaInicio = (fecha: string | Date): boolean => {
+  const fechaObj = new Date(fecha);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  
+  // Permitir fechas pasadas, actuales o futuras, pero no muy antiguas (antes de 2020)
+  const fechaMinima = new Date('2020-01-01');
+  return !isNaN(fechaObj.getTime()) && fechaObj >= fechaMinima;
+};
+
+/**
+ * Valida que una fecha de término sea válida y futura
+ * El plan debe terminar en el futuro
+ */
+export const validarFechaTermino = (fecha: string | Date): boolean => {
+  const fechaObj = new Date(fecha);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  
+  return !isNaN(fechaObj.getTime()) && fechaObj > hoy;
+};
+
+/**
  * Valida que un monto sea positivo
  */
 export const validarMontoPositivo = (monto: number): boolean => {

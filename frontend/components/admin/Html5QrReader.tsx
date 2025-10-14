@@ -26,21 +26,9 @@ export default function Html5QrReader({ onScan }: Html5QrReaderProps) {
         if (decodedText) {
           scanOnceRef.current = true;
           
-          // Usar servicio centralizado para procesar QR
-          const result = QRService.processAndLogQR(decodedText, 'scanned');
-          
-          if (result.isValid) {
-            if (result.type === 'new' && result.qrData) {
-              // QR nuevo formato - enviar datos completos
-              onScan(result.qrData);
-            } else if (result.type === 'legacy') {
-              // QR legacy - enviar solo RUT
-              onScan(result.rut);
-            }
-          } else {
-            // QR inválido - enviar texto original para debugging
-            onScan(decodedText);
-          }
+          // Solo escanear el QR, el procesamiento se hace en PasarAsistencia
+          console.log('📱 QR escaneado:', decodedText);
+          onScan(decodedText);
           
           setScanning(false);
           

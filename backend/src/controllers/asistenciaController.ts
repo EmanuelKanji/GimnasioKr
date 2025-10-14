@@ -4,11 +4,13 @@ import Alumno from '../models/Alumno';
 import { log } from '../utils/transactionHelper';
 import { AttendanceService } from '../services/attendanceService';
 
+// Función auxiliar para limpiar RUT (centralizada)
+const limpiarRut = (rut: string) => rut.replace(/\.|-/g, '').toUpperCase();
+
 export const obtenerHistorialAsistencia = async (_req: Request, res: Response) => {
   try {
     const asistencias = await Asistencia.find().sort({ fecha: -1 });
     // Buscar datos del alumno por rut limpio
-    const limpiarRut = (rut: string) => rut.replace(/\.|-/g, '').toUpperCase();
     const historial = await Promise.all(asistencias.map(async (asistencia: any) => {
       // Buscar alumno cuyo rut limpio coincida
       const alumnos = await Alumno.find();
@@ -41,8 +43,7 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
       });
     }
 
-    // Función auxiliar para limpiar RUT
-    const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
+    // Usar función centralizada limpiarRut
     
     const rutLimpio = limpiarRut(rut);
     log.info('Registrando asistencia', { 
@@ -140,11 +141,31 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
         }
         
         // Validar que el RUT del QR coincida con el enviado
-        if (datosQR.rut && limpiarRut(datosQR.rut) !== limpiarRut(rut)) {
-          return res.status(400).json({ 
-            message: 'El RUT del QR no coincide.',
-            codigo: 'RUT_NO_COINCIDE' 
+        if (datosQR.rut) {
+          const rutQRLimpio = limpiarRut(datosQR.rut);
+          const rutEnviadoLimpio = limpiarRut(rut);
+          
+          log.info('Validando RUT del QR', {
+            rutOriginal: rut,
+            rutQROriginal: datosQR.rut,
+            rutEnviadoLimpio: rutEnviadoLimpio,
+            rutQRLimpio: rutQRLimpio,
+            coinciden: rutQRLimpio === rutEnviadoLimpio,
+            action: 'validar_rut_qr'
           });
+          
+          if (rutQRLimpio !== rutEnviadoLimpio) {
+            return res.status(400).json({ 
+              message: 'El RUT del QR no coincide.',
+              codigo: 'RUT_NO_COINCIDE',
+              debug: {
+                rutEnviado: rut,
+                rutQR: datosQR.rut,
+                rutEnviadoLimpio: rutEnviadoLimpio,
+                rutQRLimpio: rutQRLimpio
+              }
+            });
+          }
         }
         
         // Validar fechas del plan en el QR (doble verificación)
