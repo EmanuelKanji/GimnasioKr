@@ -102,7 +102,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   // Función para generar nuevo QR con timestamp y token temporal
   const generarNuevoQR = useCallback(() => {
     const ahora = Date.now();
-    const tiempoExpiracion = 10 * 60 * 1000; // 10 minutos en milisegundos (sincronizado con backend)
+    const tiempoExpiracion = 5 * 60 * 1000; // 5 minutos en milisegundos (como estaba antes)
     const expiraEn = ahora + tiempoExpiracion;
     
     // Validar fechas antes de generar QR
@@ -224,9 +224,17 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
       setTiempoRestante(prev => {
         if (prev <= 1000) {
           // QR expirado, generar uno nuevo automáticamente
+          console.log('🔄 QR expirado, generando uno nuevo automáticamente');
           generarNuevoQR();
           return 0;
         }
+        
+        // Regenerar QR cuando queden 2 minutos (para evitar expiración durante uso)
+        if (prev <= 2 * 60 * 1000 && prev > 1 * 60 * 1000) {
+          console.log('🔄 QR próximo a expirar, generando uno nuevo preventivamente');
+          generarNuevoQR();
+        }
+        
         return prev - 1000;
       });
     }, 1000);

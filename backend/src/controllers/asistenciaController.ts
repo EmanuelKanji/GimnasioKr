@@ -120,8 +120,16 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
 
     // 3. Validaciones adicionales para QR con timestamp (nuevo sistema de seguridad)
     if (qrData) {
+      console.log('🔍 Procesando QR:', {
+        qrDataTipo: typeof qrData,
+        qrDataLength: qrData?.length,
+        qrDataPreview: qrData?.substring(0, 100) + '...',
+        action: 'inicio_procesamiento_qr'
+      });
+      
       // Validar que qrData sea un string no vacío
       if (typeof qrData !== 'string' || qrData.trim() === '') {
+        console.log('❌ QR vacío o inválido');
         return res.status(400).json({ 
           message: 'Datos del QR vacíos o inválidos.',
           codigo: 'QR_VACIO' 
@@ -129,7 +137,15 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
       }
       
       try {
+        console.log('🔄 Intentando parsear QR...');
         const datosQR = JSON.parse(qrData);
+        console.log('✅ QR parseado exitosamente:', {
+          campos: Object.keys(datosQR),
+          rut: datosQR.rut,
+          timestamp: datosQR.timestamp,
+          expiraEn: datosQR.expiraEn,
+          action: 'qr_parseado'
+        });
         
         // Validar estructura del QR
         if (!datosQR.rut || !datosQR.timestamp || !datosQR.expiraEn) {
@@ -171,9 +187,9 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
           });
         }
         
-        // Validar que el QR no sea demasiado antiguo (máximo 10 minutos)
+        // Validar que el QR no sea demasiado antiguo (máximo 5 minutos)
         // Solo validar si el timestamp es del pasado (no del futuro)
-        if (datosQR.timestamp && datosQR.timestamp <= tiempoActual && (tiempoActual - datosQR.timestamp) > (10 * 60 * 1000)) {
+        if (datosQR.timestamp && datosQR.timestamp <= tiempoActual && (tiempoActual - datosQR.timestamp) > (5 * 60 * 1000)) {
           return res.status(403).json({ 
             message: 'El QR es demasiado antiguo. Genera uno nuevo.',
             codigo: 'QR_ANTIGUO' 
@@ -232,6 +248,14 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
         console.log(`✅ QR válido procesado - RUT: ${rut}, Token: ${datosQR.token}, Generado: ${new Date(datosQR.timestamp).toLocaleString()}`);
         
       } catch (parseError) {
+        console.log('❌ Error parseando QR:', {
+          error: parseError instanceof Error ? parseError.message : String(parseError),
+          qrDataRecibido: qrData,
+          qrDataLength: qrData?.length || 0,
+          qrDataTipo: typeof qrData,
+          action: 'parse_qr_error'
+        });
+        
         log.error('Error parseando QR', parseError instanceof Error ? parseError : new Error(String(parseError)), {
           qrDataRecibido: qrData,
           rutRecibido: rut,
