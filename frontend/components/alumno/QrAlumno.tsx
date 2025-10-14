@@ -182,6 +182,16 @@ export default function QrAlumno({
     };
   }, []);
 
+  // Debug: Log cuando cambien las props de asistencias
+  useEffect(() => {
+    console.log('🔍 QrAlumno - Props actualizadas:', {
+      totalAsistencias,
+      asistenciasRestantes,
+      limiteClasesNumero,
+      asistenciasMes: asistenciasMes.length
+    });
+  }, [totalAsistencias, asistenciasRestantes, limiteClasesNumero, asistenciasMes]);
+
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {
     const hoy = new Date();

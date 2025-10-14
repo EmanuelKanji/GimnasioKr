@@ -124,9 +124,8 @@ export function useAsistencias() {
 
     const handleAsistenciaRegistrada = (event: CustomEvent) => {
       console.log('🔄 Asistencia registrada, actualizando cache...', event.detail);
-      // Agregar la fecha de hoy al cache
-      const hoy = new Date().toISOString().split('T')[0];
-      addAsistencia(hoy);
+      // Forzar recarga de datos desde el servidor
+      fetchAsistencias(true);
     };
 
     listeners.add(listener);
@@ -139,13 +138,18 @@ export function useAsistencias() {
       listeners.delete(listener);
       window.removeEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
     };
-  }, [fetchAsistencias, addAsistencia]);
+  }, [fetchAsistencias]);
 
   // Función para registrar una nueva asistencia localmente
   const addAsistencia = useCallback((fecha: string) => {
     if (!asistenciasCache.data.includes(fecha)) {
       asistenciasCache.data = [...asistenciasCache.data, fecha];
+      asistenciasCache.totalAsistencias = asistenciasCache.data.length;
+      asistenciasCache.asistenciasRestantes = Math.max(0, asistenciasCache.limiteClases - asistenciasCache.totalAsistencias);
+      
       setAsistencias(asistenciasCache.data);
+      setTotalAsistencias(asistenciasCache.totalAsistencias);
+      setAsistenciasRestantes(asistenciasCache.asistenciasRestantes);
       notifyListeners();
     }
   }, [notifyListeners]);
