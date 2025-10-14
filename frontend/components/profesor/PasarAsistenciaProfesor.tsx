@@ -29,7 +29,6 @@ export default function PasarAsistencia() {
     }
     
     const rutParaEnviar = result.rut;
-    const qrDataParaEnviar = result.qrData;
     
     try {
       // Enviar solicitud al backend con validaciones mejoradas
@@ -40,8 +39,7 @@ export default function PasarAsistencia() {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ 
-          rut: rutParaEnviar,
-          qrData: qrDataParaEnviar // Datos adicionales para validación de seguridad
+          rut: rutParaEnviar
         })
       });
       

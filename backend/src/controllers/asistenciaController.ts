@@ -246,7 +246,8 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
     res.status(500).json({ 
       message: 'Error interno del servidor al registrar asistencia',
       codigo: 'ERROR_SERVIDOR',
-      error: process.env.NODE_ENV === 'development' ? error : undefined
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 };

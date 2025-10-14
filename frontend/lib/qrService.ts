@@ -91,12 +91,7 @@ export class QRService {
     const prefix = type === 'scanned' ? '📱 QR nuevo formato escaneado' : '📱 QR nuevo formato detectado';
     
     console.log(prefix, {
-      rut: qrData.rut,
-      plan: qrData.plan,
-      validoDesde: qrData.validoDesde,  // Cambiar de "generado"
-      validoHasta: qrData.validoHasta,  // Cambiar de "expira"
-      timestamp: new Date(qrData.timestamp).toISOString(),
-      expiraEn: new Date(qrData.expiraEn).toISOString()
+      rut: qrData.rut
     });
   }
 
@@ -121,25 +116,23 @@ export class QRService {
     const result = this.processQR(qrData);
     
     if (result.isValid) {
-      if (result.type === 'new' && result.qrData) {
-        try {
-          const parsedQR = JSON.parse(result.qrData);
-          this.logQR(parsedQR, type);
-        } catch {
-          // Si no se puede parsear para logging, usar datos básicos
-          console.log(`📱 QR ${type === 'scanned' ? 'escaneado' : 'detectado'}:`, {
-            rut: result.rut,
-            type: result.type
-          });
-        }
-      } else if (result.type === 'legacy') {
-        this.logLegacyQR(result.rut);
-      }
+      // Solo loggear el RUT, no el QR completo
+      console.log(`📱 QR ${type === 'scanned' ? 'escaneado' : 'detectado'}:`, {
+        rut: result.rut,
+        type: result.type
+      });
     } else {
       this.logUnknownQR(qrData);
     }
 
-    return result;
+    // Devolver solo el RUT, no el QR completo
+    return {
+      rut: result.rut,
+      qrData: null, // No devolver el QR completo
+      isValid: result.isValid,
+      type: result.type,
+      originalData: result.originalData
+    };
   }
 
   /**

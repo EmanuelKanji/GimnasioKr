@@ -28,7 +28,6 @@ export default function PasarAsistencia() {
     }
     
     const rutParaEnviar = result.rut;
-    const qrDataParaEnviar = result.qrData;
     
     try {
       // Preparar datos para enviar (solo RUT)
@@ -38,7 +37,6 @@ export default function PasarAsistencia() {
       
       console.log('📤 Enviando datos al backend:', requestData);
       console.log('📤 RUT para enviar:', rutParaEnviar);
-      console.log('📤 QR Data para enviar:', qrDataParaEnviar);
       
       // Enviar solicitud al backend con validaciones mejoradas
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {

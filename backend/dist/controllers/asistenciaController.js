@@ -106,141 +106,22 @@ const registrarAsistencia = async (req, res) => {
                 codigo: 'PLAN_EXPIRADO'
             });
         }
-        // 3. Validaciones adicionales para QR con timestamp (nuevo sistema de seguridad)
+        // 3. Validación simple del QR (solo RUT)
         if (qrData) {
-            console.log('🔍 Procesando QR:', {
-                qrDataTipo: typeof qrData,
-                qrDataLength: qrData?.length,
-                qrDataPreview: qrData?.substring(0, 100) + '...',
-                action: 'inicio_procesamiento_qr'
-            });
-            // Validar que qrData sea un string no vacío
-            if (typeof qrData !== 'string' || qrData.trim() === '') {
-                console.log('❌ QR vacío o inválido');
-                return res.status(400).json({
-                    message: 'Datos del QR vacíos o inválidos.',
-                    codigo: 'QR_VACIO'
-                });
-            }
             try {
-                console.log('🔄 Intentando parsear QR...');
                 const datosQR = JSON.parse(qrData);
-                console.log('✅ QR parseado exitosamente:', {
-                    campos: Object.keys(datosQR),
-                    rut: datosQR.rut,
-                    timestamp: datosQR.timestamp,
-                    expiraEn: datosQR.expiraEn,
-                    action: 'qr_parseado'
-                });
-                // Validar estructura del QR
-                if (!datosQR.rut || datosQR.timestamp === undefined || datosQR.timestamp === null || datosQR.expiraEn === undefined || datosQR.expiraEn === null) {
-                    transactionHelper_1.log.warn('QR con estructura incompleta', {
-                        tieneRut: !!datosQR.rut,
-                        tieneTimestamp: !!datosQR.timestamp,
-                        tieneExpiraEn: !!datosQR.expiraEn,
-                        camposPresentes: Object.keys(datosQR),
-                        action: 'validar_estructura_qr'
-                    });
-                    return res.status(400).json({
-                        message: 'El QR no tiene la estructura correcta.',
-                        codigo: 'QR_ESTRUCTURA_INVALIDA',
-                        debug: process.env.NODE_ENV === 'development' ? {
-                            camposPresentes: Object.keys(datosQR),
-                            camposRequeridos: ['rut', 'timestamp', 'expiraEn']
-                        } : undefined
-                    });
-                }
-                // Validar que el QR no haya expirado (timestamp)
-                const tiempoActual = Date.now();
-                // Debug: Log de timestamps para debugging
-                transactionHelper_1.log.info('Validando timestamps del QR', {
-                    tiempoActual: tiempoActual,
-                    timestampQR: datosQR.timestamp,
-                    expiraEnQR: datosQR.expiraEn,
-                    diferenciaTimestamp: tiempoActual - datosQR.timestamp,
-                    diferenciaExpira: tiempoActual - datosQR.expiraEn,
-                    action: 'validar_timestamps_qr'
-                });
-                if (datosQR.expiraEn && tiempoActual > datosQR.expiraEn) {
-                    return res.status(403).json({
-                        message: 'El QR ha expirado. Por favor, genera uno nuevo.',
-                        codigo: 'QR_EXPIRADO'
-                    });
-                }
-                // Validar que el QR no sea demasiado antiguo (máximo 5 minutos)
-                // Solo validar si el timestamp es del pasado (no del futuro)
-                if (datosQR.timestamp && datosQR.timestamp <= tiempoActual && (tiempoActual - datosQR.timestamp) > (5 * 60 * 1000)) {
-                    return res.status(403).json({
-                        message: 'El QR es demasiado antiguo. Genera uno nuevo.',
-                        codigo: 'QR_ANTIGUO'
-                    });
-                }
                 // Validar que el RUT del QR coincida con el enviado
-                if (datosQR.rut) {
-                    const rutQRLimpio = limpiarRut(datosQR.rut);
-                    const rutEnviadoLimpio = limpiarRut(rut);
-                    transactionHelper_1.log.info('Validando RUT del QR', {
-                        rutOriginal: rut,
-                        rutQROriginal: datosQR.rut,
-                        rutEnviadoLimpio: rutEnviadoLimpio,
-                        rutQRLimpio: rutQRLimpio,
-                        coinciden: rutQRLimpio === rutEnviadoLimpio,
-                        action: 'validar_rut_qr'
+                if (datosQR.rut && limpiarRut(datosQR.rut) !== rutLimpio) {
+                    return res.status(400).json({
+                        message: 'El RUT del QR no coincide.',
+                        codigo: 'RUT_NO_COINCIDE'
                     });
-                    if (rutQRLimpio !== rutEnviadoLimpio) {
-                        return res.status(400).json({
-                            message: 'El RUT del QR no coincide.',
-                            codigo: 'RUT_NO_COINCIDE',
-                            debug: {
-                                rutEnviado: rut,
-                                rutQR: datosQR.rut,
-                                rutEnviadoLimpio: rutEnviadoLimpio,
-                                rutQRLimpio: rutQRLimpio
-                            }
-                        });
-                    }
                 }
-                // Validar fechas del plan en el QR (verificación opcional)
-                // NOTA: Las fechas del perfil del alumno ya fueron validadas arriba (líneas 104-119)
-                // El QR solo debe coincidir con el plan, no validar fechas independientemente
-                if (datosQR.plan && datosQR.plan !== alumno.plan) {
-                    transactionHelper_1.log.warn('Plan del QR no coincide con el plan del alumno', {
-                        planQR: datosQR.plan,
-                        planAlumno: alumno.plan,
-                        action: 'validar_plan_qr'
-                    });
-                    // No rechazar por esto, solo loggear para debugging
-                }
-                // Log de QR procesado exitosamente
-                transactionHelper_1.log.info('QR procesado exitosamente', {
-                    rut: rutLimpio,
-                    planQR: datosQR.plan,
-                    planAlumno: alumno.plan,
-                    timestamp: new Date(datosQR.timestamp).toISOString(),
-                    action: 'qr_procesado'
-                });
-                console.log(`✅ QR válido procesado - RUT: ${rut}, Token: ${datosQR.token}, Generado: ${new Date(datosQR.timestamp).toLocaleString()}`);
             }
-            catch (parseError) {
-                console.log('❌ Error parseando QR:', {
-                    error: parseError instanceof Error ? parseError.message : String(parseError),
-                    qrDataRecibido: qrData,
-                    qrDataLength: qrData?.length || 0,
-                    qrDataTipo: typeof qrData,
-                    action: 'parse_qr_error'
-                });
-                transactionHelper_1.log.error('Error parseando QR', parseError instanceof Error ? parseError : new Error(String(parseError)), {
-                    qrDataRecibido: qrData,
-                    rutRecibido: rut,
-                    action: 'parse_qr_error'
-                });
+            catch {
                 return res.status(400).json({
                     message: 'Formato de QR inválido.',
-                    codigo: 'QR_FORMATO_INVALIDO',
-                    debug: process.env.NODE_ENV === 'development' ? {
-                        error: parseError instanceof Error ? parseError.message : String(parseError),
-                        qrDataLength: qrData?.length || 0
-                    } : undefined
+                    codigo: 'QR_FORMATO_INVALIDO'
                 });
             }
         }
@@ -334,7 +215,8 @@ const registrarAsistencia = async (req, res) => {
         res.status(500).json({
             message: 'Error interno del servidor al registrar asistencia',
             codigo: 'ERROR_SERVIDOR',
-            error: process.env.NODE_ENV === 'development' ? error : undefined
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
         });
     }
 };
