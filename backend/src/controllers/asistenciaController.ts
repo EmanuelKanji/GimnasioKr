@@ -148,7 +148,7 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
         });
         
         // Validar estructura del QR
-        if (!datosQR.rut || !datosQR.timestamp || !datosQR.expiraEn) {
+        if (!datosQR.rut || datosQR.timestamp === undefined || datosQR.timestamp === null || datosQR.expiraEn === undefined || datosQR.expiraEn === null) {
           log.warn('QR con estructura incompleta', {
             tieneRut: !!datosQR.rut,
             tieneTimestamp: !!datosQR.timestamp,

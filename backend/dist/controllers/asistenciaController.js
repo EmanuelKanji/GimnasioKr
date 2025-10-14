@@ -133,7 +133,7 @@ const registrarAsistencia = async (req, res) => {
                     action: 'qr_parseado'
                 });
                 // Validar estructura del QR
-                if (!datosQR.rut || !datosQR.timestamp || !datosQR.expiraEn) {
+                if (!datosQR.rut || datosQR.timestamp === undefined || datosQR.timestamp === null || datosQR.expiraEn === undefined || datosQR.expiraEn === null) {
                     transactionHelper_1.log.warn('QR con estructura incompleta', {
                         tieneRut: !!datosQR.rut,
                         tieneTimestamp: !!datosQR.timestamp,
