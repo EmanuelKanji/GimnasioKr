@@ -28,10 +28,6 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   const descripcionPlan = planCompleto?.descripcion || '';
   const limiteReal = planCompleto?.limiteClases || limiteClases;
 
-  // Función para generar un token temporal único
-  const generarTokenTemporal = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  };
 
   // Función para solicitar renovación
   const solicitarRenovacion = async () => {
@@ -99,65 +95,16 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   // Función para limpiar RUT (quitar puntos y guiones)
   const limpiarRut = (r: string) => r.replace(/\.|-/g, '').toUpperCase();
 
-  // Función para generar nuevo QR con timestamp y token temporal
+  // Función para generar QR simplificado (solo RUT)
   const generarNuevoQR = useCallback(() => {
-    const ahora = Date.now();
-    const tiempoExpiracion = 5 * 60 * 1000; // 5 minutos en milisegundos (como estaba antes)
-    const expiraEn = ahora + tiempoExpiracion;
-    
-    // Validar fechas antes de generar QR
-    const fechaInicioPlan = new Date(fechaInicio);
-    const fechaFinPlan = new Date(fechaFin);
-    const fechaActual = new Date();
-    
-    // Si las fechas del perfil están expiradas, usar fechas actuales para el QR
-    // El backend ya validará las fechas reales del perfil del alumno
-    let validoDesde, validoHasta;
-    
-    if (isNaN(fechaInicioPlan.getTime()) || isNaN(fechaFinPlan.getTime())) {
-      // Fechas inválidas, usar fechas por defecto
-      validoDesde = fechaActual.toISOString();
-      validoHasta = new Date(fechaActual.getTime() + (30 * 24 * 60 * 60 * 1000)).toISOString(); // 30 días
-    } else if (fechaActual > fechaFinPlan) {
-      // Plan expirado según perfil, usar fechas actuales para QR
-      validoDesde = fechaActual.toISOString();
-      validoHasta = new Date(fechaActual.getTime() + (30 * 24 * 60 * 60 * 1000)).toISOString(); // 30 días
-    } else {
-      // Fechas válidas, usar las del perfil
-      validoDesde = fechaInicioPlan.toISOString();
-      validoHasta = fechaFinPlan.toISOString();
-    }
-    
-    // Crear datos del QR con medidas de seguridad mejoradas
+    // QR simplificado - solo RUT
     const datosQR = {
-      rut: limpiarRut(rut), // RUT limpio para compatibilidad con backend
-      plan,
-      validoDesde,          // Fechas validadas y corregidas
-      validoHasta,          // Fechas validadas y corregidas
-      timestamp: ahora,           // Momento de generación
-      expiraEn: expiraEn,        // Cuándo expira el QR
-      token: generarTokenTemporal(), // Token único para esta sesión
-      version: '2.0'             // Versión para futuras validaciones
+      rut: limpiarRut(rut)
     };
 
-    // Debug: Verificar formato de fechas
-    console.log('🔍 QR Fechas Debug:', {
-      fechaInicioOriginal: fechaInicio,
-      fechaFinOriginal: fechaFin,
-      fechaInicioPlan: fechaInicioPlan.toISOString(),
-      fechaFinPlan: fechaFinPlan.toISOString(),
-      fechaActual: fechaActual.toISOString(),
-      planExpirado: fechaActual > fechaFinPlan,
-      validoDesde: validoDesde,
-      validoHasta: validoHasta,
-      datosQR: datosQR,
-      qrStringificado: JSON.stringify(datosQR),
-      longitudQR: JSON.stringify(datosQR).length
-    });
-
     setQrData(JSON.stringify(datosQR));
-    setTiempoRestante(tiempoExpiracion);
-  }, [rut, plan, fechaInicio, fechaFin]);
+    setTiempoRestante(0); // No hay expiración
+  }, [rut]);
 
   // Calcular información de límites de clases usando el límite real del plan
   const limiteInfoCalculado = calcularLimiteClases(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
@@ -216,31 +163,7 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
     }
   }, [fechaInicio, fechaFin, rut, plan, limiteInfoCalculado.puedeAcceder, generarNuevoQR, estadoRenovacion]);
 
-  // Contador regresivo para mostrar tiempo restante del QR
-  useEffect(() => {
-    if (tiempoRestante <= 0) return;
-
-    const interval = setInterval(() => {
-      setTiempoRestante(prev => {
-        if (prev <= 1000) {
-          // QR expirado, generar uno nuevo automáticamente
-          console.log('🔄 QR expirado, generando uno nuevo automáticamente');
-          generarNuevoQR();
-          return 0;
-        }
-        
-        // Regenerar QR cuando queden 2 minutos (para evitar expiración durante uso)
-        if (prev <= 2 * 60 * 1000 && prev > 1 * 60 * 1000) {
-          console.log('🔄 QR próximo a expirar, generando uno nuevo preventivamente');
-          generarNuevoQR();
-        }
-        
-        return prev - 1000;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [tiempoRestante, generarNuevoQR]);
+  // No hay contador de tiempo - QR no expira
 
   // Si el plan no está activo o no puede acceder, mostrar mensaje de error
   if (!activo) {

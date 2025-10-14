@@ -5,13 +5,6 @@
 
 export interface QRData {
   rut: string;
-  plan: string;
-  validoDesde: string;
-  validoHasta: string;
-  timestamp: number;
-  expiraEn: number;
-  token: string;
-  version: string;
 }
 
 export interface QRProcessResult {
@@ -24,7 +17,7 @@ export interface QRProcessResult {
 
 export class QRService {
   /**
-   * Procesa un código QR escaneado y determina su tipo y validez
+   * Procesa un código QR escaneado (solo RUT)
    */
   static processQR(qrData: string): QRProcessResult {
     // Validar que sea string no vacío
@@ -39,21 +32,20 @@ export class QRService {
     }
 
     try {
-      // Intentar parsear como JSON (nuevo formato con timestamp y token)
+      // Intentar parsear como JSON
       const datosQR = JSON.parse(qrData);
       
-      // Si tiene la estructura del nuevo QR, validar campos requeridos
-      if (datosQR.rut && datosQR.timestamp) {
+      if (datosQR.rut) {
         return {
           rut: datosQR.rut,
-          qrData: qrData, // Enviar QR completo para validaciones adicionales
+          qrData: qrData,
           isValid: true,
           type: 'new',
           originalData: qrData
         };
       }
     } catch {
-      // Si no se puede parsear, buscar RUT directamente (formato legacy)
+      // Si no se puede parsear, buscar RUT directamente
       const rutMatch = qrData.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
       if (rutMatch) {
         const rutLimpio = rutMatch[1].replace(/\.|-/g, '');
@@ -67,7 +59,6 @@ export class QRService {
       }
     }
 
-    // Si no se puede procesar de ninguna manera
     return {
       rut: '',
       qrData: null,

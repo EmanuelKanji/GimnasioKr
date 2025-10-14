@@ -120,8 +120,7 @@ export default function PasarAsistencia() {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ 
-          rut: qrResult.rut,
-          qrData: qrResult.qrData ? JSON.parse(qrResult.qrData) : null
+          rut: qrResult.rut
         })
       });
       const data = await res.json();

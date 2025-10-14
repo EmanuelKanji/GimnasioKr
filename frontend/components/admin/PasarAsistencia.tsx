@@ -31,10 +31,9 @@ export default function PasarAsistencia() {
     const qrDataParaEnviar = result.qrData;
     
     try {
-      // Preparar datos para enviar
+      // Preparar datos para enviar (solo RUT)
       const requestData = { 
-        rut: rutParaEnviar,
-        qrData: qrDataParaEnviar ? JSON.parse(qrDataParaEnviar) : null
+        rut: rutParaEnviar
       };
       
       console.log('📤 Enviando datos al backend:', requestData);
@@ -126,8 +125,7 @@ export default function PasarAsistencia() {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ 
-          rut: qrResult.rut,
-          qrData: qrResult.qrData ? JSON.parse(qrResult.qrData) : null
+          rut: qrResult.rut
         })
       });
       const data = await res.json();
