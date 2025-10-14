@@ -85,32 +85,30 @@ export const schemas = {
       'string.max': 'El nombre no puede exceder 50 caracteres',
       'any.required': 'El nombre es requerido'
     }),
-    rut: customValidations.rutChileno.required().messages({
+    rut: Joi.string().min(8).max(12).required().messages({
+      'string.min': 'El RUT debe tener al menos 8 caracteres',
+      'string.max': 'El RUT no puede exceder 12 caracteres',
       'any.required': 'El RUT es requerido'
     }),
-    direccion: Joi.string().min(5).max(100).required().messages({
+    direccion: Joi.string().min(5).max(100).optional().allow('').messages({
       'string.min': 'La dirección debe tener al menos 5 caracteres',
-      'string.max': 'La dirección no puede exceder 100 caracteres',
-      'any.required': 'La dirección es requerida'
+      'string.max': 'La dirección no puede exceder 100 caracteres'
     }),
-    fechaNacimiento: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required().messages({
-      'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD',
-      'any.required': 'La fecha de nacimiento es requerida'
+    fechaNacimiento: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().allow('').messages({
+      'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD'
     }),
     email: Joi.string().email().required().messages({
       'string.email': 'El email debe ser válido',
       'any.required': 'El email es requerido'
     }),
-    telefono: Joi.string().pattern(/^[+]?[0-9\s-()]{8,15}$/).required().messages({
-      'string.pattern.base': 'El teléfono debe tener formato válido',
-      'any.required': 'El teléfono es requerido'
+    telefono: Joi.string().pattern(/^[+]?[0-9\s-()]{8,15}$/).optional().allow('').messages({
+      'string.pattern.base': 'El teléfono debe tener formato válido'
     }),
     plan: Joi.string().min(1).required().messages({
       'any.required': 'El plan es requerido'
     }),
-    fechaInicioPlan: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required().messages({
-      'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD',
-      'any.required': 'La fecha de inicio del plan es requerida'
+    fechaInicioPlan: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().allow('').messages({
+      'string.pattern.base': 'La fecha debe tener formato YYYY-MM-DD'
     }),
     duracion: Joi.string().valid('mensual', 'trimestral', 'semestral', 'anual').required().messages({
       'any.only': 'La duración debe ser mensual, trimestral, semestral o anual',
@@ -120,7 +118,8 @@ export const schemas = {
       'number.min': 'El monto debe ser mayor o igual a 0',
       'any.required': 'El monto es requerido'
     }),
-    password: customValidations.passwordStrong.required().messages({
+    password: Joi.string().min(6).required().messages({
+      'string.min': 'La contraseña debe tener al menos 6 caracteres',
       'any.required': 'La contraseña es requerida'
     }),
     limiteClases: Joi.string().valid('12', '8', 'todos_los_dias').default('12').messages({

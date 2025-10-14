@@ -405,8 +405,9 @@ export const crearAlumno = async (req: Request, res: Response) => {
       limiteClases,
       descuentoEspecial
     } = req.body;
-    if (!nombre || !rut || !direccion || !fechaNacimiento || !email || !telefono || !plan || !fechaInicioPlan || !duracion || !password) {
-      return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    // Validar solo campos obligatorios
+    if (!nombre || !rut || !email || !plan || !duracion || !password) {
+      return res.status(400).json({ message: 'Los campos obligatorios son: nombre, RUT, email, plan, duración y contraseña.' });
     }
     
     // Buscar el plan por ID para obtener el nombre
@@ -454,7 +455,7 @@ export const crearAlumno = async (req: Request, res: Response) => {
     const montoConDescuento = monto * (1 - porcentajeDescuento / 100);
     
     // Calcular fecha de término según duración
-    const inicio = new Date(fechaInicioPlan);
+    const inicio = fechaInicioPlan ? new Date(fechaInicioPlan) : new Date();
     let termino = new Date(inicio);
     if (duracion === 'mensual') {
       termino.setMonth(termino.getMonth() + 1);
@@ -490,12 +491,12 @@ export const crearAlumno = async (req: Request, res: Response) => {
         const nuevoAlumno = new Alumno({
           nombre,
           rut: rutLimpio,
-          direccion,
-          fechaNacimiento,
+          direccion: direccion || '',
+          fechaNacimiento: fechaNacimiento || '',
           email,
-          telefono,
+          telefono: telefono || '',
           plan: planEncontrado.nombre,
-          fechaInicioPlan,
+          fechaInicioPlan: fechaInicioPlan || inicio.toISOString(),
           fechaTerminoPlan: termino.toISOString(),
           duracion,
           monto: montoConDescuento,

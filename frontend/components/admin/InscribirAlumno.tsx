@@ -99,17 +99,9 @@ export default function InscribirAlumnoForm() {
     e.preventDefault();
     setMensaje(null);
 
-    // Validar formato de RUT con dígito verificador
-    const rutValidation = validarRutChileno(form.rut);
-    if (!rutValidation.valid) {
-      setMensaje(rutValidation.message);
-      return;
-    }
-
-    // Validar fortaleza de contraseña
-    const passwordValidation = validarFortalezaPassword(form.password);
-    if (!passwordValidation.valid) {
-      setMensaje(passwordValidation.message);
+    // Validación básica de campos requeridos
+    if (!form.nombre || !form.rut || !form.email || !form.password || !form.plan) {
+      setMensaje('Por favor completa los campos obligatorios: nombre, RUT, email, contraseña y plan.');
       return;
     }
 
@@ -180,12 +172,10 @@ export default function InscribirAlumnoForm() {
         <input
           type="text"
           name="rut"
-          placeholder="RUT (12.345.678-9)"
+          placeholder="RUT"
           value={form.rut}
           onChange={handleChange}
           className={styles.input}
-          pattern="^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$"
-          title="El RUT debe tener el formato 12.345.678-9"
           required
         />
         <input
@@ -195,7 +185,6 @@ export default function InscribirAlumnoForm() {
           value={form.direccion}
           onChange={handleChange}
           className={styles.input}
-          required
         />
         <input
           type="date"
@@ -204,7 +193,6 @@ export default function InscribirAlumnoForm() {
           value={form.fechaNacimiento}
           onChange={handleChange}
           className={styles.input}
-          required
         />
         <input
           type="email"
@@ -231,7 +219,6 @@ export default function InscribirAlumnoForm() {
           value={form.telefono}
           onChange={handleChange}
           className={styles.input}
-          required
         />
         <select
           name="plan"
@@ -319,7 +306,6 @@ export default function InscribirAlumnoForm() {
           value={form.fechaInicioPlan}
           onChange={handleChange}
           className={styles.input}
-          required
         />
         <button type="submit" className={styles.button}>
           Inscribir Alumno
