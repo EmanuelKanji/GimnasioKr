@@ -531,3 +531,69 @@ export const crearAlumno = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Error al inscribir alumno.', error });
   }
 };
+
+// Obtener asistencias del mes actual del plan
+export const obtenerAsistenciasMesActual = async (req: Request, res: Response) => {
+  try {
+    const rut = (req as any).user?.rut;
+    if (!rut) {
+      return res.status(400).json({ message: 'RUT no presente en el token' });
+    }
+
+    const alumno = await Alumno.findOne({ rut });
+    if (!alumno) {
+      return res.status(404).json({ message: 'Alumno no encontrado' });
+    }
+
+    // Obtener el período actual del plan
+    const periodoActual = AttendanceService.obtenerMesActualDelPlan(
+      alumno.fechaInicioPlan,
+      new Date()
+    );
+
+    // Filtrar asistencias del mes actual
+    const asistenciasMesActual = alumno.asistencias.filter(fecha => {
+      const fechaAsistencia = new Date(fecha);
+      return fechaAsistencia >= periodoActual.inicio && fechaAsistencia <= periodoActual.fin;
+    });
+
+    // Calcular límite de clases según el plan
+    let limiteClases = 0;
+    if (alumno.limiteClases === '12') {
+      limiteClases = 12;
+    } else if (alumno.limiteClases === '8') {
+      limiteClases = 8;
+    } else {
+      // todos_los_dias - usar días hábiles restantes del mes
+      const diasHabilesRestantes = AttendanceService.calcularDiasHabilesRestantes(periodoActual.fin);
+      limiteClases = AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesRestantes);
+    }
+
+    const totalAsistencias = asistenciasMesActual.length;
+    const asistenciasRestantes = Math.max(0, limiteClases - totalAsistencias);
+
+    log.info('Asistencias del mes actual obtenidas', {
+      rut: rut,
+      totalAsistencias: totalAsistencias,
+      limiteClases: limiteClases,
+      asistenciasRestantes: asistenciasRestantes,
+      periodoMes: periodoActual.numeroMes,
+      action: 'obtener_asistencias_mes_actual'
+    });
+
+    return res.json({
+      asistenciasMesActual,
+      totalAsistencias,
+      limiteClases,
+      asistenciasRestantes,
+      periodoActual: {
+        inicio: periodoActual.inicio.toISOString(),
+        fin: periodoActual.fin.toISOString(),
+        numeroMes: periodoActual.numeroMes
+      }
+    });
+  } catch (error) {
+    log.error('Error obteniendo asistencias del mes actual', error instanceof Error ? error : new Error(String(error)));
+    return res.status(500).json({ message: 'Error al obtener asistencias del mes actual' });
+  }
+};

@@ -12,6 +12,7 @@ router.get('/', (0, auth_1.requireRole)(['admin', 'profesor']), alumnoController
 router.get('/me/perfil', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerPerfilAlumno);
 router.get('/me/plan', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerPlanAlumno);
 router.get('/me/asistencias', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerAsistenciaAlumno);
+router.get('/me/asistencias-mes-actual', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerAsistenciasMesActual);
 router.get('/me/avisos', (0, auth_1.requireRole)(['alumno', 'admin']), alumnoController_1.obtenerAvisosAlumno);
 // Rutas de renovación
 router.post('/me/solicitar-renovacion', (0, auth_1.requireRole)(['alumno']), (0, validation_1.validate)(validation_1.schemas.solicitarRenovacion), alumnoController_1.solicitarRenovacion);

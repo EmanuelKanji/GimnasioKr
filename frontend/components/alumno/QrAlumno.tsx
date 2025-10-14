@@ -13,9 +13,23 @@ interface QrAlumnoProps {
   limiteClases?: LimiteClases;
   asistenciasMes?: string[];
   planCompleto?: Plan | null;
+  totalAsistencias?: number;
+  asistenciasRestantes?: number;
+  limiteClasesNumero?: number;
 }
 
-export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClases = 'todos_los_dias', asistenciasMes = [], planCompleto }: QrAlumnoProps) {
+export default function QrAlumno({ 
+  rut, 
+  plan, 
+  fechaInicio, 
+  fechaFin, 
+  limiteClases = 'todos_los_dias', 
+  asistenciasMes = [], 
+  planCompleto,
+  totalAsistencias = 0,
+  asistenciasRestantes = 0,
+  limiteClasesNumero = 0
+}: QrAlumnoProps) {
   const [activo, setActivo] = useState(false);
   const [qrData, setQrData] = useState('');
   const [tiempoRestante, setTiempoRestante] = useState(0);
@@ -242,8 +256,8 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
                 <p>{mensajeLimite}</p>
                 <div className={styles.limiteInfo}>
                   <div className={styles.limiteStats}>
-                    <span>Clases usadas: {limiteInfoCalculado.diasUsados} de {limiteInfoCalculado.diasDisponibles}</span>
-                    <span>Clases restantes: {limiteInfoCalculado.diasRestantes}</span>
+                    <span>Asistencias usadas: {totalAsistencias} de {limiteClasesNumero}</span>
+                    <span>Asistencias restantes: {asistenciasRestantes}</span>
                   </div>
                   <div className={styles.limiteMessage}>
                     {mensajeLimite}
@@ -361,15 +375,15 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
                 </span>
               </div>
               <div className={styles.limiteDetail}>
-                <span className={styles.limiteLabel}>Clases usadas:</span>
+                <span className={styles.limiteLabel}>Asistencias usadas:</span>
                 <span className={styles.limiteValue} style={{ color: colorIndicador }}>
-                  {limiteInfoCalculado.diasUsados} de {limiteInfoCalculado.diasDisponibles}
+                  {totalAsistencias} de {limiteClasesNumero}
                 </span>
               </div>
               <div className={styles.limiteDetail}>
-                <span className={styles.limiteLabel}>Clases restantes:</span>
+                <span className={styles.limiteLabel}>Asistencias restantes:</span>
                 <span className={styles.limiteValue} style={{ color: colorIndicador }}>
-                  {limiteInfoCalculado.diasRestantes}
+                  {asistenciasRestantes}
                 </span>
               </div>
               <div className={styles.limiteMessage}>

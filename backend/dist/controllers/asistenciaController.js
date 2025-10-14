@@ -106,25 +106,8 @@ const registrarAsistencia = async (req, res) => {
                 codigo: 'PLAN_EXPIRADO'
             });
         }
-        // 3. Validación simple del QR (solo RUT)
-        if (qrData) {
-            try {
-                const datosQR = JSON.parse(qrData);
-                // Validar que el RUT del QR coincida con el enviado
-                if (datosQR.rut && limpiarRut(datosQR.rut) !== rutLimpio) {
-                    return res.status(400).json({
-                        message: 'El RUT del QR no coincide.',
-                        codigo: 'RUT_NO_COINCIDE'
-                    });
-                }
-            }
-            catch {
-                return res.status(400).json({
-                    message: 'Formato de QR inválido.',
-                    codigo: 'QR_FORMATO_INVALIDO'
-                });
-            }
-        }
+        // 3. Validación simplificada (solo RUT, sin qrData)
+        // El frontend ya valida el QR antes de enviar, solo necesitamos el RUT
         // 4. Verificar que no haya registrado asistencia el mismo día (evitar duplicados)
         const hoy = new Date();
         const yyyy = hoy.getFullYear();
@@ -183,7 +166,7 @@ const registrarAsistencia = async (req, res) => {
         // ============= REGISTRO DE ASISTENCIA =============
         // Crear registro en la colección de asistencias
         const asistencia = await Asistencia_1.default.create({
-            rut: limpiarRut(rut),
+            rut: rutLimpio, // Usar el RUT ya limpiado
             fecha: new Date()
         });
         // Actualizar el array de asistencias del alumno

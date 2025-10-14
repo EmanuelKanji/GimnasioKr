@@ -2,6 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 
 interface AsistenciasCache {
   data: string[];
+  totalAsistencias: number;
+  limiteClases: number;
+  asistenciasRestantes: number;
+  periodoActual: {
+    inicio: string;
+    fin: string;
+    numeroMes: number;
+  };
   lastFetch: number;
   isLoading: boolean;
 }
@@ -9,6 +17,14 @@ interface AsistenciasCache {
 // Cache global para asistencias
 let asistenciasCache: AsistenciasCache = {
   data: [],
+  totalAsistencias: 0,
+  limiteClases: 0,
+  asistenciasRestantes: 0,
+  periodoActual: {
+    inicio: '',
+    fin: '',
+    numeroMes: 1
+  },
   lastFetch: 0,
   isLoading: false
 };
@@ -21,6 +37,10 @@ const MIN_FETCH_INTERVAL = 30000; // 30 segundos mínimo entre peticiones
 
 export function useAsistencias() {
   const [asistencias, setAsistencias] = useState<string[]>(asistenciasCache.data);
+  const [totalAsistencias, setTotalAsistencias] = useState(asistenciasCache.totalAsistencias);
+  const [limiteClases, setLimiteClases] = useState(asistenciasCache.limiteClases);
+  const [asistenciasRestantes, setAsistenciasRestantes] = useState(asistenciasCache.asistenciasRestantes);
+  const [periodoActual, setPeriodoActual] = useState(asistenciasCache.periodoActual);
   const [loading, setLoading] = useState(asistenciasCache.isLoading);
 
   const fetchAsistencias = useCallback(async (force = false) => {
@@ -46,15 +66,28 @@ export function useAsistencias() {
       setLoading(true);
 
       const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/me/asistencias`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/alumnos/me/asistencias-mes-actual`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       if (res.ok) {
         const data = await res.json();
-        asistenciasCache.data = data.diasAsistidos || [];
+        asistenciasCache.data = data.asistenciasMesActual || [];
+        asistenciasCache.totalAsistencias = data.totalAsistencias || 0;
+        asistenciasCache.limiteClases = data.limiteClases || 0;
+        asistenciasCache.asistenciasRestantes = data.asistenciasRestantes || 0;
+        asistenciasCache.periodoActual = data.periodoActual || {
+          inicio: '',
+          fin: '',
+          numeroMes: 1
+        };
         asistenciasCache.lastFetch = now;
+        
         setAsistencias(asistenciasCache.data);
+        setTotalAsistencias(asistenciasCache.totalAsistencias);
+        setLimiteClases(asistenciasCache.limiteClases);
+        setAsistenciasRestantes(asistenciasCache.asistenciasRestantes);
+        setPeriodoActual(asistenciasCache.periodoActual);
       } else if (res.status === 429) {
         console.warn('Rate limit alcanzado, reintentando en 60 segundos...');
         // En caso de rate limit, esperar más tiempo
@@ -82,6 +115,10 @@ export function useAsistencias() {
   useEffect(() => {
     const listener = () => {
       setAsistencias(asistenciasCache.data);
+      setTotalAsistencias(asistenciasCache.totalAsistencias);
+      setLimiteClases(asistenciasCache.limiteClases);
+      setAsistenciasRestantes(asistenciasCache.asistenciasRestantes);
+      setPeriodoActual(asistenciasCache.periodoActual);
       setLoading(asistenciasCache.isLoading);
     };
 
@@ -115,6 +152,10 @@ export function useAsistencias() {
 
   return {
     asistencias,
+    totalAsistencias,
+    limiteClases,
+    asistenciasRestantes,
+    periodoActual,
     loading,
     refreshAsistencias,
     addAsistencia

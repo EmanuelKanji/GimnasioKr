@@ -78,7 +78,12 @@ export default function DashboardAlumno() {
   const [planCompleto, setPlanCompleto] = useState<Plan | null>(null);
   
   // Usar hooks centralizados
-  const { asistencias: asistenciasMes } = useAsistencias();
+  const { 
+    asistencias: asistenciasMes, 
+    totalAsistencias, 
+    limiteClases: limiteClasesNumero, 
+    asistenciasRestantes 
+  } = useAsistencias();
   const { perfil, loading: loadingPerfil } = usePerfil();
 
   // Obtener límite de clases del perfil real
@@ -277,6 +282,9 @@ export default function DashboardAlumno() {
                 limiteClases={limiteClases}
                 asistenciasMes={asistenciasMes}
                 planCompleto={planCompleto}
+                totalAsistencias={totalAsistencias}
+                asistenciasRestantes={asistenciasRestantes}
+                limiteClasesNumero={limiteClasesNumero}
               />
             ) : (
               <div className={styles.errorState}>No se encontró el perfil del alumno.</div>

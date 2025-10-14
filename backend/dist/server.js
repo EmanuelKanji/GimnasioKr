@@ -96,15 +96,9 @@ const corsOptions = {
         if (!origin) {
             return callback(null, true);
         }
-        // Permitir localhost siempre (para desarrollo)
-        if (origin?.includes('localhost') || origin?.includes('127.0.0.1')) {
-            console.log(`✅ CORS permitido para localhost: ${origin}`);
-            return callback(null, true);
-        }
         // En desarrollo, permitir cualquier origen local
         if (process.env.NODE_ENV === 'development') {
-            if (origin.includes('192.168.')) {
-                console.log(`✅ CORS permitido para desarrollo: ${origin}`);
+            if (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.')) {
                 return callback(null, true);
             }
         }

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.crearAlumno = exports.loginAlumno = exports.obtenerAlumnos = exports.obtenerPerfilAlumno = exports.renovarPlanAlumno = exports.obtenerAlumnosParaRenovar = exports.obtenerEstadoRenovacion = exports.solicitarRenovacion = exports.obtenerAvisosAlumno = exports.obtenerAsistenciaAlumno = exports.obtenerPlanAlumno = void 0;
+exports.obtenerAsistenciasMesActual = exports.crearAlumno = exports.loginAlumno = exports.obtenerAlumnos = exports.obtenerPerfilAlumno = exports.renovarPlanAlumno = exports.obtenerAlumnosParaRenovar = exports.obtenerEstadoRenovacion = exports.solicitarRenovacion = exports.obtenerAvisosAlumno = exports.obtenerAsistenciaAlumno = exports.obtenerPlanAlumno = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const Alumno_1 = __importDefault(require("../models/Alumno"));
@@ -502,3 +502,62 @@ const crearAlumno = async (req, res) => {
     }
 };
 exports.crearAlumno = crearAlumno;
+// Obtener asistencias del mes actual del plan
+const obtenerAsistenciasMesActual = async (req, res) => {
+    try {
+        const rut = req.user?.rut;
+        if (!rut) {
+            return res.status(400).json({ message: 'RUT no presente en el token' });
+        }
+        const alumno = await Alumno_1.default.findOne({ rut });
+        if (!alumno) {
+            return res.status(404).json({ message: 'Alumno no encontrado' });
+        }
+        // Obtener el período actual del plan
+        const periodoActual = attendanceService_1.AttendanceService.obtenerMesActualDelPlan(alumno.fechaInicioPlan, new Date());
+        // Filtrar asistencias del mes actual
+        const asistenciasMesActual = alumno.asistencias.filter(fecha => {
+            const fechaAsistencia = new Date(fecha);
+            return fechaAsistencia >= periodoActual.inicio && fechaAsistencia <= periodoActual.fin;
+        });
+        // Calcular límite de clases según el plan
+        let limiteClases = 0;
+        if (alumno.limiteClases === '12') {
+            limiteClases = 12;
+        }
+        else if (alumno.limiteClases === '8') {
+            limiteClases = 8;
+        }
+        else {
+            // todos_los_dias - usar días hábiles restantes del mes
+            const diasHabilesRestantes = attendanceService_1.AttendanceService.calcularDiasHabilesRestantes(periodoActual.fin);
+            limiteClases = attendanceService_1.AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesRestantes);
+        }
+        const totalAsistencias = asistenciasMesActual.length;
+        const asistenciasRestantes = Math.max(0, limiteClases - totalAsistencias);
+        transactionHelper_1.log.info('Asistencias del mes actual obtenidas', {
+            rut: rut,
+            totalAsistencias: totalAsistencias,
+            limiteClases: limiteClases,
+            asistenciasRestantes: asistenciasRestantes,
+            periodoMes: periodoActual.numeroMes,
+            action: 'obtener_asistencias_mes_actual'
+        });
+        return res.json({
+            asistenciasMesActual,
+            totalAsistencias,
+            limiteClases,
+            asistenciasRestantes,
+            periodoActual: {
+                inicio: periodoActual.inicio.toISOString(),
+                fin: periodoActual.fin.toISOString(),
+                numeroMes: periodoActual.numeroMes
+            }
+        });
+    }
+    catch (error) {
+        transactionHelper_1.log.error('Error obteniendo asistencias del mes actual', error instanceof Error ? error : new Error(String(error)));
+        return res.status(500).json({ message: 'Error al obtener asistencias del mes actual' });
+    }
+};
+exports.obtenerAsistenciasMesActual = obtenerAsistenciasMesActual;
