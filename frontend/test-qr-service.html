@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        .log-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-input {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test del QRService</h1>
+    
+    <div class="test-section">
+        <h2>Casos de Prueba</h2>
+        <button onclick="runAllTests()">Ejecutar Todos los Tests</button>
+        <button onclick="clearLogs()">Limpiar Logs</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Manual</h2>
+        <textarea id="manualInput" placeholder="Pega aquí el JSON del QR o escribe un RUT" style="width: 100%; height: 100px; margin: 10px 0;"></textarea>
+        <button onclick="testManualInput()">Probar Input Manual</button>
+        <div id="manualResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Logs de Debug</h2>
+        <div id="logs" class="log-container"></div>
+    </div>
+
+    <script>
+        // Copiar exactamente el QRService que creamos
+        class QRService {
+            static processQR(qrData) {
+                if (!qrData || qrData === 'undefined') {
+                    return {
+                        rut: '',
+                        qrData: null,
+                        isValid: false,
+                        type: 'unknown',
+                        originalData: qrData
+                    };
+                }
+
+                try {
+                    const datosQR = JSON.parse(qrData);
+                    
+                    if (datosQR.rut && datosQR.timestamp) {
+                        return {
+                            rut: datosQR.rut,
+                            qrData: qrData,
+                            isValid: true,
+                            type: 'new',
+                            originalData: qrData
+                        };
+                    }
+                } catch {
+                    const rutMatch = qrData.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
+                    if (rutMatch) {
+                        const rutLimpio = rutMatch[1].replace(/\.|-/g, '');
+                        return {
+                            rut: rutLimpio,
+                            qrData: null,
+                            isValid: true,
+                            type: 'legacy',
+                            originalData: qrData
+                        };
+                    }
+                }
+
+                return {
+                    rut: '',
+                    qrData: null,
+                    isValid: false,
+                    type: 'unknown',
+                    originalData: qrData
+                };
+            }
+
+            static processAndLogQR(qrData, type = 'detected') {
+                const result = this.processQR(qrData);
+                
+                if (result.isValid) {
+                    if (result.type === 'new' && result.qrData) {
+                        try {
+                            const parsedQR = JSON.parse(result.qrData);
+                            this.logQR(parsedQR, type);
+                        } catch {
+                            log(`📱 QR ${type === 'scanned' ? 'escaneado' : 'detectado'}:`, {
+                                rut: result.rut,
+                                type: result.type
+                            });
+                        }
+                    } else if (result.type === 'legacy') {
+                        log('📱 QR formato legacy detectado (solo RUT):', result.rut);
+                    }
+                } else {
+                    log('📱 QR formato desconocido:', qrData);
+                }
+
+                return result;
+            }
+
+            static logQR(qrData, type) {
+                const prefix = type === 'scanned' ? '📱 QR nuevo formato escaneado' : '📱 QR nuevo formato detectado';
+                
+                log(prefix, {
+                    rut: qrData.rut,
+                    plan: qrData.plan,
+                    generado: new Date(qrData.timestamp).toISOString(),
+                    expira: new Date(qrData.expiraEn).toISOString()
+                });
+            }
+        }
+
+        // Casos de prueba
+        const testCases = [
+            {
+                name: "QR Nuevo Formato Válido",
+                input: JSON.stringify({
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    validoDesde: '2025-10-13T00:00:00.000Z',
+                    validoHasta: '2025-11-13T00:00:00.000Z',
+                    timestamp: Date.now(),
+                    expiraEn: Date.now() + (10 * 60 * 1000),
+                    token: 'test123',
+                    version: '2.0'
+                }),
+                expectedValid: true,
+                expectedType: 'new'
+            },
+            {
+                name: "QR Legacy (Solo RUT)",
+                input: '1234567899',
+                expectedValid: true,
+                expectedType: 'legacy'
+            },
+            {
+                name: "RUT con Formato",
+                input: '12.345.678-9',
+                expectedValid: true,
+                expectedType: 'legacy'
+            },
+            {
+                name: "QR Inválido (JSON sin campos requeridos)",
+                input: JSON.stringify({
+                    plan: 'PM 3X',
+                    timestamp: Date.now()
+                }),
+                expectedValid: false,
+                expectedType: 'unknown'
+            },
+            {
+                name: "QR Inválido (Texto aleatorio)",
+                input: 'texto aleatorio sin sentido',
+                expectedValid: false,
+                expectedType: 'unknown'
+            },
+            {
+                name: "QR Vacío",
+                input: '',
+                expectedValid: false,
+                expectedType: 'unknown'
+            },
+            {
+                name: "QR Undefined",
+                input: 'undefined',
+                expectedValid: false,
+                expectedType: 'unknown'
+            },
+            {
+                name: "QR con Fechas en Formato Local",
+                input: JSON.stringify({
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    validoDesde: '13-10-2025, 9:20:40 a. m.',
+                    validoHasta: '13-11-2025, 9:25:40 a. m.',
+                    timestamp: Date.now(),
+                    expiraEn: Date.now() + (10 * 60 * 1000),
+                    token: 'test123',
+                    version: '2.0'
+                }),
+                expectedValid: true,
+                expectedType: 'new'
+            }
+        ];
+
+        function runAllTests() {
+            log('🧪 Iniciando tests del QRService...');
+            let passed = 0;
+            let failed = 0;
+
+            testCases.forEach((testCase, index) => {
+                log(`\n--- Test ${index + 1}: ${testCase.name} ---`);
+                log('Input:', testCase.input);
+                
+                const result = QRService.processQR(testCase.input);
+                
+                log('Resultado:', result);
+                
+                const isValid = result.isValid === testCase.expectedValid;
+                const typeCorrect = result.type === testCase.expectedType;
+                
+                if (isValid && typeCorrect) {
+                    log('✅ PASS');
+                    passed++;
+                } else {
+                    log('❌ FAIL');
+                    log(`  Esperado: valid=${testCase.expectedValid}, type=${testCase.expectedType}`);
+                    log(`  Obtenido: valid=${result.isValid}, type=${result.type}`);
+                    failed++;
+                }
+            });
+
+            const total = passed + failed;
+            const message = `\n📊 Resultados: ${passed}/${total} tests pasaron (${failed} fallaron)`;
+            log(message);
+            
+            showResult('testResults', message, failed === 0 ? 'success' : 'error');
+        }
+
+        function testManualInput() {
+            const input = document.getElementById('manualInput').value.trim();
+            
+            if (!input) {
+                showResult('manualResult', 'Por favor ingresa datos para probar', 'warning');
+                return;
+            }
+
+            log('\n--- Test Manual ---');
+            log('Input:', input);
+            
+            const result = QRService.processAndLogQR(input, 'detected');
+            
+            log('Resultado:', result);
+            
+            let message = '';
+            let className = '';
+            
+            if (result.isValid) {
+                message = `✅ QR válido - Tipo: ${result.type}, RUT: ${result.rut}`;
+                className = 'success';
+            } else {
+                message = `❌ QR inválido - Tipo: ${result.type}`;
+                className = 'error';
+            }
+            
+            showResult('manualResult', message, className);
+        }
+
+        function showResult(elementId, message, className) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${className}">${message}</div>`;
+        }
+
+        function log(...args) {
+            const logsContainer = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ')}`;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Inicializar
+        window.onload = function() {
+            log('🧪 Test del QRService iniciado');
+            log('💡 Haz clic en "Ejecutar Todos los Tests" para probar el servicio');
+        };
+    </script>
+</body>
+</html>

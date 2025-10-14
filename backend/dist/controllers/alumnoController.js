@@ -383,8 +383,9 @@ exports.loginAlumno = loginAlumno;
 const crearAlumno = async (req, res) => {
     try {
         const { nombre, rut, direccion, fechaNacimiento, email, telefono, plan, fechaInicioPlan, duracion, monto, password, limiteClases, descuentoEspecial } = req.body;
-        if (!nombre || !rut || !direccion || !fechaNacimiento || !email || !telefono || !plan || !fechaInicioPlan || !duracion || !password) {
-            return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+        // Validar solo campos obligatorios
+        if (!nombre || !rut || !email || !plan || !duracion || !password) {
+            return res.status(400).json({ message: 'Los campos obligatorios son: nombre, RUT, email, plan, duración y contraseña.' });
         }
         // Buscar el plan por ID para obtener el nombre
         const planEncontrado = await Plan_1.default.findById(plan);
@@ -425,7 +426,7 @@ const crearAlumno = async (req, res) => {
         // Aplicar descuento al monto
         const montoConDescuento = monto * (1 - porcentajeDescuento / 100);
         // Calcular fecha de término según duración
-        const inicio = new Date(fechaInicioPlan);
+        const inicio = fechaInicioPlan ? new Date(fechaInicioPlan) : new Date();
         let termino = new Date(inicio);
         if (duracion === 'mensual') {
             termino.setMonth(termino.getMonth() + 1);
@@ -461,12 +462,12 @@ const crearAlumno = async (req, res) => {
                 const nuevoAlumno = new Alumno_1.default({
                     nombre,
                     rut: rutLimpio,
-                    direccion,
-                    fechaNacimiento,
+                    direccion: direccion || '',
+                    fechaNacimiento: fechaNacimiento || '',
                     email,
-                    telefono,
+                    telefono: telefono || '',
                     plan: planEncontrado.nombre,
-                    fechaInicioPlan,
+                    fechaInicioPlan: fechaInicioPlan || inicio.toISOString(),
                     fechaTerminoPlan: termino.toISOString(),
                     duracion,
                     monto: montoConDescuento,

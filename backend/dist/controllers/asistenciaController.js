@@ -133,11 +133,34 @@ const registrarAsistencia = async (req, res) => {
                     });
                 }
                 // Validar fechas del plan en el QR (doble verificación)
-                if (datosQR.validoHasta && fechaActual > new Date(datosQR.validoHasta)) {
-                    return res.status(403).json({
-                        message: 'El plan en el QR ha expirado.',
-                        codigo: 'PLAN_QR_EXPIRADO'
-                    });
+                if (datosQR.validoHasta) {
+                    let fechaValidoHasta;
+                    try {
+                        // Intentar parsear la fecha (puede ser ISO o formato local)
+                        fechaValidoHasta = new Date(datosQR.validoHasta);
+                        // Verificar que la fecha es válida
+                        if (isNaN(fechaValidoHasta.getTime())) {
+                            transactionHelper_1.log.warn('Fecha inválida en QR', {
+                                fechaRecibida: datosQR.validoHasta,
+                                action: 'validar_fecha_qr'
+                            });
+                            // Si la fecha es inválida, continuar sin esta validación
+                        }
+                        else if (fechaActual > fechaValidoHasta) {
+                            return res.status(403).json({
+                                message: 'El plan en el QR ha expirado.',
+                                codigo: 'PLAN_QR_EXPIRADO'
+                            });
+                        }
+                    }
+                    catch (error) {
+                        transactionHelper_1.log.warn('Error parseando fecha del QR', {
+                            fechaRecibida: datosQR.validoHasta,
+                            error: error instanceof Error ? error.message : String(error),
+                            action: 'parsear_fecha_qr'
+                        });
+                        // Si hay error parseando, continuar sin esta validación
+                    }
                 }
                 console.log(`✅ QR válido procesado - RUT: ${rut}, Token: ${datosQR.token}, Generado: ${new Date(datosQR.timestamp).toLocaleString()}`);
             }

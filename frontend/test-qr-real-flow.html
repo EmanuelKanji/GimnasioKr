@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Real Flow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        .log-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .qr-display {
+            border: 2px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            background-color: #f8f9fa;
+        }
+        .step {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Flujo Real QR → Asistencia</h1>
+    
+    <div class="test-section">
+        <h2>Paso 1: Generar QR (Simulando QrAlumno.tsx)</h2>
+        <button onclick="simulateQRGeneration()">Simular Generación de QR</button>
+        <div id="qrGenerationResult"></div>
+        <div id="qrDisplay" class="qr-display" style="display: none;">
+            <h3>QR Generado por Alumno:</h3>
+            <div id="qrVisual"></div>
+            <pre id="qrJSON"></pre>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Paso 2: Escanear QR (Simulando Html5QrReader.tsx)</h2>
+        <button onclick="simulateQRScanning()">Simular Escaneo de QR</button>
+        <div id="qrScanningResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Paso 3: Procesar QR (Simulando PasarAsistencia.tsx)</h2>
+        <button onclick="simulateQRProcessing()">Simular Procesamiento</button>
+        <div id="qrProcessingResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Paso 4: Registrar Asistencia (Simulando Backend)</h2>
+        <button onclick="simulateAttendanceRegistration()">Simular Registro de Asistencia</button>
+        <div id="attendanceRegistrationResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Logs de Debug</h2>
+        <button onclick="clearLogs()">Limpiar Logs</button>
+        <div id="logs" class="log-container"></div>
+    </div>
+
+    <script>
+        // Variables globales para simular el flujo
+        let generatedQR = null;
+        let scannedQR = null;
+        let processedQR = null;
+
+        // Simular QrAlumno.tsx - Generación de QR
+        function simulateQRGeneration() {
+            log('🎯 PASO 1: Simulando QrAlumno.tsx - Generación de QR');
+            
+            try {
+                // Simular datos del alumno
+                const alumnoData = {
+                    rut: '1234567899',
+                    plan: 'PM 3X',
+                    fechaInicio: '2025-10-13',
+                    fechaFin: '2025-11-13'
+                };
+
+                log('📋 Datos del alumno:', alumnoData);
+
+                // Simular función generarNuevoQR de QrAlumno.tsx
+                const ahora = Date.now();
+                const tiempoExpiracion = 10 * 60 * 1000; // 10 minutos
+                const expiraEn = ahora + tiempoExpiracion;
+                
+                const datosQR = {
+                    rut: limpiarRut(alumnoData.rut),
+                    plan: alumnoData.plan,
+                    validoDesde: new Date(alumnoData.fechaInicio).toISOString(),
+                    validoHasta: new Date(alumnoData.fechaFin).toISOString(),
+                    timestamp: ahora,
+                    expiraEn: expiraEn,
+                    token: generarTokenTemporal(),
+                    version: '2.0'
+                };
+
+                generatedQR = JSON.stringify(datosQR);
+                
+                // Mostrar QR visual
+                document.getElementById('qrVisual').innerHTML = `
+                    <div style="border: 2px solid #000; width: 200px; height: 200px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: #fff;">
+                        <div style="font-size: 12px; text-align: center;">
+                            QR Code<br>
+                            <small>${datosQR.rut}</small>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('qrJSON').textContent = generatedQR;
+                document.getElementById('qrDisplay').style.display = 'block';
+                
+                log('✅ QR generado exitosamente:', datosQR);
+                showResult('qrGenerationResult', '✅ QR generado correctamente con formato ISO', 'success');
+                
+            } catch (error) {
+                log('❌ Error generando QR:', error);
+                showResult('qrGenerationResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Simular Html5QrReader.tsx - Escaneo de QR
+        function simulateQRScanning() {
+            log('🎯 PASO 2: Simulando Html5QrReader.tsx - Escaneo de QR');
+            
+            if (!generatedQR) {
+                showResult('qrScanningResult', '❌ Primero genera un QR', 'error');
+                return;
+            }
+
+            try {
+                // Simular el escaneo (en realidad sería con cámara)
+                scannedQR = generatedQR; // En el flujo real, esto viene del escáner
+                
+                log('📱 QR escaneado:', scannedQR);
+                
+                // Simular procesamiento en Html5QrReader
+                const result = processQRInScanner(scannedQR);
+                
+                if (result.isValid) {
+                    log('✅ QR procesado en escáner:', result);
+                    showResult('qrScanningResult', `✅ QR escaneado correctamente - Tipo: ${result.type}`, 'success');
+                } else {
+                    log('❌ QR inválido en escáner:', result);
+                    showResult('qrScanningResult', `❌ QR inválido - ${result.type}`, 'error');
+                }
+                
+            } catch (error) {
+                log('❌ Error escaneando QR:', error);
+                showResult('qrScanningResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Simular PasarAsistencia.tsx - Procesamiento de QR
+        function simulateQRProcessing() {
+            log('🎯 PASO 3: Simulando PasarAsistencia.tsx - Procesamiento de QR');
+            
+            if (!scannedQR) {
+                showResult('qrProcessingResult', '❌ Primero escanea un QR', 'error');
+                return;
+            }
+
+            try {
+                // Simular handleScanCamera de PasarAsistencia.tsx
+                const result = processQRInAttendance(scannedQR);
+                
+                if (!result.isValid) {
+                    log('❌ QR inválido en procesamiento:', result);
+                    showResult('qrProcessingResult', `❌ QR inválido: ${result.originalData}`, 'error');
+                    return;
+                }
+                
+                processedQR = result;
+                
+                log('✅ QR procesado para asistencia:', result);
+                showResult('qrProcessingResult', `✅ QR procesado correctamente - RUT: ${result.rut}`, 'success');
+                
+            } catch (error) {
+                log('❌ Error procesando QR:', error);
+                showResult('qrProcessingResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Simular Backend - Registro de Asistencia
+        function simulateAttendanceRegistration() {
+            log('🎯 PASO 4: Simulando Backend - Registro de Asistencia');
+            
+            if (!processedQR) {
+                showResult('attendanceRegistrationResult', '❌ Primero procesa un QR', 'error');
+                return;
+            }
+
+            try {
+                // Simular petición al backend
+                const requestData = {
+                    rut: processedQR.rut,
+                    qrData: processedQR.qrData
+                };
+
+                log('📤 Enviando petición al backend:', requestData);
+
+                // Simular validaciones del backend
+                const validationResult = validateQRInBackend(requestData);
+                
+                if (!validationResult.valid) {
+                    log('❌ Validación fallida en backend:', validationResult);
+                    showResult('attendanceRegistrationResult', `❌ Error de validación: ${validationResult.message}`, 'error');
+                    return;
+                }
+
+                // Simular registro exitoso
+                const attendanceData = {
+                    rut: processedQR.rut,
+                    fecha: new Date().toISOString().split('T')[0],
+                    plan: 'PM 3X',
+                    timestamp: new Date().toISOString()
+                };
+
+                log('✅ Asistencia registrada exitosamente:', attendanceData);
+                showResult('attendanceRegistrationResult', `✅ Asistencia registrada - RUT: ${attendanceData.rut}, Fecha: ${attendanceData.fecha}`, 'success');
+                
+            } catch (error) {
+                log('❌ Error registrando asistencia:', error);
+                showResult('attendanceRegistrationResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Funciones auxiliares (simulando el código real)
+
+        function limpiarRut(rut) {
+            return rut.replace(/\.|-/g, '').toUpperCase();
+        }
+
+        function generarTokenTemporal() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        function processQRInScanner(qrData) {
+            // Simular lógica de Html5QrReader.tsx
+            try {
+                const datosQR = JSON.parse(qrData);
+                if (datosQR.rut && datosQR.timestamp) {
+                    log('📱 QR nuevo formato escaneado:', {
+                        rut: datosQR.rut,
+                        plan: datosQR.plan,
+                        generado: new Date(datosQR.timestamp).toISOString(),
+                        expira: new Date(datosQR.expiraEn).toISOString()
+                    });
+                    return {
+                        rut: datosQR.rut,
+                        qrData: qrData,
+                        isValid: true,
+                        type: 'new'
+                    };
+                }
+            } catch {
+                const rutMatch = qrData.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
+                if (rutMatch) {
+                    const cleanRut = rutMatch[1].replace(/\.|-/g, '');
+                    log('📱 QR legacy escaneado:', cleanRut);
+                    return {
+                        rut: cleanRut,
+                        qrData: null,
+                        isValid: true,
+                        type: 'legacy'
+                    };
+                }
+            }
+            
+            return { isValid: false, type: 'unknown' };
+        }
+
+        function processQRInAttendance(qrData) {
+            // Simular lógica de PasarAsistencia.tsx
+            try {
+                const datosQR = JSON.parse(qrData);
+                if (datosQR.rut && datosQR.timestamp) {
+                    log('📱 QR nuevo formato detectado:', {
+                        rut: datosQR.rut,
+                        plan: datosQR.plan,
+                        generado: new Date(datosQR.timestamp).toISOString(),
+                        expira: new Date(datosQR.expiraEn).toISOString()
+                    });
+                    return {
+                        rut: datosQR.rut,
+                        qrData: qrData,
+                        isValid: true,
+                        type: 'new'
+                    };
+                }
+            } catch {
+                log('📱 QR formato legacy detectado:', qrData);
+                return {
+                    rut: qrData,
+                    qrData: null,
+                    isValid: true,
+                    type: 'legacy'
+                };
+            }
+            
+            return { isValid: false, type: 'unknown', originalData: qrData };
+        }
+
+        function validateQRInBackend(requestData) {
+            // Simular validaciones del backend
+            if (!requestData.rut) {
+                return { valid: false, message: 'RUT requerido' };
+            }
+
+            if (requestData.qrData) {
+                try {
+                    const qrData = JSON.parse(requestData.qrData);
+                    
+                    // Validar timestamp
+                    const tiempoActual = Date.now();
+                    if (qrData.expiraEn && tiempoActual > qrData.expiraEn) {
+                        return { valid: false, message: 'QR expirado' };
+                    }
+                    
+                    // Validar RUT
+                    if (qrData.rut && limpiarRut(qrData.rut) !== limpiarRut(requestData.rut)) {
+                        return { valid: false, message: 'RUT no coincide' };
+                    }
+                    
+                    log('✅ Validaciones del backend pasadas');
+                    return { valid: true };
+                    
+                } catch (error) {
+                    return { valid: false, message: 'Formato de QR inválido' };
+                }
+            }
+
+            return { valid: true };
+        }
+
+        function showResult(elementId, message, className) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${className}">${message}</div>`;
+        }
+
+        function log(...args) {
+            const logsContainer = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ')}`;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Inicializar
+        window.onload = function() {
+            log('🧪 Test de flujo real QR iniciado');
+            log('💡 Sigue los pasos en orden:');
+            log('1. Generar QR (simula QrAlumno.tsx)');
+            log('2. Escanear QR (simula Html5QrReader.tsx)');
+            log('3. Procesar QR (simula PasarAsistencia.tsx)');
+            log('4. Registrar Asistencia (simula Backend)');
+        };
+    </script>
+</body>
+</html>

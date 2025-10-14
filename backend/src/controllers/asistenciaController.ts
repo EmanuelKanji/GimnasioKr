@@ -170,7 +170,7 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
           } catch (error) {
             log.warn('Error parseando fecha del QR', { 
               fechaRecibida: datosQR.validoHasta,
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
               action: 'parsear_fecha_qr'
             });
             // Si hay error parseando, continuar sin esta validación
