@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Solicitud Renovación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .log { background-color: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Solicitud de Renovación</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test de Solicitud de Renovación</h3>
+        <p>Este test verifica por qué no se envía la solicitud de renovación cuando el QR se bloquea.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Simular Estado de QR Bloqueado</h3>
+        <button onclick="simularQRBloqueado()">Simular QR Bloqueado</button>
+        <div id="qr-bloqueado-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test de Función solicitarRenovacion</h3>
+        <button onclick="testSolicitarRenovacion()">Test Solicitar Renovación</button>
+        <div id="solicitud-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test de Endpoint Backend</h3>
+        <button onclick="testEndpointBackend()">Test Endpoint</button>
+        <div id="endpoint-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Logs de Debug</h3>
+        <div id="debug-logs" class="log"></div>
+    </div>
+
+    <script>
+        let logs = [];
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push(`[${timestamp}] ${message}`);
+            document.getElementById('debug-logs').textContent = logs.join('\n');
+            console.log(message);
+        }
+
+        function simularQRBloqueado() {
+            log('🔍 Simulando estado de QR bloqueado...');
+            
+            // Simular datos del perfil con plan expirado
+            const perfilAlumno = {
+                rut: '1234567899',
+                plan: 'PM 3X',
+                fechaInicio: '2024-10-01T00:00:00.000Z',
+                fechaFin: '2024-12-31T00:00:00.000Z'
+            };
+
+            const hoy = new Date();
+            const inicio = new Date(perfilAlumno.fechaInicio);
+            const fin = new Date(perfilAlumno.fechaFin);
+            const planActivo = hoy >= inicio && hoy <= fin;
+
+            log(`📅 Fecha actual: ${hoy.toISOString()}`);
+            log(`📅 Fecha inicio plan: ${inicio.toISOString()}`);
+            log(`📅 Fecha fin plan: ${fin.toISOString()}`);
+            log(`✅ Plan activo: ${planActivo}`);
+
+            let resultado = `
+                <div class="${planActivo ? 'success' : 'error'}">
+                    <h4>${planActivo ? '✅ Plan Activo' : '❌ Plan Expirado'}</h4>
+                    <p><strong>Estado:</strong> ${planActivo ? 'El plan está activo' : 'El plan ha expirado'}</p>
+                    <p><strong>Fecha actual:</strong> ${hoy.toLocaleDateString('es-CL')}</p>
+                    <p><strong>Fecha fin plan:</strong> ${fin.toLocaleDateString('es-CL')}</p>
+                </div>
+            `;
+
+            document.getElementById('qr-bloqueado-result').innerHTML = resultado;
+        }
+
+        function testSolicitarRenovacion() {
+            log('🔍 Probando función solicitarRenovacion...');
+            
+            // Simular la función del componente QrAlumno
+            async function solicitarRenovacion() {
+                log('📤 Iniciando solicitud de renovación...');
+                
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        log('❌ Error: No hay token en localStorage');
+                        return { success: false, error: 'No hay token' };
+                    }
+
+                    const hoy = new Date();
+                    const inicio = new Date('2024-10-01T00:00:00.000Z');
+                    const fin = new Date('2024-12-31T00:00:00.000Z');
+                    const planActivo = hoy >= inicio && hoy <= fin;
+                    const motivo = !planActivo ? 'plan_expirado' : 'limite_alcanzado';
+                    
+                    log(`📋 Motivo de renovación: ${motivo}`);
+                    log(`📅 Plan activo: ${planActivo}`);
+
+                    const requestData = {
+                        motivo,
+                        fechaSolicitud: new Date().toISOString()
+                    };
+
+                    log(`📤 Datos a enviar: ${JSON.stringify(requestData, null, 2)}`);
+
+                    // Simular la petición (sin hacerla realmente)
+                    log('📡 Simulando petición HTTP...');
+                    log(`🌐 URL: ${window.location.origin}/api/alumnos/me/solicitar-renovacion`);
+                    log(`🔑 Token: ${token.substring(0, 20)}...`);
+                    
+                    return { success: true, data: requestData };
+                } catch (error) {
+                    log(`❌ Error en solicitarRenovacion: ${error.message}`);
+                    return { success: false, error: error.message };
+                }
+            }
+
+            // Ejecutar la función
+            solicitarRenovacion().then(result => {
+                let resultado = `
+                    <div class="${result.success ? 'success' : 'error'}">
+                        <h4>${result.success ? '✅ Función Ejecutada' : '❌ Error en Función'}</h4>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+                document.getElementById('solicitud-result').innerHTML = resultado;
+            });
+        }
+
+        function testEndpointBackend() {
+            log('🔍 Probando endpoint del backend...');
+            
+            // Simular validación del esquema Joi
+            const esquemaValidacion = {
+                motivo: {
+                    tipo: 'string',
+                    max: 200,
+                    required: false
+                }
+            };
+
+            const datosPrueba = {
+                motivo: 'plan_expirado',
+                fechaSolicitud: new Date().toISOString()
+            };
+
+            log('📋 Esquema de validación:');
+            log(JSON.stringify(esquemaValidacion, null, 2));
+            
+            log('📤 Datos de prueba:');
+            log(JSON.stringify(datosPrueba, null, 2));
+
+            // Validar datos
+            let errores = [];
+            
+            if (datosPrueba.motivo && datosPrueba.motivo.length > 200) {
+                errores.push('El motivo excede 200 caracteres');
+            }
+
+            if (errores.length > 0) {
+                log(`❌ Errores de validación: ${errores.join(', ')}`);
+            } else {
+                log('✅ Datos válidos según esquema Joi');
+            }
+
+            let resultado = `
+                <div class="${errores.length === 0 ? 'success' : 'error'}">
+                    <h4>${errores.length === 0 ? '✅ Endpoint Válido' : '❌ Errores de Validación'}</h4>
+                    <p><strong>Esquema:</strong> Joi.object con motivo opcional (max 200 chars)</p>
+                    <p><strong>Datos:</strong> ${JSON.stringify(datosPrueba)}</p>
+                    ${errores.length > 0 ? `<p><strong>Errores:</strong> ${errores.join(', ')}</p>` : ''}
+                </div>
+            `;
+
+            document.getElementById('endpoint-result').innerHTML = resultado;
+        }
+
+        // Inicializar logs
+        log('🚀 Test de Solicitud de Renovación iniciado');
+        log('📝 Verificando por qué no se envía la solicitud cuando el QR se bloquea...');
+    </script>
+</body>
+</html>
