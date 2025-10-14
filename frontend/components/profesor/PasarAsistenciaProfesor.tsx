@@ -105,21 +105,28 @@ export default function PasarAsistencia() {
 
   // Simulación de lectura QR por escáner físico (input)
   const handleInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rutQR = e.target.value;
-    setQrResult(rutQR);
+    const qrData = e.target.value;
+    setQrResult(qrData);
     const token = localStorage.getItem('token');
+    
+    // Procesar el QR usando el servicio centralizado
+    const qrResult = QRService.processAndLogQR(qrData);
+    
     try {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/asistencias', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ rut: rutQR })
+        body: JSON.stringify({ 
+          rut: qrResult.rut,
+          qrData: qrResult.qrData ? JSON.stringify(qrResult.qrData) : undefined
+        })
       });
       const data = await res.json();
       if (res.ok) {
-        setQrResult(`${rutQR} - ${new Date().toLocaleString()}`);
+        setQrResult(`${qrResult.rut} - ${new Date().toLocaleString()}`);
       } else {
         setQrResult(`Error: ${data.message}`);
       }
