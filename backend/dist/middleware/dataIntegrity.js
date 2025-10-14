@@ -12,6 +12,10 @@ const transactionHelper_1 = require("../utils/transactionHelper");
 const validateDataIntegrity = (req, res, next) => {
     try {
         const { body } = req;
+        // Solo validar si hay body y es un POST/PUT/PATCH
+        if (!body || !['POST', 'PUT', 'PATCH'].includes(req.method)) {
+            return next();
+        }
         // Validar fechas de plan
         if (body.fechaInicioPlan) {
             if (!(0, transactionHelper_1.validarFechaInicio)(body.fechaInicioPlan)) {
@@ -123,7 +127,7 @@ const validateDataIntegrity = (req, res, next) => {
     catch (error) {
         console.error('Error en validación de integridad de datos:', error);
         // En caso de error, continuar sin validar para no romper la funcionalidad
-        next();
+        return next();
     }
 };
 exports.validateDataIntegrity = validateDataIntegrity;

@@ -13,6 +13,11 @@ export const validateDataIntegrity = (req: Request, res: Response, next: NextFun
   try {
     const { body } = req;
 
+    // Solo validar si hay body y es un POST/PUT/PATCH
+    if (!body || !['POST', 'PUT', 'PATCH'].includes(req.method)) {
+      return next();
+    }
+
     // Validar fechas de plan
     if (body.fechaInicioPlan) {
       if (!validarFechaInicio(body.fechaInicioPlan)) {
@@ -133,7 +138,7 @@ export const validateDataIntegrity = (req: Request, res: Response, next: NextFun
   } catch (error) {
     console.error('Error en validación de integridad de datos:', error);
     // En caso de error, continuar sin validar para no romper la funcionalidad
-    next();
+    return next();
   }
 };
 
