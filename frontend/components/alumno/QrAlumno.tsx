@@ -75,20 +75,29 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
   // Función para generar nuevo QR con timestamp y token temporal
   const generarNuevoQR = useCallback(() => {
     const ahora = Date.now();
-    const tiempoExpiracion = 5 * 60 * 1000; // 5 minutos en milisegundos
+    const tiempoExpiracion = 10 * 60 * 1000; // 10 minutos en milisegundos (sincronizado con backend)
     const expiraEn = ahora + tiempoExpiracion;
     
     // Crear datos del QR con medidas de seguridad mejoradas
     const datosQR = {
       rut: limpiarRut(rut), // RUT limpio para compatibilidad con backend
       plan,
-      validoDesde: new Date(fechaInicio).toISOString(), // Convertir a ISO format
-      validoHasta: new Date(fechaFin).toISOString(),     // Convertir a ISO format
+      validoDesde: new Date(fechaInicio).toISOString(), // Asegurar formato ISO
+      validoHasta: new Date(fechaFin).toISOString(),     // Asegurar formato ISO
       timestamp: ahora,           // Momento de generación
       expiraEn: expiraEn,        // Cuándo expira el QR
       token: generarTokenTemporal(), // Token único para esta sesión
       version: '2.0'             // Versión para futuras validaciones
     };
+
+    // Debug: Verificar formato de fechas
+    console.log('🔍 QR Fechas Debug:', {
+      fechaInicioOriginal: fechaInicio,
+      fechaFinOriginal: fechaFin,
+      fechaInicioISO: new Date(fechaInicio).toISOString(),
+      fechaFinISO: new Date(fechaFin).toISOString(),
+      datosQR: datosQR
+    });
 
     setQrData(JSON.stringify(datosQR));
     setTiempoRestante(tiempoExpiracion);
