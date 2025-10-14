@@ -120,8 +120,36 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
 
     // 3. Validaciones adicionales para QR con timestamp (nuevo sistema de seguridad)
     if (qrData) {
+      // Validar que qrData sea un string no vacío
+      if (typeof qrData !== 'string' || qrData.trim() === '') {
+        return res.status(400).json({ 
+          message: 'Datos del QR vacíos o inválidos.',
+          codigo: 'QR_VACIO' 
+        });
+      }
+      
       try {
         const datosQR = JSON.parse(qrData);
+        
+        // Validar estructura del QR
+        if (!datosQR.rut || !datosQR.timestamp || !datosQR.expiraEn) {
+          log.warn('QR con estructura incompleta', {
+            tieneRut: !!datosQR.rut,
+            tieneTimestamp: !!datosQR.timestamp,
+            tieneExpiraEn: !!datosQR.expiraEn,
+            camposPresentes: Object.keys(datosQR),
+            action: 'validar_estructura_qr'
+          });
+          
+          return res.status(400).json({ 
+            message: 'El QR no tiene la estructura correcta.',
+            codigo: 'QR_ESTRUCTURA_INVALIDA',
+            debug: process.env.NODE_ENV === 'development' ? {
+              camposPresentes: Object.keys(datosQR),
+              camposRequeridos: ['rut', 'timestamp', 'expiraEn']
+            } : undefined
+          });
+        }
         
         // Validar que el QR no haya expirado (timestamp)
         const tiempoActual = Date.now();
@@ -204,9 +232,19 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
         console.log(`✅ QR válido procesado - RUT: ${rut}, Token: ${datosQR.token}, Generado: ${new Date(datosQR.timestamp).toLocaleString()}`);
         
       } catch (parseError) {
+        log.error('Error parseando QR', parseError instanceof Error ? parseError : new Error(String(parseError)), {
+          qrDataRecibido: qrData,
+          rutRecibido: rut,
+          action: 'parse_qr_error'
+        });
+        
         return res.status(400).json({ 
           message: 'Formato de QR inválido.',
-          codigo: 'QR_FORMATO_INVALIDO' 
+          codigo: 'QR_FORMATO_INVALIDO',
+          debug: process.env.NODE_ENV === 'development' ? {
+            error: parseError instanceof Error ? parseError.message : String(parseError),
+            qrDataLength: qrData?.length || 0
+          } : undefined
         });
       }
     }
@@ -321,5 +359,45 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
       codigo: 'ERROR_SERVIDOR',
       error: process.env.NODE_ENV === 'development' ? error : undefined
     });
+  }
+};
+
+export const diagnosticarQR = async (req: Request, res: Response) => {
+  try {
+    const { qrData } = req.body;
+    
+    const diagnostico = {
+      recibido: !!qrData,
+      tipo: typeof qrData,
+      longitud: qrData?.length || 0,
+      esString: typeof qrData === 'string',
+      esVacio: !qrData || qrData.trim() === '',
+      parseableJSON: false,
+      estructura: null as any,
+      errores: [] as string[]
+    };
+    
+    if (typeof qrData === 'string' && qrData.trim() !== '') {
+      try {
+        const parsed = JSON.parse(qrData);
+        diagnostico.parseableJSON = true;
+        diagnostico.estructura = {
+          campos: Object.keys(parsed),
+          tieneRut: !!parsed.rut,
+          tieneTimestamp: !!parsed.timestamp,
+          tieneExpiraEn: !!parsed.expiraEn,
+          tienePlan: !!parsed.plan,
+          valores: parsed
+        };
+      } catch (e) {
+        diagnostico.errores.push('No se puede parsear como JSON: ' + (e instanceof Error ? e.message : String(e)));
+      }
+    } else {
+      diagnostico.errores.push('No es un string válido');
+    }
+    
+    res.json(diagnostico);
+  } catch (error) {
+    res.status(500).json({ error: 'Error en diagnóstico', details: error });
   }
 };

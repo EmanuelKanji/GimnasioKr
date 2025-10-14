@@ -27,7 +27,8 @@ export class QRService {
    * Procesa un código QR escaneado y determina su tipo y validez
    */
   static processQR(qrData: string): QRProcessResult {
-    if (!qrData || qrData === 'undefined') {
+    // Validar que sea string no vacío
+    if (!qrData || typeof qrData !== 'string' || qrData === 'undefined' || qrData.trim() === '') {
       return {
         rut: '',
         qrData: null,
@@ -101,8 +102,10 @@ export class QRService {
     console.log(prefix, {
       rut: qrData.rut,
       plan: qrData.plan,
-      generado: new Date(qrData.timestamp).toISOString(),
-      expira: new Date(qrData.expiraEn).toISOString()
+      validoDesde: qrData.validoDesde,  // Cambiar de "generado"
+      validoHasta: qrData.validoHasta,  // Cambiar de "expira"
+      timestamp: new Date(qrData.timestamp).toISOString(),
+      expiraEn: new Date(qrData.expiraEn).toISOString()
     });
   }
 

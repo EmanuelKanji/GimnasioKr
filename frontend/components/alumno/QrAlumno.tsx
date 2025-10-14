@@ -150,7 +150,9 @@ export default function QrAlumno({ rut, plan, fechaInicio, fechaFin, limiteClase
       planExpirado: fechaActual > fechaFinPlan,
       validoDesde: validoDesde,
       validoHasta: validoHasta,
-      datosQR: datosQR
+      datosQR: datosQR,
+      qrStringificado: JSON.stringify(datosQR),
+      longitudQR: JSON.stringify(datosQR).length
     });
 
     setQrData(JSON.stringify(datosQR));
