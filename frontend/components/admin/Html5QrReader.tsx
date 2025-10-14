@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { QRService } from '../../lib/qrService';
 
 interface Html5QrReaderProps {
   onScan: (data: string) => void;
@@ -25,33 +26,20 @@ export default function Html5QrReader({ onScan }: Html5QrReaderProps) {
         if (decodedText) {
           scanOnceRef.current = true;
           
-          // Intentar parsear como JSON (nuevo formato)
-          try {
-            const qrData = JSON.parse(decodedText);
-            if (qrData.rut && qrData.timestamp) {
+          // Usar servicio centralizado para procesar QR
+          const result = QRService.processAndLogQR(decodedText, 'scanned');
+          
+          if (result.isValid) {
+            if (result.type === 'new' && result.qrData) {
               // QR nuevo formato - enviar datos completos
-              console.log('📱 QR nuevo formato escaneado:', qrData);
-              onScan(decodedText); // Enviar JSON completo
-            } else {
-              // JSON pero sin estructura esperada, buscar RUT
-              const rutMatch = decodedText.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
-              if (rutMatch) {
-                const cleanRut = rutMatch[1].replace(/\.|-/g, '');
-                onScan(cleanRut);
-              }
+              onScan(result.qrData);
+            } else if (result.type === 'legacy') {
+              // QR legacy - enviar solo RUT
+              onScan(result.rut);
             }
-          } catch {
-            // No es JSON, buscar RUT directamente (formato legacy)
-            const rutMatch = decodedText.match(/(\d{1,2}\.??\d{3}\.??\d{3}-?[\dkK])/);
-            if (rutMatch) {
-              const cleanRut = rutMatch[1].replace(/\.|-/g, '');
-              console.log('📱 QR legacy escaneado:', cleanRut);
-              onScan(cleanRut);
-            } else {
-              // Si no encuentra RUT, enviar texto completo
-              console.log('📱 QR formato desconocido:', decodedText);
-              onScan(decodedText);
-            }
+          } else {
+            // QR inválido - enviar texto original para debugging
+            onScan(decodedText);
           }
           
           setScanning(false);

@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import Html5QrReader from './Html5QrReader';
+import { QRService } from '../../lib/qrService';
 import styles from './PasarAsistencia.module.css';
 
 export default function PasarAsistencia() {
@@ -17,29 +18,17 @@ export default function PasarAsistencia() {
     if (!data || data === 'undefined') return; // Evita procesar "undefined" string
     
     const token = localStorage.getItem('token');
-    let rutParaEnviar = data;
-    let qrDataParaEnviar = null;
     
-    try {
-      // Intentar parsear como JSON (nuevo formato con timestamp y token)
-      const datosQR = JSON.parse(data);
-      
-      // Si tiene la estructura del nuevo QR, extraer RUT y enviar datos completos
-      if (datosQR.rut && datosQR.timestamp) {
-        rutParaEnviar = datosQR.rut;
-        qrDataParaEnviar = data; // Enviar QR completo para validaciones adicionales
-        
-        console.log('📱 QR nuevo formato detectado:', {
-          rut: datosQR.rut,
-          plan: datosQR.plan,
-          generado: new Date(datosQR.timestamp).toLocaleString(),
-          expira: new Date(datosQR.expiraEn).toLocaleString()
-        });
-      }
-    } catch {
-      // Si no se puede parsear, asumir que es solo un RUT (formato legacy)
-      console.log('📱 QR formato legacy detectado (solo RUT):', data);
+    // Usar servicio centralizado para procesar QR
+    const result = QRService.processAndLogQR(data, 'detected');
+    
+    if (!result.isValid) {
+      setQrResult(`Error: QR inválido - ${data}`);
+      return;
     }
+    
+    const rutParaEnviar = result.rut;
+    const qrDataParaEnviar = result.qrData;
     
     try {
       // Enviar solicitud al backend con validaciones mejoradas
