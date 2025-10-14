@@ -112,6 +112,15 @@ const registrarAsistencia = async (req, res) => {
                 const datosQR = JSON.parse(qrData);
                 // Validar que el QR no haya expirado (timestamp)
                 const tiempoActual = Date.now();
+                // Debug: Log de timestamps para debugging
+                transactionHelper_1.log.info('Validando timestamps del QR', {
+                    tiempoActual: tiempoActual,
+                    timestampQR: datosQR.timestamp,
+                    expiraEnQR: datosQR.expiraEn,
+                    diferenciaTimestamp: tiempoActual - datosQR.timestamp,
+                    diferenciaExpira: tiempoActual - datosQR.expiraEn,
+                    action: 'validar_timestamps_qr'
+                });
                 if (datosQR.expiraEn && tiempoActual > datosQR.expiraEn) {
                     return res.status(403).json({
                         message: 'El QR ha expirado. Por favor, genera uno nuevo.',
@@ -119,7 +128,8 @@ const registrarAsistencia = async (req, res) => {
                     });
                 }
                 // Validar que el QR no sea demasiado antiguo (máximo 10 minutos)
-                if (datosQR.timestamp && (tiempoActual - datosQR.timestamp) > (10 * 60 * 1000)) {
+                // Solo validar si el timestamp es del pasado (no del futuro)
+                if (datosQR.timestamp && datosQR.timestamp <= tiempoActual && (tiempoActual - datosQR.timestamp) > (10 * 60 * 1000)) {
                     return res.status(403).json({
                         message: 'El QR es demasiado antiguo. Genera uno nuevo.',
                         codigo: 'QR_ANTIGUO'
