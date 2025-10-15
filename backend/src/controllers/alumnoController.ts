@@ -561,18 +561,34 @@ export const obtenerAsistenciasMesActual = async (req: Request, res: Response) =
       periodoNumero: periodoActual.numeroMes
     });
 
-    // Filtrar asistencias del mes actual del plan únicamente
-    const asistenciasMesActual = alumno.asistencias.filter(fecha => {
-      const fechaAsistencia = new Date(fecha);
-      const fechaNormalizada = new Date(fechaAsistencia.getFullYear(), fechaAsistencia.getMonth(), fechaAsistencia.getDate());
-      const periodoInicioNorm = new Date(periodoActual.inicio.getFullYear(), periodoActual.inicio.getMonth(), periodoActual.inicio.getDate());
-      const periodoFinNorm = new Date(periodoActual.fin.getFullYear(), periodoActual.fin.getMonth(), periodoActual.fin.getDate());
-      return fechaNormalizada >= periodoInicioNorm && fechaNormalizada <= periodoFinNorm;
+    // Filtrar asistencias del mes actual del plan (comparación directa)
+    let asistenciasMesActual = alumno.asistencias.filter(fecha => {
+      const fechaAsistencia = new Date(fecha + 'T00:00:00'); // Asegurar formato correcto
+      return fechaAsistencia >= periodoActual.inicio && fechaAsistencia <= periodoActual.fin;
     });
+
+    // Si no hay asistencias en el período del plan, usar mes calendario como fallback
+    if (asistenciasMesActual.length === 0) {
+      const hoy = new Date();
+      const mesActual = hoy.getMonth();
+      const añoActual = hoy.getFullYear();
+      
+      asistenciasMesActual = alumno.asistencias.filter(fecha => {
+        const fechaAsistencia = new Date(fecha + 'T00:00:00');
+        return fechaAsistencia.getMonth() === mesActual && fechaAsistencia.getFullYear() === añoActual;
+      });
+    }
+
+    // Si aún no hay asistencias, mostrar todas (útil para debugging)
+    if (asistenciasMesActual.length === 0 && alumno.asistencias.length > 0) {
+      console.log('⚠️ No se encontraron asistencias en filtros, mostrando todas');
+      asistenciasMesActual = [...alumno.asistencias];
+    }
 
     console.log('🔍 Filtro por período del plan:', {
       asistenciasTotales: alumno.asistencias.length,
       asistenciasFiltradas: asistenciasMesActual.length,
+      primerasAsistencias: alumno.asistencias.slice(0, 3),
       periodoInicio: periodoActual.inicio.toISOString(),
       periodoFin: periodoActual.fin.toISOString(),
       numeroMes: periodoActual.numeroMes
@@ -581,6 +597,13 @@ export const obtenerAsistenciasMesActual = async (req: Request, res: Response) =
 
     // Calcular límite de clases según el plan
     let limiteClases = 0;
+
+    console.log('🔍 Debug límite de clases:', {
+      limiteClasesAlumno: alumno.limiteClases,
+      planAlumno: alumno.plan,
+      tipoLimiteClases: typeof alumno.limiteClases
+    });
+
     if (alumno.limiteClases === '12') {
       limiteClases = 12;
     } else if (alumno.limiteClases === '8') {
@@ -590,6 +613,9 @@ export const obtenerAsistenciasMesActual = async (req: Request, res: Response) =
       const diasHabilesMes = AttendanceService.calcularDiasHabiles(periodoActual.inicio, periodoActual.fin);
       limiteClases = AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesMes);
     } else {
+      // Fallback: intentar obtener del plan o usar días hábiles
+      console.log('⚠️ Límite de clases no definido, usando fallback');
+      
       // Fallback: usar el plan completo si está disponible
       if (alumno.plan && typeof alumno.plan === 'string' && alumno.plan.length === 24) {
         try {
