@@ -16,6 +16,10 @@ const validateDataIntegrity = (req, res, next) => {
         if (!body || !['POST', 'PUT', 'PATCH'].includes(req.method)) {
             return next();
         }
+        // Validación adicional de seguridad
+        if (typeof body !== 'object' || body === null) {
+            return next();
+        }
         // Validar fechas de plan
         if (body.fechaInicioPlan) {
             if (!(0, transactionHelper_1.validarFechaInicio)(body.fechaInicioPlan)) {

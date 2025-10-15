@@ -18,6 +18,11 @@ export const validateDataIntegrity = (req: Request, res: Response, next: NextFun
       return next();
     }
 
+    // Validación adicional de seguridad
+    if (typeof body !== 'object' || body === null) {
+      return next();
+    }
+
     // Validar fechas de plan
     if (body.fechaInicioPlan) {
       if (!validarFechaInicio(body.fechaInicioPlan)) {

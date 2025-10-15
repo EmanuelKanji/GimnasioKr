@@ -528,19 +528,51 @@ const obtenerAsistenciasMesActual = async (req, res) => {
         else if (alumno.limiteClases === '8') {
             limiteClases = 8;
         }
+        else if (alumno.limiteClases === 'todos_los_dias') {
+            // todos_los_dias - calcular días hábiles del mes actual
+            const diasHabilesMes = attendanceService_1.AttendanceService.calcularDiasHabiles(periodoActual.inicio, periodoActual.fin);
+            limiteClases = attendanceService_1.AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesMes);
+        }
         else {
-            // todos_los_dias - usar días hábiles restantes del mes
-            const diasHabilesRestantes = attendanceService_1.AttendanceService.calcularDiasHabilesRestantes(periodoActual.fin);
-            limiteClases = attendanceService_1.AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesRestantes);
+            // Fallback: usar el plan completo si está disponible
+            if (alumno.plan && typeof alumno.plan === 'string' && alumno.plan.length === 24) {
+                try {
+                    const planEncontrado = await Plan_1.default.findById(alumno.plan);
+                    if (planEncontrado) {
+                        if (planEncontrado.limiteClases === '12') {
+                            limiteClases = 12;
+                        }
+                        else if (planEncontrado.limiteClases === '8') {
+                            limiteClases = 8;
+                        }
+                        else {
+                            const diasHabilesMes = attendanceService_1.AttendanceService.calcularDiasHabiles(periodoActual.inicio, periodoActual.fin);
+                            limiteClases = attendanceService_1.AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesMes);
+                        }
+                    }
+                }
+                catch (error) {
+                    console.error('Error obteniendo plan:', error);
+                }
+            }
+            // Si aún no se pudo determinar, usar días hábiles del mes
+            if (limiteClases === 0) {
+                const diasHabilesMes = attendanceService_1.AttendanceService.calcularDiasHabiles(periodoActual.inicio, periodoActual.fin);
+                limiteClases = attendanceService_1.AttendanceService.aplicarProtocoloGimnasio(999, diasHabilesMes);
+            }
         }
         const totalAsistencias = asistenciasMesActual.length;
         const asistenciasRestantes = Math.max(0, limiteClases - totalAsistencias);
         transactionHelper_1.log.info('Asistencias del mes actual obtenidas', {
             rut: rut,
+            limiteClasesAlumno: alumno.limiteClases,
+            planAlumno: alumno.plan,
             totalAsistencias: totalAsistencias,
             limiteClases: limiteClases,
             asistenciasRestantes: asistenciasRestantes,
             periodoMes: periodoActual.numeroMes,
+            periodoInicio: periodoActual.inicio.toISOString(),
+            periodoFin: periodoActual.fin.toISOString(),
             action: 'obtener_asistencias_mes_actual'
         });
         return res.json({
