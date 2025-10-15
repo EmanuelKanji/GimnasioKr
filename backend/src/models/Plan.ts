@@ -6,7 +6,7 @@ export interface IPlan extends Document {
   precio: number;
   clases: string | number;
   matricula: string | number;
-  duracion: string; // Ejemplo: 'mensual', 'trimestral', 'anual'
+  duracion: string; // Ejemplo: 'mensual', 'trimestral', 'semestral', 'anual'
   limiteClases: '12' | '8' | 'todos_los_dias'; // Límite de clases por mes
 }
 

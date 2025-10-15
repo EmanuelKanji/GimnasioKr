@@ -191,6 +191,7 @@ export default function GestionarPlanes() {
         >
           <option value="mensual">Mensual</option>
           <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
           <option value="anual">Anual</option>
         </select>
         <button type="submit" className={styles.submitButton}>
