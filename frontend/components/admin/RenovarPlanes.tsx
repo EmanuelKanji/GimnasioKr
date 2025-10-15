@@ -420,17 +420,19 @@ export default function RenovarPlanes() {
                           </select>
                         </div>
 
-                        {/* Fecha de Inicio (automática) */}
+                        {/* Fecha de Inicio (editable) */}
                         <div className={styles.formGroup}>
                           <label className={styles.formLabel}>Fecha de Inicio:</label>
                           <input 
                             type="date" 
                             value={formularioRenovacion.fechaInicio}
-                            readOnly
-                            className={`${styles.formInput} ${styles.readOnlyInput}`}
+                            onChange={(e) => handleFechaInicioChange(e.target.value)}
+                            min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // 30 días atrás
+                            max={new Date().toISOString().split('T')[0]} // Máximo hoy
+                            className={styles.formInput}
                           />
                           <small className={styles.helpText}>
-                            Inicia automáticamente hoy
+                            Puedes seleccionar una fecha hasta 30 días atrás
                           </small>
                         </div>
 
