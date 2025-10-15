@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import styles from './QrAlumno.module.css';
-import { calcularLimiteClases, obtenerMensajeLimite, obtenerColorIndicador, type LimiteClases } from '../../lib/classLimits';
 import { useEstadoRenovacion } from '../../hooks/useEstadoRenovacion';
 import type { Plan } from '../../../shared/types';
 
@@ -10,12 +9,10 @@ interface QrAlumnoProps {
   plan: string;
   fechaInicio: string;
   fechaFin: string;
-  limiteClases?: LimiteClases;
-  asistenciasMes?: string[];
   planCompleto?: Plan | null;
-  totalAsistencias?: number;
-  asistenciasRestantes?: number;
-  limiteClasesNumero?: number;
+  totalAsistencias: number;
+  asistenciasRestantes: number;
+  limiteClasesNumero: number;
 }
 
 export default function QrAlumno({ 
@@ -23,12 +20,10 @@ export default function QrAlumno({
   plan, 
   fechaInicio, 
   fechaFin, 
-  limiteClases = 'todos_los_dias', 
-  asistenciasMes = [], 
   planCompleto,
-  totalAsistencias = 0,
-  asistenciasRestantes = 0,
-  limiteClasesNumero = 0
+  totalAsistencias,
+  asistenciasRestantes,
+  limiteClasesNumero
 }: QrAlumnoProps) {
   const [activo, setActivo] = useState(false);
   const [qrData, setQrData] = useState('');
@@ -40,7 +35,10 @@ export default function QrAlumno({
   // Usar datos del plan real si está disponible
   const nombrePlanReal = planCompleto?.nombre || plan;
   const descripcionPlan = planCompleto?.descripcion || '';
-  const limiteReal = planCompleto?.limiteClases || limiteClases;
+
+  // Calcular color basado en porcentaje de uso
+  const porcentajeUso = limiteClasesNumero > 0 ? (totalAsistencias / limiteClasesNumero) * 100 : 0;
+  const colorIndicador = porcentajeUso >= 90 ? '#ef4444' : porcentajeUso >= 70 ? '#f59e0b' : '#10b981';
 
 
   // Función para solicitar renovación
@@ -125,12 +123,8 @@ export default function QrAlumno({
     setTiempoRestante(5 * 60 * 1000); // 5 minutos en milisegundos
   }, [rut]);
 
-  // Calcular información de límites de clases usando el límite real del plan
-  const limiteInfoCalculado = calcularLimiteClases(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
-  const mensajeLimite = obtenerMensajeLimite(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
-  const colorIndicador = obtenerColorIndicador(limiteReal, asistenciasMes, new Date(), fechaInicio, fechaFin);
 
-  // Debug: Log de información para verificar datos
+  // Debug: Log de información básica
   console.log('🔍 QR Debug Info:', {
     rutOriginal: rut,
     rutLimpio: limpiarRut(rut),
@@ -138,14 +132,11 @@ export default function QrAlumno({
     planCompleto,
     nombrePlanReal,
     descripcionPlan,
-    limiteReal,
     fechaInicio,
     fechaFin,
-    limiteClases,
-    asistenciasMesTotal: asistenciasMes.length,
-    asistenciasMes: asistenciasMes,
-    limiteInfo: limiteInfoCalculado,
-    mensajeLimite,
+    totalAsistencias,
+    asistenciasRestantes,
+    limiteClasesNumero,
     colorIndicador
   });
 
@@ -188,9 +179,8 @@ export default function QrAlumno({
       totalAsistencias,
       asistenciasRestantes,
       limiteClasesNumero,
-      asistenciasMes: asistenciasMes.length
     });
-  }, [totalAsistencias, asistenciasRestantes, limiteClasesNumero, asistenciasMes]);
+  }, [totalAsistencias, asistenciasRestantes, limiteClasesNumero]);
 
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {
@@ -199,8 +189,8 @@ export default function QrAlumno({
     const fin = new Date(fechaFin);
     const planActivo = hoy >= inicio && hoy <= fin;
     
-    // Verificar si puede acceder hoy según los límites de clases
-    const puedeAccederHoy = limiteInfoCalculado.puedeAcceder;
+    // Verificar si puede acceder hoy según las asistencias restantes
+    const puedeAccederHoy = asistenciasRestantes > 0;
     
     // Debug: Log del estado del QR
     console.log('🔍 QR Estado Debug:', {
@@ -220,7 +210,7 @@ export default function QrAlumno({
     if (planActivo && puedeAccederHoy) {
       generarNuevoQR();
     }
-  }, [fechaInicio, fechaFin, rut, plan, limiteInfoCalculado.puedeAcceder, generarNuevoQR, estadoRenovacion]);
+  }, [fechaInicio, fechaFin, rut, plan, asistenciasRestantes, generarNuevoQR, estadoRenovacion]);
 
   // No hay contador de tiempo - QR no expira
 
@@ -263,14 +253,14 @@ export default function QrAlumno({
             ) : (
               <>
                 <p>Has alcanzado el límite de clases de tu plan.</p>
-                <p>{mensajeLimite}</p>
+                <p>Asistencias: {totalAsistencias} de {limiteClasesNumero}</p>
                 <div className={styles.limiteInfo}>
                   <div className={styles.limiteStats}>
                     <span>Asistencias usadas: {totalAsistencias} de {limiteClasesNumero}</span>
                     <span>Asistencias restantes: {asistenciasRestantes}</span>
                   </div>
                   <div className={styles.limiteMessage}>
-                    {mensajeLimite}
+                    Restantes: {asistenciasRestantes} clases
                   </div>
                 </div>
                 <div className={styles.renovacionSection}>
@@ -379,9 +369,7 @@ export default function QrAlumno({
               <div className={styles.limiteDetail}>
                 <span className={styles.limiteLabel}>Límite del plan:</span>
                 <span className={styles.limiteValue}>
-                  {planCompleto?.clases ? `${planCompleto.clases} clases al mes` : 
-                   limiteReal === '12' ? '12 clases al mes' : 
-                   limiteReal === '8' ? '8 clases al mes' : 'Todos los días hábiles'}
+                  {limiteClasesNumero} clases al mes
                 </span>
               </div>
               <div className={styles.limiteDetail}>
@@ -397,7 +385,7 @@ export default function QrAlumno({
                 </span>
               </div>
               <div className={styles.limiteMessage}>
-                {mensajeLimite}
+                Restantes: {asistenciasRestantes} clases
               </div>
             </div>
           </div>

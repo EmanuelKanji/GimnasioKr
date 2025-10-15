@@ -74,7 +74,6 @@ export default function DashboardAlumno() {
   >("inicio");
   
   const [menuOpen, setMenuOpen] = useState(false);
-  const [limiteClases, setLimiteClases] = useState<'12' | '8' | 'todos_los_dias'>('todos_los_dias');
   const [planCompleto, setPlanCompleto] = useState<Plan | null>(null);
   
   // Usar hooks centralizados
@@ -94,23 +93,6 @@ export default function DashboardAlumno() {
     asistenciasRestantes
   });
 
-  // Obtener límite de clases del perfil real
-  useEffect(() => {
-    if (perfil?.limiteClases) {
-      // Usar el campo limiteClases del perfil
-      setLimiteClases(perfil.limiteClases);
-    } else if (perfil?.plan) {
-      // Fallback: inferir del nombre del plan (para alumnos antiguos)
-      const planNombre = perfil.plan.toLowerCase();
-      if (planNombre.includes('12')) {
-        setLimiteClases('12');
-      } else if (planNombre.includes('8')) {
-        setLimiteClases('8');
-      } else {
-        setLimiteClases('todos_los_dias');
-      }
-    }
-  }, [perfil]);
 
   // Obtener plan completo del alumno
   useEffect(() => {
@@ -287,8 +269,6 @@ export default function DashboardAlumno() {
                 plan={perfil?.plan ?? ''}
                 fechaInicio={perfil?.fechaInicioPlan ?? ''}
                 fechaFin={perfil?.fechaTerminoPlan ?? ''}
-                limiteClases={limiteClases}
-                asistenciasMes={asistenciasMes}
                 planCompleto={planCompleto}
                 totalAsistencias={totalAsistencias}
                 asistenciasRestantes={asistenciasRestantes}
