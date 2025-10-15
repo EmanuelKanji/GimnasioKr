@@ -135,7 +135,7 @@ export function useAsistencias() {
 
   const refreshAsistencias = useCallback(() => {
     fetchAsistencias(true);
-  }, [fetchAsistencias]);
+  }, []);
 
   // Notificar a todos los listeners cuando cambien las asistencias
   const notifyListeners = useCallback(() => {
@@ -168,7 +168,7 @@ export function useAsistencias() {
       listeners.delete(listener);
       window.removeEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
     };
-  }, [fetchAsistencias]);
+  }, []);
 
   // Función para registrar una nueva asistencia localmente
   const addAsistencia = useCallback((fecha: string) => {
