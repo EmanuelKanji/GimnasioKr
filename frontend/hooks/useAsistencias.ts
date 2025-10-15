@@ -72,6 +72,17 @@ export function useAsistencias() {
 
       if (res.ok) {
         const data = await res.json();
+        
+        console.log('🔍 useAsistencias - Datos recibidos del backend:', {
+          asistenciasMesActual: data.asistenciasMesActual,
+          totalAsistencias: data.totalAsistencias,
+          limiteClases: data.limiteClases,
+          asistenciasRestantes: data.asistenciasRestantes,
+          periodoActual: data.periodoActual,
+          status: res.status,
+          url: res.url
+        });
+        
         asistenciasCache.data = data.asistenciasMesActual || [];
         asistenciasCache.totalAsistencias = data.totalAsistencias || 0;
         asistenciasCache.limiteClases = data.limiteClases || 0;
@@ -93,7 +104,19 @@ export function useAsistencias() {
         // En caso de rate limit, esperar más tiempo
         asistenciasCache.lastFetch = now - CACHE_DURATION + 60000;
       } else {
-        console.error('Error cargando asistencias:', res.status);
+        console.error('🔍 useAsistencias - Error cargando asistencias:', {
+          status: res.status,
+          statusText: res.statusText,
+          url: res.url
+        });
+        
+        // Intentar obtener el texto del error
+        try {
+          const errorData = await res.text();
+          console.error('🔍 useAsistencias - Error response:', errorData);
+        } catch (e) {
+          console.error('🔍 useAsistencias - No se pudo leer el error response');
+        }
       }
     } catch (error) {
       console.error('Error de conexión:', error);
