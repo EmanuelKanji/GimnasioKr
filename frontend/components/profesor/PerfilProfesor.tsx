@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './PerfilProfesor.module.css';
 import { HttpClient } from '../../lib/httpClient';
+import { validarFortalezaPassword } from '../../lib/validators';
 
 interface PerfilInfo {
   nombre: string;
@@ -45,6 +46,11 @@ export default function PerfilProfesor() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [passwordValidation, setPasswordValidation] = useState<{
+    valid: boolean;
+    message: string;
+    strength: 'weak' | 'medium' | 'strong';
+  } | null>(null);
 
   // Obtener perfil al cargar
   useEffect(() => {
@@ -122,8 +128,12 @@ export default function PerfilProfesor() {
     if (changePasswordMode) {
       if (!form.password) {
         errors.password = 'La contraseña es requerida';
-      } else if (form.password.length < 6) {
-        errors.password = 'La contraseña debe tener al menos 6 caracteres';
+      } else {
+        // Validar fortaleza de la contraseña
+        const validation = validarFortalezaPassword(form.password);
+        if (!validation.valid) {
+          errors.password = `La contraseña no cumple los requisitos: ${validation.message}`;
+        }
       }
       
       if (!form.confirmPassword) {
@@ -137,12 +147,27 @@ export default function PerfilProfesor() {
     return Object.keys(errors).length === 0;
   };
 
+  // Validar contraseña en tiempo real
+  const handlePasswordChange = (password: string) => {
+    if (password.length > 0) {
+      const validation = validarFortalezaPassword(password);
+      setPasswordValidation(validation);
+    } else {
+      setPasswordValidation(null);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     if (name === 'rut') return; // No permitir editar rut
     
     setForm({ ...form, [name]: value });
+    
+    // Validar contraseña en tiempo real si es el campo de contraseña
+    if (name === 'password') {
+      handlePasswordChange(value);
+    }
     
     // Limpiar error de validación cuando el usuario empiece a escribir
     if (validationErrors[name]) {
@@ -385,8 +410,28 @@ export default function PerfilProfesor() {
                           value={form.password} 
                           onChange={handleChange} 
                           className={`${styles.input} ${validationErrors.password ? styles.inputError : ''}`}
-                          placeholder="Mínimo 6 caracteres"
+                          placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número, 1 carácter especial"
                         />
+                        
+                        {/* Indicador de validación en tiempo real */}
+                        {passwordValidation && (
+                          <div className={`${styles.passwordIndicator} ${styles[passwordValidation.strength]}`}>
+                            <div className={styles.strengthBar}>
+                              <div 
+                                className={styles.strengthFill} 
+                                style={{ 
+                                  width: passwordValidation.strength === 'weak' ? '33%' : 
+                                         passwordValidation.strength === 'medium' ? '66%' : '100%' 
+                                }}
+                              />
+                            </div>
+                            <span className={styles.strengthText}>
+                              {passwordValidation.valid ? '✅ ' : '⚠️ '}
+                              {passwordValidation.message}
+                            </span>
+                          </div>
+                        )}
+                        
                         {validationErrors.password && (
                           <span className={styles.errorText}>{validationErrors.password}</span>
                         )}

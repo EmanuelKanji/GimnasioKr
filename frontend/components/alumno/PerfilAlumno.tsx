@@ -1,6 +1,7 @@
 import styles from './PerfilAlumno.module.css';
 import { useState } from 'react';
 import { usePerfil } from '../../hooks/usePerfil';
+import { validarFortalezaPassword } from '../../lib/validators';
 
 export default function PerfilAlumno() {
   const { perfil, loading } = usePerfil();
@@ -13,6 +14,22 @@ export default function PerfilAlumno() {
     passwordNueva: '',
     confirmarPassword: ''
   });
+  
+  const [passwordValidation, setPasswordValidation] = useState<{
+    valid: boolean;
+    message: string;
+    strength: 'weak' | 'medium' | 'strong';
+  } | null>(null);
+
+  // Validar contraseña en tiempo real
+  const handlePasswordChange = (password: string) => {
+    if (password.length > 0) {
+      const validation = validarFortalezaPassword(password);
+      setPasswordValidation(validation);
+    } else {
+      setPasswordValidation(null);
+    }
+  };
 
   const handleCambiarPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +40,10 @@ export default function PerfilAlumno() {
       return;
     }
 
-    if (formularioPassword.passwordNueva.length < 6) {
-      setMensaje({ tipo: 'error', texto: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    // Validar fortaleza de la nueva contraseña
+    const validation = validarFortalezaPassword(formularioPassword.passwordNueva);
+    if (!validation.valid) {
+      setMensaje({ tipo: 'error', texto: `La nueva contraseña no cumple los requisitos: ${validation.message}` });
       return;
     }
 
@@ -120,12 +139,34 @@ export default function PerfilAlumno() {
                 id="passwordNueva"
                 type="password"
                 value={formularioPassword.passwordNueva}
-                onChange={(e) => setFormularioPassword({...formularioPassword, passwordNueva: e.target.value})}
+                onChange={(e) => {
+                  setFormularioPassword({...formularioPassword, passwordNueva: e.target.value});
+                  handlePasswordChange(e.target.value);
+                }}
                 required
                 disabled={cambiandoPassword}
-                minLength={6}
+                minLength={8}
+                placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número, 1 carácter especial"
               />
-              <small>Mínimo 6 caracteres</small>
+              
+              {/* Indicador de validación en tiempo real */}
+              {passwordValidation && (
+                <div className={`${styles.passwordIndicator} ${styles[passwordValidation.strength]}`}>
+                  <div className={styles.strengthBar}>
+                    <div 
+                      className={styles.strengthFill} 
+                      style={{ 
+                        width: passwordValidation.strength === 'weak' ? '33%' : 
+                               passwordValidation.strength === 'medium' ? '66%' : '100%' 
+                      }}
+                    />
+                  </div>
+                  <span className={styles.strengthText}>
+                    {passwordValidation.valid ? '✅ ' : '⚠️ '}
+                    {passwordValidation.message}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className={styles.formGroup}>
