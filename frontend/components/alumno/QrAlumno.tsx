@@ -173,14 +173,6 @@ export default function QrAlumno({
     };
   }, []);
 
-  // Debug: Log cuando cambien las props de asistencias
-  useEffect(() => {
-    console.log('🔍 QrAlumno - Props actualizadas:', {
-      totalAsistencias,
-      asistenciasRestantes,
-      limiteClasesNumero,
-    });
-  }, [totalAsistencias, asistenciasRestantes, limiteClasesNumero]);
 
   // Verificar si el plan está activo y si puede acceder hoy
   useEffect(() => {
@@ -191,26 +183,18 @@ export default function QrAlumno({
     
     // Verificar si puede acceder hoy según las asistencias restantes
     const puedeAccederHoy = asistenciasRestantes > 0;
+    const nuevoActivo = planActivo && puedeAccederHoy;
     
-    // Debug: Log del estado del QR
-    console.log('🔍 QR Estado Debug:', {
-      hoy: hoy.toISOString(),
-      inicio: inicio.toISOString(),
-      fin: fin.toISOString(),
-      planActivo,
-      puedeAccederHoy,
-      activo: planActivo && puedeAccederHoy,
-      estadoRenovacion,
-      motivo: !planActivo ? 'plan_expirado' : 'limite_alcanzado'
-    });
-    
-    setActivo(planActivo && puedeAccederHoy);
-    
-    // Solo generar QR si el plan está activo y puede acceder
-    if (planActivo && puedeAccederHoy) {
-      generarNuevoQR();
+    // Solo actualizar si el estado cambió
+    if (activo !== nuevoActivo) {
+      setActivo(nuevoActivo);
+      
+      // Solo generar QR si el plan está activo y puede acceder
+      if (nuevoActivo) {
+        generarNuevoQR();
+      }
     }
-  }, [fechaInicio, fechaFin, rut, plan, asistenciasRestantes, generarNuevoQR, estadoRenovacion]);
+  }, [fechaInicio, fechaFin, asistenciasRestantes, activo, generarNuevoQR]);
 
   // No hay contador de tiempo - QR no expira
 

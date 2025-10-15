@@ -36,8 +36,6 @@ const CACHE_DURATION = 60000; // 1 minuto
 const MIN_FETCH_INTERVAL = 30000; // 30 segundos mínimo entre peticiones
 
 export function useAsistencias() {
-  console.log('🔍 useAsistencias - Hook inicializado');
-  
   const [asistencias, setAsistencias] = useState<string[]>(asistenciasCache.data);
   const [totalAsistencias, setTotalAsistencias] = useState(asistenciasCache.totalAsistencias);
   const [limiteClases, setLimiteClases] = useState(asistenciasCache.limiteClases);
@@ -46,25 +44,20 @@ export function useAsistencias() {
   const [loading, setLoading] = useState(asistenciasCache.isLoading);
 
   const fetchAsistencias = useCallback(async (force = false) => {
-    console.log('🔍 useAsistencias - fetchAsistencias llamado', { force, isLoading: asistenciasCache.isLoading });
-    
     const now = Date.now();
     
     // Si no es forzado y tenemos datos recientes, no hacer petición
     if (!force && asistenciasCache.data.length > 0 && (now - asistenciasCache.lastFetch) < CACHE_DURATION) {
-      console.log('🔍 useAsistencias - Usando cache, no haciendo petición');
       return;
     }
 
     // Si ya hay una petición en curso, no hacer otra
     if (asistenciasCache.isLoading) {
-      console.log('🔍 useAsistencias - Ya hay una petición en curso, saltando');
       return;
     }
 
     // Verificar intervalo mínimo entre peticiones
     if (!force && (now - asistenciasCache.lastFetch) < MIN_FETCH_INTERVAL) {
-      console.log('🔍 useAsistencias - Rate limit, saltando petición');
       return;
     }
 
@@ -79,16 +72,6 @@ export function useAsistencias() {
 
       if (res.ok) {
         const data = await res.json();
-        
-        console.log('🔍 useAsistencias - Datos recibidos del backend:', {
-          asistenciasMesActual: data.asistenciasMesActual,
-          totalAsistencias: data.totalAsistencias,
-          limiteClases: data.limiteClases,
-          asistenciasRestantes: data.asistenciasRestantes,
-          periodoActual: data.periodoActual,
-          status: res.status,
-          url: res.url
-        });
         
         asistenciasCache.data = data.asistenciasMesActual || [];
         asistenciasCache.totalAsistencias = data.totalAsistencias || 0;
@@ -111,19 +94,7 @@ export function useAsistencias() {
         // En caso de rate limit, esperar más tiempo
         asistenciasCache.lastFetch = now - CACHE_DURATION + 60000;
       } else {
-        console.error('🔍 useAsistencias - Error cargando asistencias:', {
-          status: res.status,
-          statusText: res.statusText,
-          url: res.url
-        });
-        
-        // Intentar obtener el texto del error
-        try {
-          const errorData = await res.text();
-          console.error('🔍 useAsistencias - Error response:', errorData);
-        } catch (e) {
-          console.error('🔍 useAsistencias - No se pudo leer el error response');
-        }
+        console.error('Error cargando asistencias:', res.status, res.statusText);
       }
     } catch (error) {
       console.error('Error de conexión:', error);
@@ -153,7 +124,6 @@ export function useAsistencias() {
     };
 
     const handleAsistenciaRegistrada = (event: CustomEvent) => {
-      console.log('🔄 Asistencia registrada, actualizando cache...', event.detail);
       // Forzar recarga de datos desde el servidor
       fetchAsistencias(true);
     };
@@ -161,14 +131,16 @@ export function useAsistencias() {
     listeners.add(listener);
     window.addEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
 
-    // Cargar datos iniciales
-    fetchAsistencias();
+    // Cargar datos iniciales solo si no hay datos en cache
+    if (asistenciasCache.data.length === 0) {
+      fetchAsistencias();
+    }
 
     return () => {
       listeners.delete(listener);
       window.removeEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
     };
-  }, []);
+  }, [fetchAsistencias]);
 
   // Función para registrar una nueva asistencia localmente
   const addAsistencia = useCallback((fecha: string) => {

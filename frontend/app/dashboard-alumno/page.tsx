@@ -117,7 +117,7 @@ export default function DashboardAlumno() {
     };
     
     obtenerPlanCompleto();
-  }, [perfil]);
+  }, [perfil?.plan]); // Solo ejecutar cuando cambie el plan específico
 
   const handleViewChange = (newView: "inicio" | "asistencia" | "plan" | "perfil" | "avisos" | "qr") => {
     setView(newView);
