@@ -86,6 +86,14 @@ export default function DashboardAlumno() {
   } = useAsistencias();
   const { perfil, loading: loadingPerfil } = usePerfil();
 
+  // Debug: Log de valores del hook
+  console.log('🔍 Dashboard - Valores del hook useAsistencias:', {
+    asistenciasMes: asistenciasMes.length,
+    totalAsistencias,
+    limiteClasesNumero,
+    asistenciasRestantes
+  });
+
   // Obtener límite de clases del perfil real
   useEffect(() => {
     if (perfil?.limiteClases) {

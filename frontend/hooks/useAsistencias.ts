@@ -36,6 +36,8 @@ const CACHE_DURATION = 60000; // 1 minuto
 const MIN_FETCH_INTERVAL = 30000; // 30 segundos mínimo entre peticiones
 
 export function useAsistencias() {
+  console.log('🔍 useAsistencias - Hook inicializado');
+  
   const [asistencias, setAsistencias] = useState<string[]>(asistenciasCache.data);
   const [totalAsistencias, setTotalAsistencias] = useState(asistenciasCache.totalAsistencias);
   const [limiteClases, setLimiteClases] = useState(asistenciasCache.limiteClases);
@@ -44,20 +46,25 @@ export function useAsistencias() {
   const [loading, setLoading] = useState(asistenciasCache.isLoading);
 
   const fetchAsistencias = useCallback(async (force = false) => {
+    console.log('🔍 useAsistencias - fetchAsistencias llamado', { force, isLoading: asistenciasCache.isLoading });
+    
     const now = Date.now();
     
     // Si no es forzado y tenemos datos recientes, no hacer petición
     if (!force && asistenciasCache.data.length > 0 && (now - asistenciasCache.lastFetch) < CACHE_DURATION) {
+      console.log('🔍 useAsistencias - Usando cache, no haciendo petición');
       return;
     }
 
     // Si ya hay una petición en curso, no hacer otra
     if (asistenciasCache.isLoading) {
+      console.log('🔍 useAsistencias - Ya hay una petición en curso, saltando');
       return;
     }
 
     // Verificar intervalo mínimo entre peticiones
     if (!force && (now - asistenciasCache.lastFetch) < MIN_FETCH_INTERVAL) {
+      console.log('🔍 useAsistencias - Rate limit, saltando petición');
       return;
     }
 
