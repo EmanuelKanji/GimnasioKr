@@ -551,10 +551,61 @@ export const obtenerAsistenciasMesActual = async (req: Request, res: Response) =
       new Date()
     );
 
+    // Debug: Log de datos antes del filtrado
+    console.log('🔍 Debug filtrado de asistencias:', {
+      rut: rut,
+      asistenciasTotales: alumno.asistencias.length,
+      asistenciasArray: alumno.asistencias,
+      periodoInicio: periodoActual.inicio.toISOString(),
+      periodoFin: periodoActual.fin.toISOString(),
+      periodoNumero: periodoActual.numeroMes
+    });
+
     // Filtrar asistencias del mes actual
     const asistenciasMesActual = alumno.asistencias.filter(fecha => {
       const fechaAsistencia = new Date(fecha);
-      return fechaAsistencia >= periodoActual.inicio && fechaAsistencia <= periodoActual.fin;
+      
+      // Normalizar fechas para comparación (solo fecha, sin hora)
+      const fechaAsistenciaNormalizada = new Date(fechaAsistencia.getFullYear(), fechaAsistencia.getMonth(), fechaAsistencia.getDate());
+      const periodoInicioNormalizado = new Date(periodoActual.inicio.getFullYear(), periodoActual.inicio.getMonth(), periodoActual.inicio.getDate());
+      const periodoFinNormalizado = new Date(periodoActual.fin.getFullYear(), periodoActual.fin.getMonth(), periodoActual.fin.getDate());
+      
+      const estaEnPeriodo = fechaAsistenciaNormalizada >= periodoInicioNormalizado && fechaAsistenciaNormalizada <= periodoFinNormalizado;
+      
+      console.log('🔍 Filtro asistencia:', {
+        fechaOriginal: fecha,
+        fechaAsistencia: fechaAsistencia.toISOString(),
+        fechaAsistenciaNormalizada: fechaAsistenciaNormalizada.toISOString(),
+        periodoInicio: periodoActual.inicio.toISOString(),
+        periodoInicioNormalizado: periodoInicioNormalizado.toISOString(),
+        periodoFin: periodoActual.fin.toISOString(),
+        periodoFinNormalizado: periodoFinNormalizado.toISOString(),
+        estaEnPeriodo: estaEnPeriodo
+      });
+      
+      return estaEnPeriodo;
+    });
+
+    console.log('🔍 Resultado filtrado:', {
+      asistenciasFiltradas: asistenciasMesActual.length,
+      asistenciasMesActual: asistenciasMesActual
+    });
+
+    // Debug alternativo: filtrar por mes calendario como fallback
+    const hoy = new Date();
+    const mesActual = hoy.getMonth();
+    const añoActual = hoy.getFullYear();
+    
+    const asistenciasMesCalendario = alumno.asistencias.filter(fecha => {
+      const fechaAsistencia = new Date(fecha);
+      return fechaAsistencia.getMonth() === mesActual && fechaAsistencia.getFullYear() === añoActual;
+    });
+    
+    console.log('🔍 Filtro alternativo (mes calendario):', {
+      mesActual: mesActual,
+      añoActual: añoActual,
+      asistenciasMesCalendario: asistenciasMesCalendario.length,
+      asistenciasMesCalendarioArray: asistenciasMesCalendario
     });
 
     // Calcular límite de clases según el plan
