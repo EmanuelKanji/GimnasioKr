@@ -43,23 +43,13 @@ export function useAsistencias() {
   const [periodoActual, setPeriodoActual] = useState(asistenciasCache.periodoActual);
   const [loading, setLoading] = useState(asistenciasCache.isLoading);
 
-  const fetchAsistencias = useCallback(async (force = false) => {
-    const now = Date.now();
-    
-    // Si no es forzado y tenemos datos recientes, no hacer petición
-    if (!force && asistenciasCache.data.length > 0 && (now - asistenciasCache.lastFetch) < CACHE_DURATION) {
-      return;
-    }
-
+  const fetchAsistencias = useCallback(async () => {
     // Si ya hay una petición en curso, no hacer otra
     if (asistenciasCache.isLoading) {
       return;
     }
 
-    // Verificar intervalo mínimo entre peticiones
-    if (!force && (now - asistenciasCache.lastFetch) < MIN_FETCH_INTERVAL) {
-      return;
-    }
+    console.log('🔍 useAsistencias - Haciendo petición al backend...');
 
     try {
       asistenciasCache.isLoading = true;
@@ -73,6 +63,15 @@ export function useAsistencias() {
       if (res.ok) {
         const data = await res.json();
         
+        console.log('🔍 useAsistencias - Datos recibidos del backend:', {
+          asistenciasMesActual: data.asistenciasMesActual,
+          totalAsistencias: data.totalAsistencias,
+          limiteClases: data.limiteClases,
+          asistenciasRestantes: data.asistenciasRestantes,
+          periodoActual: data.periodoActual,
+          status: res.status
+        });
+        
         asistenciasCache.data = data.asistenciasMesActual || [];
         asistenciasCache.totalAsistencias = data.totalAsistencias || 0;
         asistenciasCache.limiteClases = data.limiteClases || 0;
@@ -82,7 +81,7 @@ export function useAsistencias() {
           fin: '',
           numeroMes: 1
         };
-        asistenciasCache.lastFetch = now;
+        asistenciasCache.lastFetch = Date.now();
         
         setAsistencias(asistenciasCache.data);
         setTotalAsistencias(asistenciasCache.totalAsistencias);
@@ -92,7 +91,7 @@ export function useAsistencias() {
       } else if (res.status === 429) {
         console.warn('Rate limit alcanzado, reintentando en 60 segundos...');
         // En caso de rate limit, esperar más tiempo
-        asistenciasCache.lastFetch = now - CACHE_DURATION + 60000;
+        asistenciasCache.lastFetch = Date.now() - CACHE_DURATION + 60000;
       } else {
         console.error('Error cargando asistencias:', res.status, res.statusText);
       }
@@ -105,7 +104,7 @@ export function useAsistencias() {
   }, []);
 
   const refreshAsistencias = useCallback(() => {
-    fetchAsistencias(true);
+    fetchAsistencias();
   }, []);
 
   // Notificar a todos los listeners cuando cambien las asistencias
@@ -114,33 +113,9 @@ export function useAsistencias() {
   }, []);
 
   useEffect(() => {
-    const listener = () => {
-      setAsistencias(asistenciasCache.data);
-      setTotalAsistencias(asistenciasCache.totalAsistencias);
-      setLimiteClases(asistenciasCache.limiteClases);
-      setAsistenciasRestantes(asistenciasCache.asistenciasRestantes);
-      setPeriodoActual(asistenciasCache.periodoActual);
-      setLoading(asistenciasCache.isLoading);
-    };
-
-    const handleAsistenciaRegistrada = (event: CustomEvent) => {
-      // Forzar recarga de datos desde el servidor
-      fetchAsistencias(true);
-    };
-
-    listeners.add(listener);
-    window.addEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
-
-    // Cargar datos iniciales solo si no hay datos en cache
-    if (asistenciasCache.data.length === 0) {
-      fetchAsistencias();
-    }
-
-    return () => {
-      listeners.delete(listener);
-      window.removeEventListener('asistenciaRegistrada', handleAsistenciaRegistrada as EventListener);
-    };
-  }, [fetchAsistencias]);
+    // Hacer solo UNA petición al backend
+    fetchAsistencias();
+  }, []); // Solo se ejecuta una vez al montar el componente
 
   // Función para registrar una nueva asistencia localmente
   const addAsistencia = useCallback((fecha: string) => {
